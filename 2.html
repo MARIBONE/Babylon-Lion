@@ -1,0 +1,2154 @@
+```html
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Babylon Lion</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+html,body{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:#080606;
+    font-family:Georgia,"Times New Roman",serif;
+}
+
+body{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+#game{
+    position:relative;
+    width:100vw;
+    height:100vh;
+    overflow:hidden;
+    background:#160b08;
+}
+
+canvas{
+    width:100%;
+    height:100%;
+    display:block;
+}
+
+#hud{
+    position:absolute;
+    top:24px;
+    left:28px;
+    right:28px;
+    display:flex;
+    justify-content:space-between;
+    z-index:10;
+    pointer-events:none;
+}
+
+.hudBox{
+    min-width:150px;
+    padding:10px 17px;
+    border:1px solid rgba(231,190,91,.7);
+    background:rgba(17,9,7,.72);
+    box-shadow:
+        0 5px 25px rgba(0,0,0,.45),
+        inset 0 0 18px rgba(210,150,50,.08);
+    backdrop-filter:blur(5px);
+}
+
+.hudLabel{
+    color:#cda753;
+    font-size:10px;
+    letter-spacing:3px;
+}
+
+.hudValue{
+    color:#fff1bd;
+    font-size:25px;
+    font-weight:bold;
+    margin-top:2px;
+}
+
+.screen{
+    position:absolute;
+    inset:0;
+    z-index:20;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+
+    background:
+        radial-gradient(
+            circle at 50% 45%,
+            rgba(95,45,18,.12),
+            rgba(5,3,2,.88) 75%
+        );
+}
+
+#gameover{
+    display:none;
+}
+
+.cuneiform{
+    color:#c99a48;
+    font-size:20px;
+    letter-spacing:10px;
+    margin-bottom:12px;
+    opacity:.8;
+}
+
+.logo{
+    font-family:Georgia,serif;
+    font-size:clamp(50px,9vw,110px);
+    line-height:.82;
+    letter-spacing:-5px;
+    color:#e6b94e;
+
+    text-shadow:
+        0 3px 0 #6e3b16,
+        0 6px 0 #3b1d0d,
+        0 15px 35px rgba(0,0,0,.8);
+}
+
+.logoSmall{
+    font-size:clamp(25px,4vw,48px);
+    letter-spacing:13px;
+    margin-left:13px;
+    color:#f0d68a;
+}
+
+.tagline{
+    margin-top:25px;
+    color:#d7c49a;
+    font-size:13px;
+    letter-spacing:5px;
+    text-transform:uppercase;
+}
+
+button{
+    margin-top:38px;
+    padding:15px 42px;
+
+    color:#fff2c8;
+    font-family:Georgia,serif;
+    font-size:16px;
+    letter-spacing:3px;
+
+    border:1px solid #e2bd63;
+    background:
+        linear-gradient(
+            180deg,
+            #a96827,
+            #623413
+        );
+
+    cursor:pointer;
+
+    box-shadow:
+        0 8px 25px rgba(0,0,0,.5),
+        inset 0 1px rgba(255,255,255,.2);
+
+    transition:.18s;
+}
+
+button:hover{
+    transform:translateY(-2px);
+    filter:brightness(1.15);
+}
+
+.instructions{
+    margin-top:18px;
+    color:#a99676;
+    font-size:12px;
+    letter-spacing:1px;
+}
+
+.finalLabel{
+    color:#cda753;
+    letter-spacing:5px;
+    font-size:13px;
+}
+
+#finalScore{
+    margin-top:10px;
+    color:#efc65d;
+    font-size:72px;
+    font-weight:bold;
+}
+
+#bestScore{
+    color:#b9a98c;
+    margin-top:5px;
+}
+
+#mobile{
+    display:none;
+    position:absolute;
+    bottom:25px;
+    left:0;
+    right:0;
+    justify-content:center;
+    z-index:15;
+}
+
+.mobileButton{
+    width:70px;
+    height:70px;
+    border-radius:50%;
+    padding:0;
+    margin:0 8px;
+    font-size:25px;
+    opacity:.72;
+}
+
+@media(max-width:700px){
+    #mobile{
+        display:flex;
+    }
+
+    #hud{
+        top:10px;
+        left:10px;
+        right:10px;
+    }
+
+    .hudBox{
+        min-width:110px;
+        padding:7px 10px;
+    }
+
+    .hudValue{
+        font-size:19px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div id="game">
+
+<canvas id="canvas"></canvas>
+
+<div id="hud">
+
+    <div class="hudBox">
+        <div class="hudLabel">PONTUAÇÃO</div>
+        <div class="hudValue" id="score">0</div>
+    </div>
+
+    <div class="hudBox">
+        <div class="hudLabel">RECORDE</div>
+        <div class="hudValue" id="best">0</div>
+    </div>
+
+</div>
+
+<div id="menu" class="screen">
+
+    <div class="cuneiform">𒀭 𒆠 𒂗 𒀀 𒊭</div>
+
+    <div class="logo">
+        BABYLON
+    </div>
+
+    <div class="logoSmall">
+        LION
+    </div>
+
+    <div class="tagline">
+        O guardião da cidade eterna
+    </div>
+
+    <button id="start">
+        ENTRAR NA BABILÔNIA
+    </button>
+
+    <div class="instructions">
+        ESPAÇO / ↑ SALTAR &nbsp; • &nbsp; ↓ ABAIXAR
+    </div>
+
+</div>
+
+<div id="gameover" class="screen">
+
+    <div class="finalLabel">
+        A AREIA COBRIU SEUS PASSOS
+    </div>
+
+    <div id="finalScore">
+        0
+    </div>
+
+    <div class="instructions">
+        PONTOS
+    </div>
+
+    <div id="bestScore">
+        Recorde: 0
+    </div>
+
+    <button id="restart">
+        RETORNAR À ARENA
+    </button>
+
+</div>
+
+<div id="mobile">
+    <button class="mobileButton" id="jump">↑</button>
+    <button class="mobileButton" id="duck">↓</button>
+</div>
+
+</div>
+
+<script>
+
+const canvas=document.getElementById("canvas");
+const ctx=canvas.getContext("2d");
+
+let W,H;
+let running=false;
+let last=0;
+
+let score=0;
+let best=Number(localStorage.getItem("babylonLionBest")||0);
+
+let speed=7;
+let distance=0;
+
+let obstacles=[];
+let coins=[];
+let dust=[];
+
+let obstacleTimer=0;
+let coinTimer=0;
+
+const lion={
+    x:150,
+    y:0,
+    w:105,
+    h:78,
+    vy:0,
+    gravity:1900,
+    jump:-730,
+    grounded:true,
+    duck:false,
+    animation:0
+};
+
+document.getElementById("best").textContent=best;
+
+
+/* =========================
+   RESIZE
+========================= */
+
+function resize(){
+
+    const dpr=window.devicePixelRatio||1;
+
+    canvas.width=innerWidth*dpr;
+    canvas.height=innerHeight*dpr;
+
+    canvas.style.width=innerWidth+"px";
+    canvas.style.height=innerHeight+"px";
+
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+
+    W=innerWidth;
+    H=innerHeight;
+
+    lion.y=ground()-lion.h;
+}
+
+window.addEventListener("resize",resize);
+
+
+/* =========================
+   WORLD
+========================= */
+
+function ground(){
+    return H-120;
+}
+
+
+/* =========================
+   GAME START
+========================= */
+
+function startGame(){
+
+    running=true;
+
+    score=0;
+    distance=0;
+    speed=7;
+
+    obstacles=[];
+    coins=[];
+    dust=[];
+
+    lion.y=ground()-lion.h;
+    lion.vy=0;
+    lion.grounded=true;
+    lion.duck=false;
+
+    obstacleTimer=.8;
+    coinTimer=.5;
+
+    document.getElementById("menu").style.display="none";
+    document.getElementById("gameover").style.display="none";
+
+    last=performance.now();
+
+    requestAnimationFrame(loop);
+}
+
+
+/* =========================
+   GAME OVER
+========================= */
+
+function gameOver(){
+
+    running=false;
+
+    if(score>best){
+
+        best=score;
+
+        localStorage.setItem(
+            "babylonLionBest",
+            best
+        );
+    }
+
+    document.getElementById("best").textContent=best;
+
+    document.getElementById("finalScore").textContent=score;
+
+    document.getElementById("bestScore").textContent=
+        "Recorde: "+best;
+
+    document.getElementById("gameover").style.display="flex";
+}
+
+
+/* =========================
+   CONTROLS
+========================= */
+
+function jump(){
+
+    if(!running)return;
+
+    if(lion.grounded){
+
+        lion.vy=lion.jump;
+        lion.grounded=false;
+
+        for(let i=0;i<12;i++){
+
+            dust.push({
+                x:lion.x+20+Math.random()*60,
+                y:ground(),
+                vx:(Math.random()-.5)*160,
+                vy:-Math.random()*140,
+                life:.7
+            });
+        }
+    }
+}
+
+function duck(v){
+    lion.duck=v;
+}
+
+window.addEventListener("keydown",e=>{
+
+    if(
+        e.code==="Space" ||
+        e.code==="ArrowUp"
+    ){
+        e.preventDefault();
+        jump();
+    }
+
+    if(e.code==="ArrowDown"){
+        e.preventDefault();
+        duck(true);
+    }
+
+    if(
+        e.code==="Enter" &&
+        !running
+    ){
+        startGame();
+    }
+});
+
+window.addEventListener("keyup",e=>{
+
+    if(e.code==="ArrowDown"){
+        duck(false);
+    }
+});
+
+document.getElementById("start").onclick=startGame;
+document.getElementById("restart").onclick=startGame;
+
+document.getElementById("jump").ontouchstart=e=>{
+    e.preventDefault();
+    jump();
+};
+
+document.getElementById("duck").ontouchstart=e=>{
+    e.preventDefault();
+    duck(true);
+};
+
+document.getElementById("duck").ontouchend=e=>{
+    e.preventDefault();
+    duck(false);
+};
+
+
+/* =========================
+   SPAWN
+========================= */
+
+function spawnObstacle(){
+
+    const type=Math.random()<.5
+        ?"statue"
+        :"brick";
+
+    if(type==="statue"){
+
+        obstacles.push({
+            type,
+            x:W+80,
+            y:ground()-72,
+            w:52,
+            h:72
+        });
+
+    }else{
+
+        obstacles.push({
+            type,
+            x:W+80,
+            y:ground()-48,
+            w:72,
+            h:48
+        });
+    }
+}
+
+function spawnCoin(){
+
+    coins.push({
+
+        x:W+50,
+
+        y:
+            ground()
+            -100
+            -Math.random()*160,
+
+        r:14,
+
+        rotation:Math.random()*Math.PI*2
+    });
+}
+
+
+/* =========================
+   UPDATE
+========================= */
+
+function update(dt){
+
+    distance+=speed*60*dt;
+
+    score=Math.floor(distance/10);
+
+    speed=
+        7+
+        Math.min(
+            12,
+            score/250
+        );
+
+    document.getElementById("score").textContent=score;
+
+    lion.animation+=dt*12;
+
+    /*
+        FÍSICA DO LEÃO
+    */
+
+    lion.vy+=lion.gravity*dt;
+    lion.y+=lion.vy*dt;
+
+    const floor=ground()-lion.h;
+
+    if(lion.y>=floor){
+
+        lion.y=floor;
+        lion.vy=0;
+        lion.grounded=true;
+    }
+
+
+    /*
+        OBSTÁCULOS
+    */
+
+    obstacleTimer-=dt;
+
+    if(obstacleTimer<=0){
+
+        spawnObstacle();
+
+        obstacleTimer=
+            Math.max(
+                .58,
+                1.25-score/1400
+            )
+            +
+            Math.random()*.65;
+    }
+
+
+    /*
+        MOEDAS
+    */
+
+    coinTimer-=dt;
+
+    if(coinTimer<=0){
+
+        spawnCoin();
+
+        coinTimer=
+            .8+
+            Math.random()*1.1;
+    }
+
+
+    for(const o of obstacles){
+
+        o.x-=speed*60*dt;
+    }
+
+    for(const c of coins){
+
+        c.x-=speed*60*dt;
+
+        c.rotation+=dt*8;
+    }
+
+
+    obstacles=
+        obstacles.filter(
+            o=>o.x>-150
+        );
+
+    coins=
+        coins.filter(
+            c=>c.x>-80
+        );
+
+
+    /*
+        POEIRA
+    */
+
+    for(const p of dust){
+
+        p.x+=p.vx*dt;
+        p.y+=p.vy*dt;
+
+        p.vy+=400*dt;
+
+        p.life-=dt;
+    }
+
+    dust=
+        dust.filter(
+            p=>p.life>0
+        );
+
+
+    collision();
+}
+
+
+/* =========================
+   COLLISION
+========================= */
+
+function collision(){
+
+    const duck=lion.duck;
+
+    const lx=lion.x+22;
+    const ly=lion.y+(duck?28:10);
+
+    const lw=lion.w-38;
+    const lh=duck?45:lion.h-15;
+
+
+    for(const o of obstacles){
+
+        if(
+            lx<o.x+o.w-6 &&
+            lx+lw>o.x+6 &&
+            ly<o.y+o.h &&
+            ly+lh>o.y+5
+        ){
+
+            gameOver();
+
+            return;
+        }
+    }
+
+
+    for(
+        let i=coins.length-1;
+        i>=0;
+        i--
+    ){
+
+        const c=coins[i];
+
+        const dx=
+            lion.x+lion.w/2-c.x;
+
+        const dy=
+            lion.y+lion.h/2-c.y;
+
+        const d=
+            Math.sqrt(
+                dx*dx+dy*dy
+            );
+
+        if(d<55){
+
+            score+=25;
+            distance+=250;
+
+            for(let j=0;j<15;j++){
+
+                dust.push({
+
+                    x:c.x,
+                    y:c.y,
+
+                    vx:(Math.random()-.5)*300,
+                    vy:(Math.random()-.5)*300,
+
+                    life:.6
+                });
+            }
+
+            coins.splice(i,1);
+        }
+    }
+}
+
+
+/* =========================
+   SKY
+========================= */
+
+function drawSky(){
+
+    const gradient=
+        ctx.createLinearGradient(
+            0,0,0,H
+        );
+
+    gradient.addColorStop(
+        0,
+        "#090b16"
+    );
+
+    gradient.addColorStop(
+        .25,
+        "#201524"
+    );
+
+    gradient.addColorStop(
+        .58,
+        "#733d20"
+    );
+
+    gradient.addColorStop(
+        1,
+        "#c0772d"
+    );
+
+    ctx.fillStyle=gradient;
+
+    ctx.fillRect(
+        0,0,W,H
+    );
+
+
+    /*
+        ESTRELAS
+    */
+
+    for(let i=0;i<55;i++){
+
+        const x=(i*197)%W;
+        const y=(i*83)%(H*.45);
+
+        ctx.fillStyle=
+            "rgba(255,228,164,.6)";
+
+        ctx.fillRect(
+            x,
+            y,
+            2,
+            2
+        );
+    }
+
+
+    /*
+        LUA
+    */
+
+    ctx.beginPath();
+
+    ctx.arc(
+        W*.78,
+        H*.2,
+        48,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fillStyle="#efd28a";
+    ctx.shadowBlur=35;
+    ctx.shadowColor="#e8b950";
+    ctx.fill();
+
+    ctx.shadowBlur=0;
+}
+
+
+/* =========================
+   BABYLON ARCHITECTURE
+========================= */
+
+function drawBabylon(){
+
+    const g=ground();
+
+
+    /*
+        SILHUETA DA CIDADE
+    */
+
+    ctx.fillStyle="#271612";
+
+    for(
+        let x=-100;
+        x<W+150;
+        x+=95
+    ){
+
+        const h=
+            80+
+            ((x*17)%80);
+
+        ctx.fillRect(
+            x,
+            g-h,
+            60,
+            h
+        );
+
+        ctx.fillRect(
+            x+12,
+            g-h-35,
+            36,
+            35
+        );
+    }
+
+
+    /*
+        ZIGURATE
+    */
+
+    const z=W*.56;
+
+    ctx.fillStyle="#452318";
+
+    ctx.beginPath();
+
+    ctx.moveTo(z-210,g);
+    ctx.lineTo(z-155,g-100);
+    ctx.lineTo(z+155,g-100);
+    ctx.lineTo(z+210,g);
+
+    ctx.fill();
+
+
+    ctx.fillStyle="#63321d";
+
+    ctx.fillRect(
+        z-130,
+        g-150,
+        260,
+        50
+    );
+
+    ctx.fillRect(
+        z-90,
+        g-195,
+        180,
+        45
+    );
+
+    ctx.fillRect(
+        z-50,
+        g-235,
+        100,
+        40
+    );
+
+
+    /*
+        TEMPLO
+    */
+
+    ctx.fillStyle="#74401f";
+
+    ctx.fillRect(
+        z-25,
+        g-300,
+        50,
+        65
+    );
+
+
+    /*
+        PORTA
+    */
+
+    ctx.fillStyle="#161018";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        z,
+        g-275,
+        19,
+        Math.PI,
+        0
+    );
+
+    ctx.lineTo(
+        z+19,
+        g-235
+    );
+
+    ctx.lineTo(
+        z-19,
+        g-235
+    );
+
+    ctx.closePath();
+
+    ctx.fill();
+
+
+    /*
+        TORRES
+    */
+
+    for(const side of [-1,1]){
+
+        const tx=
+            z+
+            side*145;
+
+        ctx.fillStyle="#63341d";
+
+        ctx.fillRect(
+            tx-25,
+            g-175,
+            50,
+            175
+        );
+
+        ctx.fillStyle="#9b5a2b";
+
+        ctx.fillRect(
+            tx-34,
+            g-185,
+            68,
+            15
+        );
+
+        /*
+            ponta
+        */
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            tx-30,
+            g-185
+        );
+
+        ctx.lineTo(
+            tx,
+            g-225
+        );
+
+        ctx.lineTo(
+            tx+30,
+            g-185
+        );
+
+        ctx.fill();
+    }
+}
+
+
+/* =========================
+   PORTA DE ISHTAR
+========================= */
+
+function drawIshtar(){
+
+    const x=W*.16;
+    const y=ground();
+
+    /*
+        arco monumental
+    */
+
+    ctx.fillStyle="#142d46";
+
+    ctx.fillRect(
+        x-85,
+        y-175,
+        170,
+        175
+    );
+
+    ctx.fillStyle="#1e4865";
+
+    ctx.fillRect(
+        x-62,
+        y-150,
+        124,
+        150
+    );
+
+
+    /*
+        arco interno
+    */
+
+    ctx.fillStyle="#090b12";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        x,
+        y-70,
+        45,
+        Math.PI,
+        0
+    );
+
+    ctx.lineTo(
+        x+45,
+        y
+    );
+
+    ctx.lineTo(
+        x-45,
+        y
+    );
+
+    ctx.closePath();
+
+    ctx.fill();
+
+
+    /*
+        torres
+    */
+
+    for(const side of [-1,1]){
+
+        const tx=x+side*105;
+
+        ctx.fillStyle="#163850";
+
+        ctx.fillRect(
+            tx-30,
+            y-230,
+            60,
+            230
+        );
+
+        ctx.fillStyle="#255873";
+
+        ctx.fillRect(
+            tx-40,
+            y-240,
+            80,
+            16
+        );
+
+
+        /*
+            leões decorativos
+        */
+
+        drawReliefLion(
+            tx,
+            y-120
+        );
+    }
+}
+
+
+/* =========================
+   LEÃO EM RELEVO
+========================= */
+
+function drawReliefLion(x,y){
+
+    ctx.save();
+
+    ctx.translate(x,y);
+
+    ctx.fillStyle="#d49a3c";
+
+    /*
+        corpo
+    */
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+        0,
+        10,
+        28,
+        15,
+        0,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+
+    /*
+        cabeça
+    */
+
+    ctx.beginPath();
+
+    ctx.arc(
+        -24,
+        0,
+        14,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+
+    /*
+        pernas
+    */
+
+    ctx.strokeStyle="#d49a3c";
+    ctx.lineWidth=6;
+
+    for(const leg of [-1,1]){
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            leg*5,
+            18
+        );
+
+        ctx.lineTo(
+            leg*8,
+            34
+        );
+
+        ctx.stroke();
+    }
+
+
+    /*
+        cauda
+    */
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        25,
+        8
+    );
+
+    ctx.quadraticCurveTo(
+        43,
+        -10,
+        34,
+        -22
+    );
+
+    ctx.stroke();
+
+
+    ctx.restore();
+}
+
+
+/* =========================
+   CHÃO
+========================= */
+
+function drawGround(){
+
+    const y=ground();
+
+    ctx.fillStyle="#8b4c22";
+
+    ctx.fillRect(
+        0,
+        y,
+        W,
+        H-y
+    );
+
+
+    /*
+        faixa dourada
+    */
+
+    ctx.fillStyle="#c78a35";
+
+    ctx.fillRect(
+        0,
+        y,
+        W,
+        5
+    );
+
+
+    /*
+        tijolos
+    */
+
+    const offset=
+        -(distance*1.8)%90;
+
+    for(
+        let x=offset;
+        x<W+100;
+        x+=90
+    ){
+
+        ctx.strokeStyle=
+            "rgba(73,35,18,.55)";
+
+        ctx.lineWidth=2;
+
+        ctx.strokeRect(
+            x,
+            y+20,
+            70,
+            25
+        );
+
+        ctx.strokeRect(
+            x+35,
+            y+45,
+            70,
+            25
+        );
+    }
+
+
+    /*
+        areia
+    */
+
+    ctx.fillStyle=
+        "rgba(224,165,76,.25)";
+
+    ctx.fillRect(
+        0,
+        y+82,
+        W,
+        38
+    );
+}
+
+
+/* =========================
+   LEÃO REALISTA ESTILIZADO
+========================= */
+
+function drawLion(){
+
+    const x=lion.x;
+    const y=
+        lion.y+
+        (
+            lion.grounded
+            ?Math.sin(lion.animation)*2
+            :0
+        );
+
+    const duck=lion.duck;
+
+    ctx.save();
+
+
+    /*
+        sombra
+    */
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+        x+50,
+        ground()+4,
+        duck?52:55,
+        9,
+        0,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fillStyle=
+        "rgba(20,8,3,.48)";
+
+    ctx.fill();
+
+
+    /*
+        CAUDA
+    */
+
+    ctx.strokeStyle="#6c3515";
+    ctx.lineWidth=8;
+    ctx.lineCap="round";
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        x+18,
+        y+42
+    );
+
+    ctx.bezierCurveTo(
+        x-25,
+        y+15,
+        x-30,
+        y-10,
+        x-3,
+        y-23
+    );
+
+    ctx.stroke();
+
+
+    /*
+        ponta da cauda
+    */
+
+    ctx.beginPath();
+
+    ctx.arc(
+        x-3,
+        y-23,
+        8,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fillStyle="#4d220e";
+    ctx.fill();
+
+
+    /*
+        CORPO
+    */
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+        x+55,
+        y+43,
+        43,
+        duck?19:25,
+        0,
+        0,
+        Math.PI*2
+    );
+
+    const bodyGradient=
+        ctx.createLinearGradient(
+            x+20,
+            y+20,
+            x+80,
+            y+70
+        );
+
+    bodyGradient.addColorStop(
+        0,
+        "#d18a39"
+    );
+
+    bodyGradient.addColorStop(
+        .55,
+        "#a85e20"
+    );
+
+    bodyGradient.addColorStop(
+        1,
+        "#6e3212"
+    );
+
+    ctx.fillStyle=bodyGradient;
+    ctx.fill();
+
+
+    /*
+        BARRIGA
+    */
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+        x+62,
+        y+49,
+        27,
+        17,
+        0,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fillStyle="#dca15a";
+    ctx.fill();
+
+
+    /*
+        JUBA
+    */
+
+    const maneGradient=
+        ctx.createRadialGradient(
+            x+40,
+            y+23,
+            4,
+            x+40,
+            y+23,
+            39
+        );
+
+    maneGradient.addColorStop(
+        0,
+        "#9a501b"
+    );
+
+    maneGradient.addColorStop(
+        .6,
+        "#5a270e"
+    );
+
+    maneGradient.addColorStop(
+        1,
+        "#291008"
+    );
+
+    ctx.fillStyle=maneGradient;
+
+    ctx.beginPath();
+
+    ctx.arc(
+        x+39,
+        y+24,
+        37,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+
+    /*
+        cabeça
+    */
+
+    const headGradient=
+        ctx.createLinearGradient(
+            x+20,
+            y+2,
+            x+65,
+            y+45
+        );
+
+    headGradient.addColorStop(
+        0,
+        "#d99342"
+    );
+
+    headGradient.addColorStop(
+        1,
+        "#8b4717"
+    );
+
+    ctx.fillStyle=headGradient;
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+        x+45,
+        y+25,
+        24,
+        25,
+        0,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+
+    /*
+        ORELHA
+    */
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        x+29,
+        y+8
+    );
+
+    ctx.lineTo(
+        x+22,
+        y-9
+    );
+
+    ctx.lineTo(
+        x+39,
+        y+1
+    );
+
+    ctx.fillStyle="#6b2e12";
+    ctx.fill();
+
+
+    /*
+        FOCINHO
+    */
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+        x+61,
+        y+31,
+        13,
+        10,
+        0,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fillStyle="#e0aa68";
+    ctx.fill();
+
+
+    /*
+        NARIZ
+    */
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        x+65,
+        y+27
+    );
+
+    ctx.lineTo(
+        x+73,
+        y+29
+    );
+
+    ctx.lineTo(
+        x+66,
+        y+34
+    );
+
+    ctx.closePath();
+
+    ctx.fillStyle="#26100a";
+    ctx.fill();
+
+
+    /*
+        OLHO
+    */
+
+    ctx.beginPath();
+
+    ctx.arc(
+        x+51,
+        y+17,
+        3.5,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fillStyle="#120805";
+    ctx.fill();
+
+
+    /*
+        brilho do olho
+    */
+
+    ctx.beginPath();
+
+    ctx.arc(
+        x+52,
+        y+16,
+        1,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fillStyle="#fff1b0";
+    ctx.fill();
+
+
+    /*
+        BIGODES
+    */
+
+    ctx.strokeStyle=
+        "rgba(255,224,167,.75)";
+
+    ctx.lineWidth=1;
+
+    for(let i=0;i<3;i++){
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            x+68,
+            y+32+i*3
+        );
+
+        ctx.lineTo(
+            x+87,
+            y+29+i*6
+        );
+
+        ctx.stroke();
+    }
+
+
+    /*
+        PERNAS
+    */
+
+    if(!duck){
+
+        const step=
+            Math.sin(lion.animation)*8;
+
+        ctx.strokeStyle="#713512";
+        ctx.lineWidth=11;
+        ctx.lineCap="round";
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            x+34,
+            y+56
+        );
+
+        ctx.lineTo(
+            x+31+step,
+            y+77
+        );
+
+        ctx.stroke();
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            x+66,
+            y+56
+        );
+
+        ctx.lineTo(
+            x+68-step,
+            y+77
+        );
+
+        ctx.stroke();
+
+
+        /*
+            patas
+        */
+
+        ctx.lineWidth=7;
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            x+29+step,
+            y+77
+        );
+
+        ctx.lineTo(
+            x+40+step,
+            y+77
+        );
+
+        ctx.stroke();
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            x+65-step,
+            y+77
+        );
+
+        ctx.lineTo(
+            x+76-step,
+            y+77
+        );
+
+        ctx.stroke();
+    }
+
+
+    ctx.restore();
+}
+
+
+/* =========================
+   OBSTÁCULOS
+========================= */
+
+function drawObstacle(o){
+
+    if(o.type==="brick"){
+
+        ctx.fillStyle="#693519";
+
+        ctx.fillRect(
+            o.x,
+            o.y,
+            o.w,
+            o.h
+        );
+
+        ctx.strokeStyle="#b66c2e";
+        ctx.lineWidth=2;
+
+        for(
+            let y=o.y+15;
+            y<o.y+o.h;
+            y+=15
+        ){
+
+            ctx.beginPath();
+
+            ctx.moveTo(
+                o.x,
+                y
+            );
+
+            ctx.lineTo(
+                o.x+o.w,
+                y
+            );
+
+            ctx.stroke();
+        }
+
+        for(
+            let x=o.x+20;
+            x<o.x+o.w;
+            x+=25
+        ){
+
+            ctx.beginPath();
+
+            ctx.moveTo(
+                x,
+                o.y
+            );
+
+            ctx.lineTo(
+                x,
+                o.y+o.h
+            );
+
+            ctx.stroke();
+        }
+
+    }else{
+
+        /*
+            ESTÁTUA BABILÔNICA
+        */
+
+        ctx.fillStyle="#5a3019";
+
+        ctx.fillRect(
+            o.x+7,
+            o.y+15,
+            o.w-14,
+            o.h-15
+        );
+
+
+        /*
+            cabeça
+        */
+
+        ctx.beginPath();
+
+        ctx.arc(
+            o.x+o.w/2,
+            o.y+13,
+            17,
+            0,
+            Math.PI*2
+        );
+
+        ctx.fillStyle="#70401e";
+        ctx.fill();
+
+
+        /*
+            coroa
+        */
+
+        ctx.fillStyle="#9d632c";
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            o.x+13,
+            o.y+2
+        );
+
+        ctx.lineTo(
+            o.x+26,
+            o.y-17
+        );
+
+        ctx.lineTo(
+            o.x+39,
+            o.y+2
+        );
+
+        ctx.closePath();
+
+        ctx.fill();
+
+
+        /*
+            olhos
+        */
+
+        ctx.fillStyle="#e0ad4f";
+
+        ctx.fillRect(
+            o.x+20,
+            o.y+10,
+            4,
+            4
+        );
+
+        ctx.fillRect(
+            o.x+29,
+            o.y+10,
+            4,
+            4
+        );
+
+
+        /*
+            pedestal
+        */
+
+        ctx.fillStyle="#8d5226";
+
+        ctx.fillRect(
+            o.x,
+            o.y+o.h-12,
+            o.w,
+            12
+        );
+    }
+}
+
+
+/* =========================
+   MOEDAS
+========================= */
+
+function drawCoin(c){
+
+    const squash=
+        Math.abs(
+            Math.cos(c.rotation)
+        );
+
+    ctx.save();
+
+    ctx.translate(
+        c.x,
+        c.y
+    );
+
+    ctx.scale(
+        .3+.7*squash,
+        1
+    );
+
+
+    ctx.beginPath();
+
+    ctx.arc(
+        0,
+        0,
+        c.r,
+        0,
+        Math.PI*2
+    );
+
+    const gold=
+        ctx.createRadialGradient(
+            -4,
+            -5,
+            2,
+            0,
+            0,
+            16
+        );
+
+    gold.addColorStop(
+        0,
+        "#fff1a5"
+    );
+
+    gold.addColorStop(
+        .4,
+        "#eac24d"
+    );
+
+    gold.addColorStop(
+        1,
+        "#986016"
+    );
+
+    ctx.fillStyle=gold;
+    ctx.fill();
+
+    ctx.strokeStyle="#ffe28a";
+    ctx.lineWidth=2;
+    ctx.stroke();
+
+
+    ctx.fillStyle="#75450f";
+
+    ctx.font="bold 12px Georgia";
+    ctx.textAlign="center";
+    ctx.textBaseline="middle";
+
+    ctx.fillText(
+        "𒀭",
+        0,
+        1
+    );
+
+    ctx.restore();
+}
+
+
+/* =========================
+   DUST
+========================= */
+
+function drawDust(){
+
+    for(const p of dust){
+
+        ctx.globalAlpha=
+            Math.max(
+                0,
+                p.life/.7
+            );
+
+        ctx.fillStyle="#e1ad63";
+
+        ctx.beginPath();
+
+        ctx.arc(
+            p.x,
+            p.y,
+            3,
+            0,
+            Math.PI*2
+        );
+
+        ctx.fill();
+    }
+
+    ctx.globalAlpha=1;
+}
+
+
+/* =========================
+   DRAW
+========================= */
+
+function draw(){
+
+    ctx.clearRect(
+        0,
+        0,
+        W,
+        H
+    );
+
+    drawSky();
+
+    drawBabylon();
+
+    drawIshtar();
+
+    drawGround();
+
+
+    for(const c of coins){
+        drawCoin(c);
+    }
+
+
+    for(const o of obstacles){
+        drawObstacle(o);
+    }
+
+
+    drawLion();
+
+    drawDust();
+
+
+    /*
+        VINHETA CINEMATOGRÁFICA
+    */
+
+    const vignette=
+        ctx.createRadialGradient(
+            W/2,
+            H/2,
+            Math.min(W,H)*.25,
+            W/2,
+            H/2,
+            Math.max(W,H)*.75
+        );
+
+    vignette.addColorStop(
+        0,
+        "rgba(0,0,0,0)"
+    );
+
+    vignette.addColorStop(
+        1,
+        "rgba(0,0,0,.52)"
+    );
+
+    ctx.fillStyle=vignette;
+
+    ctx.fillRect(
+        0,
+        0,
+        W,
+        H
+    );
+}
+
+
+/* =========================
+   LOOP
+========================= */
+
+function loop(time){
+
+    if(!running)return;
+
+    let dt=
+        (time-last)/1000;
+
+    last=time;
+
+    dt=Math.min(
+        dt,
+        .035
+    );
+
+    update(dt);
+    draw();
+
+    requestAnimationFrame(loop);
+}
+
+
+/* =========================
+   INITIAL
+========================= */
+
+resize();
+draw();
+
+</script>
+
+</body>
+</html>
+```
