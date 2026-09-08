@@ -1,1 +1,889 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Babylon Lion</title>
 
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+html,body{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:#120b08;
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+body{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+#game{
+    position:relative;
+    width:100vw;
+    height:100vh;
+    max-width:1400px;
+    overflow:hidden;
+    background:#24130c;
+}
+
+canvas{
+    display:block;
+    width:100%;
+    height:100%;
+}
+
+#hud{
+    position:absolute;
+    top:22px;
+    left:22px;
+    right:22px;
+    display:flex;
+    justify-content:space-between;
+    pointer-events:none;
+    color:white;
+    z-index:5;
+}
+
+.panel{
+    background:rgba(25,12,6,.72);
+    border:2px solid rgba(241,190,75,.55);
+    border-radius:12px;
+    padding:10px 16px;
+    box-shadow:0 5px 20px rgba(0,0,0,.3);
+    backdrop-filter:blur(4px);
+}
+
+.label{
+    font-size:11px;
+    letter-spacing:2px;
+    color:#e7bb54;
+    text-transform:uppercase;
+}
+
+.value{
+    font-size:25px;
+    font-weight:bold;
+    margin-top:2px;
+}
+
+#menu,
+#gameover{
+    position:absolute;
+    inset:0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    z-index:10;
+    background:
+        radial-gradient(circle at center,rgba(117,69,24,.25),rgba(10,5,3,.9));
+}
+
+#gameover{display:none}
+
+.logo{
+    font-size:clamp(48px,9vw,105px);
+    font-weight:900;
+    letter-spacing:-5px;
+    color:#f0bd4e;
+    text-shadow:
+        0 4px 0 #7b4515,
+        0 8px 25px rgba(0,0,0,.8);
+}
+
+.subtitle{
+    margin-top:-5px;
+    color:#fff1c8;
+    font-size:clamp(13px,2vw,20px);
+    letter-spacing:6px;
+    text-transform:uppercase;
+}
+
+button{
+    margin-top:35px;
+    padding:16px 42px;
+    border:2px solid #f3ca67;
+    border-radius:999px;
+    background:linear-gradient(#d99a30,#9b5c16);
+    color:white;
+    font-size:18px;
+    font-weight:bold;
+    letter-spacing:2px;
+    cursor:pointer;
+    box-shadow:0 7px 20px rgba(0,0,0,.4);
+    transition:.15s;
+}
+
+button:hover{
+    transform:translateY(-2px) scale(1.03);
+    filter:brightness(1.12);
+}
+
+button:active{
+    transform:scale(.97);
+}
+
+.instructions{
+    margin-top:18px;
+    color:#d7c39a;
+    font-size:13px;
+}
+
+#finalScore{
+    font-size:58px;
+    color:#f0bd4e;
+    font-weight:900;
+    margin-top:8px;
+}
+
+#bestScore{
+    color:#ddd;
+    margin-top:4px;
+}
+
+#mobileControls{
+    position:absolute;
+    bottom:25px;
+    left:0;
+    right:0;
+    display:none;
+    justify-content:center;
+    z-index:6;
+    pointer-events:none;
+}
+
+.mobileBtn{
+    pointer-events:auto;
+    width:72px;
+    height:72px;
+    border-radius:50%;
+    padding:0;
+    margin:0 8px;
+    font-size:28px;
+    opacity:.75;
+}
+
+@media(max-width:700px){
+    #mobileControls{display:flex}
+    #hud{top:10px;left:10px;right:10px}
+    .panel{padding:7px 11px}
+    .value{font-size:19px}
+}
+</style>
+</head>
+
+<body>
+
+<div id="game">
+
+<canvas id="canvas"></canvas>
+
+<div id="hud">
+    <div class="panel">
+        <div class="label">Pontuação</div>
+        <div class="value" id="score">0</div>
+    </div>
+
+    <div class="panel">
+        <div class="label">Recorde</div>
+        <div class="value" id="best">0</div>
+    </div>
+</div>
+
+<div id="menu">
+    <div class="logo">BABYLON</div>
+    <div class="subtitle">LION</div>
+    <button id="startBtn">ENTRAR NA ARENA</button>
+    <div class="instructions">
+        Espaço / ↑ para saltar • ↓ para abaixar
+    </div>
+</div>
+
+<div id="gameover">
+    <div class="subtitle">O LEÃO CAIU</div>
+    <div id="finalScore">0</div>
+    <div class="instructions">PONTOS</div>
+    <div id="bestScore">Recorde: 0</div>
+    <button id="restartBtn">CORRER NOVAMENTE</button>
+</div>
+
+<div id="mobileControls">
+    <button class="mobileBtn" id="jumpBtn">↑</button>
+    <button class="mobileBtn" id="duckBtn">↓</button>
+</div>
+
+</div>
+
+<script>
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+let W,H;
+let running=false;
+let lastTime=0;
+
+let score=0;
+let best=Number(localStorage.getItem("babylonLionBest")||0);
+
+let speed=7;
+let distance=0;
+
+let obstacles=[];
+let coins=[];
+let particles=[];
+
+let spawnTimer=0;
+let coinTimer=0;
+
+const groundHeight=115;
+
+const lion={
+    x:160,
+    y:0,
+    width:78,
+    height:68,
+    vy:0,
+    gravity:1900,
+    jumpPower:-720,
+    grounded:true,
+    duck:false,
+    frame:0
+};
+
+document.getElementById("best").textContent=best;
+
+function resize(){
+    W=canvas.width=canvas.clientWidth*devicePixelRatio;
+    H=canvas.height=canvas.clientHeight*devicePixelRatio;
+
+    ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+
+    W=canvas.clientWidth;
+    H=canvas.clientHeight;
+
+    lion.y=H-groundHeight-lion.height;
+}
+
+window.addEventListener("resize",resize);
+resize();
+
+function groundY(){
+    return H-groundHeight;
+}
+
+function startGame(){
+
+    running=true;
+    score=0;
+    distance=0;
+    speed=7;
+    obstacles=[];
+    coins=[];
+    particles=[];
+
+    lion.y=groundY()-lion.height;
+    lion.vy=0;
+    lion.grounded=true;
+    lion.duck=false;
+
+    document.getElementById("menu").style.display="none";
+    document.getElementById("gameover").style.display="none";
+
+    lastTime=performance.now();
+    requestAnimationFrame(loop);
+}
+
+function gameOver(){
+
+    running=false;
+
+    if(score>best){
+        best=score;
+        localStorage.setItem("babylonLionBest",best);
+    }
+
+    document.getElementById("finalScore").textContent=score;
+    document.getElementById("bestScore").textContent="Recorde: "+best;
+    document.getElementById("best").textContent=best;
+
+    document.getElementById("gameover").style.display="flex";
+}
+
+function jump(){
+
+    if(!running)return;
+
+    if(lion.grounded){
+        lion.vy=lion.jumpPower;
+        lion.grounded=false;
+
+        for(let i=0;i<7;i++){
+            particles.push({
+                x:lion.x+25,
+                y:groundY(),
+                vx:-Math.random()*100,
+                vy:-Math.random()*100,
+                life:.5
+            });
+        }
+    }
+}
+
+function duck(state){
+    lion.duck=state;
+}
+
+window.addEventListener("keydown",e=>{
+
+    if(e.code==="Space" || e.code==="ArrowUp"){
+        e.preventDefault();
+        jump();
+    }
+
+    if(e.code==="ArrowDown"){
+        e.preventDefault();
+        duck(true);
+    }
+
+    if(e.code==="Enter" && !running){
+        startGame();
+    }
+});
+
+window.addEventListener("keyup",e=>{
+    if(e.code==="ArrowDown")duck(false);
+});
+
+document.getElementById("startBtn").onclick=startGame;
+document.getElementById("restartBtn").onclick=startGame;
+
+document.getElementById("jumpBtn").ontouchstart=e=>{
+    e.preventDefault();
+    jump();
+};
+
+document.getElementById("duckBtn").ontouchstart=e=>{
+    e.preventDefault();
+    duck(true);
+};
+
+document.getElementById("duckBtn").ontouchend=e=>{
+    e.preventDefault();
+    duck(false);
+};
+
+function spawnObstacle(){
+
+    const tall=Math.random()<.6;
+
+    obstacles.push({
+        x:W+80,
+        y:groundY()-(tall?65:45),
+        width:tall?42:65,
+        height:tall?65:45,
+        type:tall?"column":"brick"
+    });
+}
+
+function spawnCoin(){
+
+    const y=groundY()-100-Math.random()*130;
+
+    coins.push({
+        x:W+50,
+        y,
+        r:12,
+        spin:Math.random()*Math.PI*2
+    });
+}
+
+function update(dt){
+
+    distance+=speed*dt;
+
+    score=Math.floor(distance/10);
+
+    speed=7+Math.min(10,score/250);
+
+    document.getElementById("score").textContent=score;
+
+    lion.frame+=dt*12;
+
+    lion.vy+=lion.gravity*dt;
+    lion.y+=lion.vy*dt;
+
+    const targetGround=groundY()-lion.height;
+
+    if(lion.y>=targetGround){
+        lion.y=targetGround;
+        lion.vy=0;
+        lion.grounded=true;
+    }
+
+    spawnTimer-=dt;
+    coinTimer-=dt;
+
+    if(spawnTimer<=0){
+        spawnObstacle();
+
+        spawnTimer=
+            Math.max(.65,1.35-Math.min(.55,score/600))
+            +Math.random()*.65;
+    }
+
+    if(coinTimer<=0){
+        spawnCoin();
+        coinTimer=.8+Math.random()*1.2;
+    }
+
+    for(const o of obstacles){
+        o.x-=speed*60*dt;
+    }
+
+    for(const c of coins){
+        c.x-=speed*60*dt;
+        c.spin+=dt*7;
+    }
+
+    obstacles=obstacles.filter(o=>o.x>-120);
+    coins=coins.filter(c=>c.x>-50);
+
+    checkCollisions();
+
+    for(const p of particles){
+        p.x+=p.vx*dt;
+        p.y+=p.vy*dt;
+        p.vy+=400*dt;
+        p.life-=dt;
+    }
+
+    particles=particles.filter(p=>p.life>0);
+}
+
+function checkCollisions(){
+
+    const ducked=lion.duck;
+
+    const lx=lion.x+15;
+    const ly=lion.y+(ducked?25:5);
+    const lw=lion.width-25;
+    const lh=ducked?lion.height-25:lion.height-8;
+
+    for(const o of obstacles){
+
+        const hit=
+            lx<o.x+o.width-6 &&
+            lx+lw>o.x+6 &&
+            ly<o.y+o.height &&
+            ly+lh>o.y+5;
+
+        if(hit){
+            gameOver();
+            return;
+        }
+    }
+
+    for(let i=coins.length-1;i>=0;i--){
+
+        const c=coins[i];
+
+        const dx=(lion.x+lion.width/2)-c.x;
+        const dy=(lion.y+lion.height/2)-c.y;
+
+        if(Math.sqrt(dx*dx+dy*dy)<42){
+
+            score+=25;
+            distance+=250;
+
+            for(let j=0;j<12;j++){
+                particles.push({
+                    x:c.x,
+                    y:c.y,
+                    vx:(Math.random()-.5)*180,
+                    vy:(Math.random()-.5)*180,
+                    life:.6
+                });
+            }
+
+            coins.splice(i,1);
+        }
+    }
+}
+
+function drawSky(){
+
+    const g=ctx.createLinearGradient(0,0,0,H);
+    g.addColorStop(0,"#20110c");
+    g.addColorStop(.45,"#75421d");
+    g.addColorStop(1,"#c0782b");
+
+    ctx.fillStyle=g;
+    ctx.fillRect(0,0,W,H);
+
+    // Lua / sol
+    ctx.beginPath();
+    ctx.arc(W-150,130,52,0,Math.PI*2);
+    ctx.fillStyle="rgba(246,205,108,.9)";
+    ctx.fill();
+
+    // estrelas
+    for(let i=0;i<35;i++){
+
+        const x=(i*173)%W;
+        const y=30+(i*71)%(H*.45);
+
+        ctx.fillStyle="rgba(255,235,170,.55)";
+        ctx.fillRect(x,y,2,2);
+    }
+}
+
+function drawDistantCity(){
+
+    const y=groundY();
+
+    ctx.fillStyle="#3d2115";
+
+    for(let x=-50;x<W+100;x+=90){
+
+        const h=70+(x*13%100);
+
+        ctx.fillRect(x,y-h,55,h);
+
+        // torre
+        ctx.fillRect(x+15,y-h-35,25,35);
+
+        ctx.beginPath();
+        ctx.moveTo(x+10,y-h-35);
+        ctx.lineTo(x+27,y-h-60);
+        ctx.lineTo(x+44,y-h-35);
+        ctx.fill();
+    }
+
+    // Zigurate
+    const zx=W*.55;
+
+    ctx.fillStyle="#542b18";
+
+    ctx.beginPath();
+    ctx.moveTo(zx-180,y);
+    ctx.lineTo(zx-120,y-95);
+    ctx.lineTo(zx+120,y-95);
+    ctx.lineTo(zx+180,y);
+    ctx.fill();
+
+    ctx.fillStyle="#6d381d";
+
+    ctx.fillRect(zx-85,y-150,170,55);
+
+    ctx.fillRect(zx-48,y-195,96,45);
+
+    ctx.beginPath();
+    ctx.moveTo(zx-55,y-195);
+    ctx.lineTo(zx,y-240);
+    ctx.lineTo(zx+55,y-195);
+    ctx.fill();
+}
+
+function drawGround(){
+
+    const y=groundY();
+
+    ctx.fillStyle="#9a5420";
+    ctx.fillRect(0,y,W,groundHeight);
+
+    // faixas
+    ctx.fillStyle="#743b1b";
+
+    const offset=-(distance*1.8)%80;
+
+    for(let x=offset;x<W;x+=80){
+        ctx.fillRect(x,y+20,45,7);
+        ctx.fillRect(x+25,y+65,35,7);
+    }
+
+    // linha superior
+    ctx.fillStyle="#e0a13e";
+    ctx.fillRect(0,y,W,5);
+
+    // pequenas pedras
+    for(let x=-(distance*2)%120;x<W;x+=120){
+        ctx.fillStyle="#673516";
+        ctx.fillRect(x,y+95,20,5);
+    }
+}
+
+function drawLion(){
+
+    let x=lion.x;
+    let y=lion.y;
+
+    const bob=
+        lion.grounded?
+        Math.sin(lion.frame)*2:
+        0;
+
+    y+=bob;
+
+    const duck=lion.duck;
+
+    ctx.save();
+
+    // sombra
+    ctx.beginPath();
+    ctx.ellipse(
+        x+38,
+        groundY()+4,
+        duck?42:45,
+        8,
+        0,0,Math.PI*2
+    );
+    ctx.fillStyle="rgba(0,0,0,.35)";
+    ctx.fill();
+
+    // cauda
+    ctx.strokeStyle="#6b3415";
+    ctx.lineWidth=9;
+    ctx.lineCap="round";
+
+    ctx.beginPath();
+    ctx.moveTo(x+10,y+42);
+    ctx.quadraticCurveTo(
+        x-25,y+20,
+        x-8,y-2
+    );
+    ctx.stroke();
+
+    // juba
+    ctx.beginPath();
+    ctx.arc(
+        x+38,
+        y+25,
+        32,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fillStyle="#51250f";
+    ctx.fill();
+
+    // corpo
+    ctx.fillStyle="#b96d27";
+
+    if(duck){
+        ctx.beginPath();
+        ctx.roundRect(x+10,y+27,60,32,15);
+        ctx.fill();
+    }else{
+        ctx.beginPath();
+        ctx.roundRect(x+13,y+30,55,34,17);
+        ctx.fill();
+    }
+
+    // cabeça
+    ctx.beginPath();
+    ctx.arc(x+42,y+23,24,0,Math.PI*2);
+    ctx.fillStyle="#c77a2c";
+    ctx.fill();
+
+    // focinho
+    ctx.beginPath();
+    ctx.arc(x+57,y+28,11,0,Math.PI*2);
+    ctx.fillStyle="#e2a14d";
+    ctx.fill();
+
+    // nariz
+    ctx.beginPath();
+    ctx.arc(x+63,y+26,4,0,Math.PI*2);
+    ctx.fillStyle="#28100a";
+    ctx.fill();
+
+    // olho
+    ctx.beginPath();
+    ctx.arc(x+51,y+16,3.5,0,Math.PI*2);
+    ctx.fillStyle="#160b06";
+    ctx.fill();
+
+    // brilho
+    ctx.beginPath();
+    ctx.arc(x+52,y+15,1,0,Math.PI*2);
+    ctx.fillStyle="#fff";
+    ctx.fill();
+
+    // orelha
+    ctx.beginPath();
+    ctx.moveTo(x+27,y+7);
+    ctx.lineTo(x+23,y-9);
+    ctx.lineTo(x+38,y+1);
+    ctx.fillStyle="#713516";
+    ctx.fill();
+
+    // pernas
+    if(!duck){
+
+        const step=Math.sin(lion.frame)*8;
+
+        ctx.strokeStyle="#783916";
+        ctx.lineWidth=11;
+
+        ctx.beginPath();
+        ctx.moveTo(x+27,y+55);
+        ctx.lineTo(x+25+step,y+69);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(x+54,y+55);
+        ctx.lineTo(x+55-step,y+69);
+        ctx.stroke();
+    }
+
+    ctx.restore();
+}
+
+function drawObstacle(o){
+
+    if(o.type==="column"){
+
+        // coluna
+        ctx.fillStyle="#6b3920";
+        ctx.fillRect(o.x,o.y,o.width,o.height);
+
+        ctx.fillStyle="#9a5a2b";
+        ctx.fillRect(o.x-7,o.y-8,o.width+14,12);
+
+        ctx.fillRect(
+            o.x-7,
+            o.y+o.height-5,
+            o.width+14,
+            10
+        );
+
+        // hieróglifos
+        ctx.fillStyle="#d08b3d";
+
+        for(let y=o.y+15;y<o.y+o.height-10;y+=18){
+            ctx.fillRect(o.x+18,y,7,7);
+        }
+
+    }else{
+
+        ctx.fillStyle="#713718";
+        ctx.fillRect(o.x,o.y,o.width,o.height);
+
+        ctx.strokeStyle="#a96128";
+        ctx.lineWidth=3;
+
+        for(let y=o.y+15;y<o.y+o.height;y+=15){
+            ctx.beginPath();
+            ctx.moveTo(o.x,y);
+            ctx.lineTo(o.x+o.width,y);
+            ctx.stroke();
+        }
+
+        for(let x=o.x+15;x<o.x+o.width;x+=25){
+            ctx.beginPath();
+            ctx.moveTo(x,o.y);
+            ctx.lineTo(x,o.y+o.height);
+            ctx.stroke();
+        }
+    }
+}
+
+function drawCoin(c){
+
+    const squash=Math.abs(Math.cos(c.spin));
+
+    ctx.save();
+
+    ctx.translate(c.x,c.y);
+    ctx.scale(.35+.65*squash,1);
+
+    ctx.beginPath();
+    ctx.arc(0,0,c.r,0,Math.PI*2);
+
+    ctx.fillStyle="#f2c34e";
+    ctx.fill();
+
+    ctx.strokeStyle="#fff0a2";
+    ctx.lineWidth=2;
+    ctx.stroke();
+
+    ctx.fillStyle="#875015";
+    ctx.font="bold 13px Arial";
+    ctx.textAlign="center";
+    ctx.textBaseline="middle";
+    ctx.fillText("𒀭",0,1);
+
+    ctx.restore();
+}
+
+function drawParticles(){
+
+    for(const p of particles){
+
+        ctx.globalAlpha=Math.max(0,p.life/.6);
+
+        ctx.fillStyle="#f4c45c";
+
+        ctx.beginPath();
+        ctx.arc(p.x,p.y,3,0,Math.PI*2);
+        ctx.fill();
+    }
+
+    ctx.globalAlpha=1;
+}
+
+function draw(){
+
+    ctx.clearRect(0,0,W,H);
+
+    drawSky();
+    drawDistantCity();
+    drawGround();
+
+    for(const c of coins)drawCoin(c);
+    for(const o of obstacles)drawObstacle(o);
+
+    drawLion();
+    drawParticles();
+
+    // vinheta
+    const v=ctx.createRadialGradient(
+        W/2,H/2,Math.min(W,H)*.25,
+        W/2,H/2,Math.max(W,H)*.75
+    );
+
+    v.addColorStop(0,"rgba(0,0,0,0)");
+    v.addColorStop(1,"rgba(0,0,0,.42)");
+
+    ctx.fillStyle=v;
+    ctx.fillRect(0,0,W,H);
+}
+
+function loop(time){
+
+    if(!running)return;
+
+    let dt=(time-lastTime)/1000;
+    lastTime=time;
+
+    dt=Math.min(dt,.035);
+
+    update(dt);
+    draw();
+
+    requestAnimationFrame(loop);
+}
+
+// desenho inicial
+draw();
+
+</script>
+
+</body>
+</html>
