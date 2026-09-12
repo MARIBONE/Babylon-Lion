@@ -526,30 +526,28 @@ function drawSky(){
     ctx.fillStyle=g;
     ctx.fillRect(0,0,W,H);
 
-   
-    // A partir da LINHA 419: Desenho das divisões dos tijolos azuis
-ctx.strokeStyle = "rgba(10, 25, 50, 0.6)"; // Cor da massa/junta dos tijolos (escuro)
-ctx.lineWidth = 2;
+    ctx.strokeStyle = "rgba(10, 25, 50, 0.6)";
+    ctx.lineWidth = 2;
 
-const brickH = 18; // Altura de cada tijolo
-const brickW = 45; // Largura de cada tijolo
+    const brickH = 18;
+    const brickW = 45;
 
-for (let y = 0; y < H; y += brickH) {
-    // Linha horizontal dos tijolos
-    ctx.beginPath();
-    ctx.moveTo(0, y);
-    ctx.lineTo(W, y);
-    ctx.stroke();
-
-    // Linhas verticais intercaladas
-    const offsetX = (Math.floor(y / brickH) % 2) * (brickW / 2);
-    for (let x = offsetX; x < W; x += brickW) {
+    for (let y = 0; y < H; y += brickH) {
         ctx.beginPath();
-        ctx.moveTo(x, y);
-        ctx.lineTo(x, y + brickH);
+        ctx.moveTo(0, y);
+        ctx.lineTo(W, y);
         ctx.stroke();
+
+        const offsetX = (Math.floor(y / brickH) % 2) * (brickW / 2);
+        for (let x = offsetX; x < W; x += brickW) {
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(x, y + brickH);
+            ctx.stroke();
+        }
     }
 }
+
 function drawDistantCity(){
 
     const y=groundY();
