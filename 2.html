@@ -43,7 +43,7 @@ canvas{
     left:22px;
     right:22px;
     display:flex;
-    justify-space-between;
+    justify-content:space-between;
     pointer-events:none;
     color:white;
     z-index:5;
@@ -246,7 +246,7 @@ const groundHeight=115;
 const lion={
     x:160,
     y:0,
-    width:95,
+    width:78,
     height:68,
     vy:0,
     gravity:1900,
@@ -519,26 +519,42 @@ function checkCollisions(){
 function drawSky(){
 
     const g=ctx.createLinearGradient(0,0,0,H);
-    g.addColorStop(0,"#20110c");
-    g.addColorStop(.45,"#75421d");
-    g.addColorStop(1,"#c0782b");
+    g.addColorStop(0,"#0d2240");
+    g.addColorStop(.45,"#123e75");
+    g.addColorStop(1,"#1a549c");
 
     ctx.fillStyle=g;
     ctx.fillRect(0,0,W,H);
 
+    // Lua / sol
     ctx.beginPath();
     ctx.arc(W-150,130,52,0,Math.PI*2);
     ctx.fillStyle="rgba(246,205,108,.9)";
     ctx.fill();
 
-    for(let i=0;i<35;i++){
-        const x=(i*173)%W;
-        const y=30+(i*71)%(H*.45);
-        ctx.fillStyle="rgba(255,235,170,.55)";
-        ctx.fillRect(x,y,2,2);
+    // A partir da LINHA 419: Desenho das divisões dos tijolos azuis
+ctx.strokeStyle = "rgba(10, 25, 50, 0.6)"; // Cor da massa/junta dos tijolos (escuro)
+ctx.lineWidth = 2;
+
+const brickH = 18; // Altura de cada tijolo
+const brickW = 45; // Largura de cada tijolo
+
+for (let y = 0; y < H; y += brickH) {
+    // Linha horizontal dos tijolos
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(W, y);
+    ctx.stroke();
+
+    // Linhas verticais intercaladas
+    const offsetX = (Math.floor(y / brickH) % 2) * (brickW / 2);
+    for (let x = offsetX; x < W; x += brickW) {
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x, y + brickH);
+        ctx.stroke();
     }
 }
-
 function drawDistantCity(){
 
     const y=groundY();
@@ -546,8 +562,12 @@ function drawDistantCity(){
     ctx.fillStyle="#3d2115";
 
     for(let x=-50;x<W+100;x+=90){
+
         const h=70+(x*13%100);
+
         ctx.fillRect(x,y-h,55,h);
+
+        // torre
         ctx.fillRect(x+15,y-h-35,25,35);
 
         ctx.beginPath();
@@ -557,6 +577,7 @@ function drawDistantCity(){
         ctx.fill();
     }
 
+    // Zigurate
     const zx=W*.55;
 
     ctx.fillStyle="#542b18";
@@ -569,7 +590,9 @@ function drawDistantCity(){
     ctx.fill();
 
     ctx.fillStyle="#6d381d";
+
     ctx.fillRect(zx-85,y-150,170,55);
+
     ctx.fillRect(zx-48,y-195,96,45);
 
     ctx.beginPath();
@@ -586,6 +609,7 @@ function drawGround(){
     ctx.fillStyle="#9a5420";
     ctx.fillRect(0,y,W,groundHeight);
 
+    // faixas
     ctx.fillStyle="#743b1b";
 
     const offset=-(distance*1.8)%80;
@@ -595,165 +619,139 @@ function drawGround(){
         ctx.fillRect(x+25,y+65,35,7);
     }
 
+    // linha superior
     ctx.fillStyle="#e0a13e";
     ctx.fillRect(0,y,W,5);
 
+    // pequenas pedras
     for(let x=-(distance*2)%120;x<W;x+=120){
         ctx.fillStyle="#673516";
         ctx.fillRect(x,y+95,20,5);
     }
 }
 
-// NOVO LEÃO BABILÔNICO (INSPIRADO NA PORTA DE ISHTAR)
 function drawLion(){
 
     let x=lion.x;
     let y=lion.y;
 
-    const bob=lion.grounded ? Math.sin(lion.frame)*2 : 0;
+    const bob=
+        lion.grounded?
+        Math.sin(lion.frame)*2:
+        0;
+
     y+=bob;
 
     const duck=lion.duck;
 
     ctx.save();
 
-    // Sombra projetada
+    // sombra
     ctx.beginPath();
-    ctx.ellipse(x+45, groundY()+4, duck?50:52, 8, 0, 0, Math.PI*2);
+    ctx.ellipse(
+        x+38,
+        groundY()+4,
+        duck?42:45,
+        8,
+        0,0,Math.PI*2
+    );
     ctx.fillStyle="rgba(0,0,0,.35)";
     ctx.fill();
 
-    // CAUDA LONGA E ARQUEADA
-    ctx.strokeStyle="#e2d8c3";
-    ctx.lineWidth=5;
+    // cauda
+    ctx.strokeStyle="#6b3415";
+    ctx.lineWidth=9;
     ctx.lineCap="round";
+
     ctx.beginPath();
-    ctx.moveTo(x+10, y+35);
-    ctx.bezierCurveTo(x-20, y+45, x-40, y+60, x-25, y+62);
+    ctx.moveTo(x+10,y+42);
+    ctx.quadraticCurveTo(
+        x-25,y+20,
+        x-8,y-2
+    );
     ctx.stroke();
 
-    // Borla da cauda
+    // juba
     ctx.beginPath();
-    ctx.arc(x-24, y+62, 6, 0, Math.PI*2);
-    ctx.fillStyle="#c2852a";
+    ctx.arc(
+        x+38,
+        y+25,
+        32,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fillStyle="#51250f";
     ctx.fill();
 
-    // CORPO (Creme/Bege com textura de tijolo babilônico)
-    ctx.fillStyle="#ebdcc2";
+    // corpo
+    ctx.fillStyle="#b96d27";
+
     if(duck){
         ctx.beginPath();
-        ctx.roundRect(x+10, y+25, 65, 30, 12);
+        ctx.roundRect(x+10,y+27,60,32,15);
         ctx.fill();
     }else{
         ctx.beginPath();
-        ctx.roundRect(x+15, y+22, 60, 32, 14);
+        ctx.roundRect(x+13,y+30,55,34,17);
         ctx.fill();
     }
 
-    // Costelas / Detalhes anatômicos do relevo
-    ctx.strokeStyle="#c4b193";
-    ctx.lineWidth=2;
+    // cabeça
     ctx.beginPath();
-    ctx.moveTo(x+40, y+27);
-    ctx.lineTo(x+37, y+45);
-    ctx.moveTo(x+47, y+27);
-    ctx.lineTo(x+44, y+45);
-    ctx.moveTo(x+54, y+27);
-    ctx.lineTo(x+51, y+45);
-    ctx.stroke();
-
-    // JUBA DETALHADA E FLAMEJANTE (Dourado/Laranja/Brown)
-    ctx.fillStyle="#c2852a";
-    ctx.beginPath();
-    ctx.ellipse(x+55, y+22, 22, 25, 0, 0, Math.PI*2);
+    ctx.arc(x+42,y+23,24,0,Math.PI*2);
+    ctx.fillStyle="#c77a2c";
     ctx.fill();
 
-    // Camadas de franja da juba (estilo mesopotâmico)
-    ctx.fillStyle="#8c5119";
-    for(let i=0; i<6; i++){
-        ctx.beginPath();
-        ctx.arc(x+42+(i*4), y+8+(i*5), 6, 0, Math.PI*2);
-        ctx.fill();
-    }
-
-    ctx.fillStyle="#d99938";
-    for(let i=0; i<5; i++){
-        ctx.beginPath();
-        ctx.arc(x+46+(i*4), y+12+(i*5), 5, 0, Math.PI*2);
-        ctx.fill();
-    }
-
-    // CABEÇA
-    ctx.fillStyle="#ebdcc2";
+    // focinho
     ctx.beginPath();
-    ctx.ellipse(x+72, y+18, 16, 14, 0, 0, Math.PI*2);
+    ctx.arc(x+57,y+28,11,0,Math.PI*2);
+    ctx.fillStyle="#e2a14d";
     ctx.fill();
 
-    // FOCINHO E BOCA ABERTA (RUGIDO)
-    ctx.fillStyle="#ebdcc2";
+    // nariz
     ctx.beginPath();
-    ctx.fillRect(x+78, y+10, 16, 10); // Mandíbula superior
-    ctx.fillRect(x+78, y+22, 14, 6);  // Mandíbula inferior
-
-    // Interior da boca
-    ctx.fillStyle="#611d13";
-    ctx.fillRect(x+80, y+18, 12, 6);
-
-    // Dentes à mostra
-    ctx.fillStyle="#ffffff";
-    ctx.beginPath();
-    ctx.moveTo(x+84, y+18);
-    ctx.lineTo(x+86, y+20);
-    ctx.lineTo(x+88, y+18);
+    ctx.arc(x+63,y+26,4,0,Math.PI*2);
+    ctx.fillStyle="#28100a";
     ctx.fill();
 
-    // OLHO
+    // olho
     ctx.beginPath();
-    ctx.arc(x+72, y+14, 3, 0, Math.PI*2);
-    ctx.fillStyle="#1c130b";
+    ctx.arc(x+51,y+16,3.5,0,Math.PI*2);
+    ctx.fillStyle="#160b06";
     ctx.fill();
 
-    // ORELHA
+    // brilho
     ctx.beginPath();
-    ctx.ellipse(x+62, y+8, 4, 6, -0.3, 0, Math.PI*2);
-    ctx.fillStyle="#c2852a";
+    ctx.arc(x+52,y+15,1,0,Math.PI*2);
+    ctx.fillStyle="#fff";
     ctx.fill();
 
-    // PERNAS (Passo de caminhada babilônico)
+    // orelha
+    ctx.beginPath();
+    ctx.moveTo(x+27,y+7);
+    ctx.lineTo(x+23,y-9);
+    ctx.lineTo(x+38,y+1);
+    ctx.fillStyle="#713516";
+    ctx.fill();
+
+    // pernas
     if(!duck){
-        const step=Math.sin(lion.frame)*10;
 
-        ctx.strokeStyle="#ebdcc2";
-        ctx.lineWidth=8;
+        const step=Math.sin(lion.frame)*8;
 
-        // Pernas traseiras
+        ctx.strokeStyle="#783916";
+        ctx.lineWidth=11;
+
         ctx.beginPath();
-        ctx.moveTo(x+28, y+48);
-        ctx.lineTo(x+22+step, y+68);
+        ctx.moveTo(x+27,y+55);
+        ctx.lineTo(x+25+step,y+69);
         ctx.stroke();
 
         ctx.beginPath();
-        ctx.moveTo(x+40, y+48);
-        ctx.lineTo(x+42-step, y+68);
+        ctx.moveTo(x+54,y+55);
+        ctx.lineTo(x+55-step,y+69);
         ctx.stroke();
-
-        // Pernas dianteiras
-        ctx.beginPath();
-        ctx.moveTo(x+62, y+45);
-        ctx.lineTo(x+58+step, y+68);
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.moveTo(x+74, y+45);
-        ctx.lineTo(x+78-step, y+68);
-        ctx.stroke();
-
-        // Patas
-        ctx.fillStyle="#ebdcc2";
-        ctx.fillRect(x+18+step, y+65, 8, 4);
-        ctx.fillRect(x+38-step, y+65, 8, 4);
-        ctx.fillRect(x+54+step, y+65, 8, 4);
-        ctx.fillRect(x+74-step, y+65, 8, 4);
     }
 
     ctx.restore();
@@ -763,6 +761,7 @@ function drawObstacle(o){
 
     if(o.type==="column"){
 
+        // coluna
         ctx.fillStyle="#6b3920";
         ctx.fillRect(o.x,o.y,o.width,o.height);
 
@@ -776,6 +775,7 @@ function drawObstacle(o){
             10
         );
 
+        // hieróglifos
         ctx.fillStyle="#d08b3d";
 
         for(let y=o.y+15;y<o.y+o.height-10;y+=18){
@@ -864,6 +864,7 @@ function draw(){
     drawLion();
     drawParticles();
 
+    // vinheta
     const v=ctx.createRadialGradient(
         W/2,H/2,Math.min(W,H)*.25,
         W/2,H/2,Math.max(W,H)*.75
@@ -891,6 +892,7 @@ function loop(time){
     requestAnimationFrame(loop);
 }
 
+// desenho inicial
 draw();
 
 </script>
