@@ -43,7 +43,7 @@ canvas{
     left:22px;
     right:22px;
     display:flex;
-    justify-content:space-between;
+    justify-space-between;
     pointer-events:none;
     color:white;
     z-index:5;
@@ -82,16 +82,10 @@ canvas{
     text-align:center;
     z-index:10;
     background:
-        radial-gradient(
-            circle at center,
-            rgba(117,69,24,.25),
-            rgba(10,5,3,.9)
-        );
+        radial-gradient(circle at center,rgba(117,69,24,.25),rgba(10,5,3,.9));
 }
 
-#gameover{
-    display:none;
-}
+#gameover{display:none}
 
 .logo{
     font-size:clamp(48px,9vw,105px);
@@ -176,24 +170,10 @@ button:active{
 }
 
 @media(max-width:700px){
-
-    #mobileControls{
-        display:flex;
-    }
-
-    #hud{
-        top:10px;
-        left:10px;
-        right:10px;
-    }
-
-    .panel{
-        padding:7px 11px;
-    }
-
-    .value{
-        font-size:19px;
-    }
+    #mobileControls{display:flex}
+    #hud{top:10px;left:10px;right:10px}
+    .panel{padding:7px 11px}
+    .value{font-size:19px}
 }
 </style>
 </head>
@@ -205,7 +185,6 @@ button:active{
 <canvas id="canvas"></canvas>
 
 <div id="hud">
-
     <div class="panel">
         <div class="label">Pontuação</div>
         <div class="value" id="score">0</div>
@@ -215,1421 +194,580 @@ button:active{
         <div class="label">Recorde</div>
         <div class="value" id="best">0</div>
     </div>
-
 </div>
 
-
 <div id="menu">
-
-    <div class="logo">
-        BABYLON
-    </div>
-
-    <div class="subtitle">
-        LION
-    </div>
-
-    <button id="startBtn">
-        ENTRAR NA ARENA
-    </button>
-
+    <div class="logo">BABYLON</div>
+    <div class="subtitle">LION</div>
+    <button id="startBtn">ENTRAR NA ARENA</button>
     <div class="instructions">
         Espaço / ↑ para saltar • ↓ para abaixar
     </div>
-
 </div>
-
 
 <div id="gameover">
-
-    <div class="subtitle">
-        O LEÃO CAIU
-    </div>
-
-    <div id="finalScore">
-        0
-    </div>
-
-    <div class="instructions">
-        PONTOS
-    </div>
-
-    <div id="bestScore">
-        Recorde: 0
-    </div>
-
-    <button id="restartBtn">
-        CORRER NOVAMENTE
-    </button>
-
+    <div class="subtitle">O LEÃO CAIU</div>
+    <div id="finalScore">0</div>
+    <div class="instructions">PONTOS</div>
+    <div id="bestScore">Recorde: 0</div>
+    <button id="restartBtn">CORRER NOVAMENTE</button>
 </div>
-
 
 <div id="mobileControls">
-
-    <button class="mobileBtn" id="jumpBtn">
-        ↑
-    </button>
-
-    <button class="mobileBtn" id="duckBtn">
-        ↓
-    </button>
-
+    <button class="mobileBtn" id="jumpBtn">↑</button>
+    <button class="mobileBtn" id="duckBtn">↓</button>
 </div>
 
 </div>
-
 
 <script>
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
 
-/* =========================================================
-   CANVAS
-========================================================= */
+let W,H;
+let running=false;
+let lastTime=0;
 
-const canvas =
-    document.getElementById("canvas");
+let score=0;
+let best=Number(localStorage.getItem("babylonLionBest")||0);
 
-const ctx =
-    canvas.getContext("2d");
+let speed=7;
+let distance=0;
 
+let obstacles=[];
+let coins=[];
+let particles=[];
 
-let W;
-let H;
+let spawnTimer=0;
+let coinTimer=0;
 
-let running = false;
-let lastTime = 0;
+const groundHeight=115;
 
-let score = 0;
-
-let best =
-    Number(
-        localStorage.getItem(
-            "babylonLionBest"
-        ) || 0
-    );
-
-let speed = 7;
-let distance = 0;
-
-let obstacles = [];
-let coins = [];
-let particles = [];
-
-let spawnTimer = 0;
-let coinTimer = 0;
-
-const groundHeight = 115;
-
-
-/* =========================================================
-   LEÃO BABILÔNICO — IMAGEM INLINE
-   =========================================================
-
-   A imagem está incorporada diretamente no HTML.
-
-   NÃO existe:
-   assets/lion.png
-   pasta externa
-   servidor de imagens
-   arquivo adicional
-
-   Tudo está dentro deste único index.html.
-========================================================= */
-
-const lionImage = new Image();
-
-let lionImageReady = false;
-
-lionImage.onload = function(){
-
-    lionImageReady = true;
-
-    draw();
-
-};
-
-lionImage.src =
-"data:image/webp;base64,UklGRg5CAABXRUJQVlA4WAoAAAAQAAAAowEAvAAAQUxQSIgUAA";
-
-
-/*
-   A linha acima é substituída pelo bloco Base64 completo
-   abaixo antes do fechamento do código.
-*/
-
-
-/* =========================================================
-   PERSONAGEM
-========================================================= */
-
-const lion = {
-
-    x:135,
-
+const lion={
+    x:160,
     y:0,
-
-    width:155,
-
-    height:70,
-
+    width:95,
+    height:68,
     vy:0,
-
     gravity:1900,
-
     jumpPower:-720,
-
     grounded:true,
-
     duck:false,
-
     frame:0
-
 };
 
-
-/* =========================================================
-   HUD
-========================================================= */
-
-document.getElementById(
-    "best"
-).textContent = best;
-
-
-/* =========================================================
-   RESIZE
-========================================================= */
+document.getElementById("best").textContent=best;
 
 function resize(){
+    W=canvas.width=canvas.clientWidth*devicePixelRatio;
+    H=canvas.height=canvas.clientHeight*devicePixelRatio;
 
-    W =
-        canvas.width =
-        canvas.clientWidth *
-        devicePixelRatio;
+    ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
 
-    H =
-        canvas.height =
-        canvas.clientHeight *
-        devicePixelRatio;
+    W=canvas.clientWidth;
+    H=canvas.clientHeight;
 
-
-    ctx.setTransform(
-        devicePixelRatio,
-        0,
-        0,
-        devicePixelRatio,
-        0,
-        0
-    );
-
-
-    W = canvas.clientWidth;
-    H = canvas.clientHeight;
-
-
-    lion.y =
-        H -
-        groundHeight -
-        lion.height;
-
+    lion.y=H-groundHeight-lion.height;
 }
 
-window.addEventListener(
-    "resize",
-    resize
-);
-
+window.addEventListener("resize",resize);
 resize();
 
-
-/* =========================================================
-   CHÃO
-========================================================= */
-
 function groundY(){
-
-    return H - groundHeight;
-
+    return H-groundHeight;
 }
-
-
-/* =========================================================
-   INICIAR JOGO
-========================================================= */
 
 function startGame(){
 
-    running = true;
+    running=true;
+    score=0;
+    distance=0;
+    speed=7;
+    obstacles=[];
+    coins=[];
+    particles=[];
 
-    score = 0;
+    lion.y=groundY()-lion.height;
+    lion.vy=0;
+    lion.grounded=true;
+    lion.duck=false;
 
-    distance = 0;
+    document.getElementById("menu").style.display="none";
+    document.getElementById("gameover").style.display="none";
 
-    speed = 7;
-
-    obstacles = [];
-
-    coins = [];
-
-    particles = [];
-
-    spawnTimer = .8;
-
-    coinTimer = .5;
-
-
-    lion.y =
-        groundY() -
-        lion.height;
-
-    lion.vy = 0;
-
-    lion.grounded = true;
-
-    lion.duck = false;
-
-
-    document.getElementById(
-        "menu"
-    ).style.display = "none";
-
-
-    document.getElementById(
-        "gameover"
-    ).style.display = "none";
-
-
-    lastTime =
-        performance.now();
-
+    lastTime=performance.now();
     requestAnimationFrame(loop);
-
 }
-
-
-/* =========================================================
-   GAME OVER
-========================================================= */
 
 function gameOver(){
 
-    running = false;
+    running=false;
 
-
-    if(score > best){
-
-        best = score;
-
-        localStorage.setItem(
-            "babylonLionBest",
-            best
-        );
-
+    if(score>best){
+        best=score;
+        localStorage.setItem("babylonLionBest",best);
     }
 
+    document.getElementById("finalScore").textContent=score;
+    document.getElementById("bestScore").textContent="Recorde: "+best;
+    document.getElementById("best").textContent=best;
 
-    document.getElementById(
-        "finalScore"
-    ).textContent = score;
-
-
-    document.getElementById(
-        "bestScore"
-    ).textContent =
-        "Recorde: " + best;
-
-
-    document.getElementById(
-        "best"
-    ).textContent = best;
-
-
-    document.getElementById(
-        "gameover"
-    ).style.display = "flex";
-
+    document.getElementById("gameover").style.display="flex";
 }
-
-
-/* =========================================================
-   SALTO
-========================================================= */
 
 function jump(){
 
-    if(!running)
-        return;
-
+    if(!running)return;
 
     if(lion.grounded){
+        lion.vy=lion.jumpPower;
+        lion.grounded=false;
 
-        lion.vy =
-            lion.jumpPower;
-
-        lion.grounded = false;
-
-
-        for(
-            let i=0;
-            i<7;
-            i++
-        ){
-
+        for(let i=0;i<7;i++){
             particles.push({
-
-                x:
-                    lion.x + 35,
-
-                y:
-                    groundY(),
-
-                vx:
-                    -Math.random()*100,
-
-                vy:
-                    -Math.random()*100,
-
+                x:lion.x+25,
+                y:groundY(),
+                vx:-Math.random()*100,
+                vy:-Math.random()*100,
                 life:.5
-
             });
-
         }
-
     }
-
 }
-
-
-/* =========================================================
-   ABAIXAR
-========================================================= */
 
 function duck(state){
-
-    lion.duck = state;
-
+    lion.duck=state;
 }
 
+window.addEventListener("keydown",e=>{
 
-/* =========================================================
-   TECLADO
-========================================================= */
-
-window.addEventListener(
-    "keydown",
-    function(e){
-
-        if(
-            e.code === "Space" ||
-            e.code === "ArrowUp"
-        ){
-
-            e.preventDefault();
-
-            jump();
-
-        }
-
-
-        if(
-            e.code === "ArrowDown"
-        ){
-
-            e.preventDefault();
-
-            duck(true);
-
-        }
-
-
-        if(
-            e.code === "Enter" &&
-            !running
-        ){
-
-            startGame();
-
-        }
-
+    if(e.code==="Space" || e.code==="ArrowUp"){
+        e.preventDefault();
+        jump();
     }
-);
 
-
-window.addEventListener(
-    "keyup",
-    function(e){
-
-        if(
-            e.code === "ArrowDown"
-        ){
-
-            duck(false);
-
-        }
-
+    if(e.code==="ArrowDown"){
+        e.preventDefault();
+        duck(true);
     }
-);
 
+    if(e.code==="Enter" && !running){
+        startGame();
+    }
+});
 
-/* =========================================================
-   BOTÕES
-========================================================= */
+window.addEventListener("keyup",e=>{
+    if(e.code==="ArrowDown")duck(false);
+});
 
-document.getElementById(
-    "startBtn"
-).onclick = startGame;
+document.getElementById("startBtn").onclick=startGame;
+document.getElementById("restartBtn").onclick=startGame;
 
-
-document.getElementById(
-    "restartBtn"
-).onclick = startGame;
-
-
-/* =========================================================
-   CONTROLES MOBILE
-========================================================= */
-
-document.getElementById(
-    "jumpBtn"
-).ontouchstart =
-function(e){
-
+document.getElementById("jumpBtn").ontouchstart=e=>{
     e.preventDefault();
-
     jump();
-
 };
 
-
-document.getElementById(
-    "duckBtn"
-).ontouchstart =
-function(e){
-
+document.getElementById("duckBtn").ontouchstart=e=>{
     e.preventDefault();
-
     duck(true);
-
 };
 
-
-document.getElementById(
-    "duckBtn"
-).ontouchend =
-function(e){
-
+document.getElementById("duckBtn").ontouchend=e=>{
     e.preventDefault();
-
     duck(false);
-
 };
-
-
-/* =========================================================
-   OBSTÁCULO
-========================================================= */
 
 function spawnObstacle(){
 
-    const tall =
-        Math.random() < .6;
-
+    const tall=Math.random()<.6;
 
     obstacles.push({
-
-        x:
-            W + 80,
-
-        y:
-            groundY() -
-            (
-                tall
-                ? 65
-                : 45
-            ),
-
-        width:
-            tall
-            ? 42
-            : 65,
-
-        height:
-            tall
-            ? 65
-            : 45,
-
-        type:
-            tall
-            ? "column"
-            : "brick"
-
+        x:W+80,
+        y:groundY()-(tall?65:45),
+        width:tall?42:65,
+        height:tall?65:45,
+        type:tall?"column":"brick"
     });
-
 }
-
-
-/* =========================================================
-   MOEDA
-========================================================= */
 
 function spawnCoin(){
 
-    const y =
-        groundY() -
-        100 -
-        Math.random()*130;
-
+    const y=groundY()-100-Math.random()*130;
 
     coins.push({
-
-        x:
-            W + 50,
-
-        y:y,
-
+        x:W+50,
+        y,
         r:12,
-
-        spin:
-            Math.random() *
-            Math.PI *
-            2
-
+        spin:Math.random()*Math.PI*2
     });
-
 }
-
-
-/* =========================================================
-   UPDATE
-========================================================= */
 
 function update(dt){
 
-    distance +=
-        speed * dt;
+    distance+=speed*dt;
 
+    score=Math.floor(distance/10);
 
-    score =
-        Math.floor(
-            distance / 10
-        );
+    speed=7+Math.min(10,score/250);
 
+    document.getElementById("score").textContent=score;
 
-    speed =
-        7 +
-        Math.min(
-            10,
-            score / 250
-        );
+    lion.frame+=dt*12;
 
+    lion.vy+=lion.gravity*dt;
+    lion.y+=lion.vy*dt;
 
-    document.getElementById(
-        "score"
-    ).textContent = score;
+    const targetGround=groundY()-lion.height;
 
-
-    lion.frame +=
-        dt * 12;
-
-
-    /*
-       FÍSICA DO LEÃO
-    */
-
-    lion.vy +=
-        lion.gravity * dt;
-
-    lion.y +=
-        lion.vy * dt;
-
-
-    const targetGround =
-        groundY() -
-        lion.height;
-
-
-    if(
-        lion.y >=
-        targetGround
-    ){
-
-        lion.y =
-            targetGround;
-
-        lion.vy = 0;
-
-        lion.grounded = true;
-
+    if(lion.y>=targetGround){
+        lion.y=targetGround;
+        lion.vy=0;
+        lion.grounded=true;
     }
 
+    spawnTimer-=dt;
+    coinTimer-=dt;
 
-    /*
-       SPAWN
-    */
-
-    spawnTimer -= dt;
-
-    coinTimer -= dt;
-
-
-    if(
-        spawnTimer <= 0
-    ){
-
+    if(spawnTimer<=0){
         spawnObstacle();
 
-
-        spawnTimer =
-            Math.max(
-                .65,
-                1.35 -
-                Math.min(
-                    .55,
-                    score / 600
-                )
-            ) +
-            Math.random()*.65;
-
+        spawnTimer=
+            Math.max(.65,1.35-Math.min(.55,score/600))
+            +Math.random()*.65;
     }
 
-
-    if(
-        coinTimer <= 0
-    ){
-
+    if(coinTimer<=0){
         spawnCoin();
-
-        coinTimer =
-            .8 +
-            Math.random()*1.2;
-
+        coinTimer=.8+Math.random()*1.2;
     }
 
-
-    /*
-       MOVIMENTO
-    */
-
-    for(
-        const o of obstacles
-    ){
-
-        o.x -=
-            speed *
-            60 *
-            dt;
-
+    for(const o of obstacles){
+        o.x-=speed*60*dt;
     }
 
-
-    for(
-        const c of coins
-    ){
-
-        c.x -=
-            speed *
-            60 *
-            dt;
-
-        c.spin +=
-            dt * 7;
-
+    for(const c of coins){
+        c.x-=speed*60*dt;
+        c.spin+=dt*7;
     }
 
-
-    /*
-       LIMPEZA
-    */
-
-    obstacles =
-        obstacles.filter(
-            o => o.x > -120
-        );
-
-
-    coins =
-        coins.filter(
-            c => c.x > -50
-        );
-
-
-    /*
-       COLISÕES
-    */
+    obstacles=obstacles.filter(o=>o.x>-120);
+    coins=coins.filter(c=>c.x>-50);
 
     checkCollisions();
 
-
-    /*
-       PARTÍCULAS
-    */
-
-    for(
-        const p of particles
-    ){
-
-        p.x +=
-            p.vx * dt;
-
-        p.y +=
-            p.vy * dt;
-
-        p.vy +=
-            400 * dt;
-
-        p.life -= dt;
-
+    for(const p of particles){
+        p.x+=p.vx*dt;
+        p.y+=p.vy*dt;
+        p.vy+=400*dt;
+        p.life-=dt;
     }
 
-
-    particles =
-        particles.filter(
-            p => p.life > 0
-        );
-
+    particles=particles.filter(p=>p.life>0);
 }
-
-
-/* =========================================================
-   COLISÕES
-========================================================= */
 
 function checkCollisions(){
 
-    const ducked =
-        lion.duck;
+    const ducked=lion.duck;
 
+    const lx=lion.x+15;
+    const ly=lion.y+(ducked?25:5);
+    const lw=lion.width-25;
+    const lh=ducked?lion.height-25:lion.height-8;
 
-    const lx =
-        lion.x + 18;
+    for(const o of obstacles){
 
-
-    const ly =
-        lion.y +
-        (
-            ducked
-            ? 28
-            : 12
-        );
-
-
-    const lw =
-        lion.width - 34;
-
-
-    const lh =
-        ducked
-        ? lion.height - 30
-        : lion.height - 15;
-
-
-    /*
-       OBSTÁCULOS
-    */
-
-    for(
-        const o of obstacles
-    ){
-
-        const hit =
-
-            lx <
-                o.x +
-                o.width -
-                6 &&
-
-            lx + lw >
-                o.x +
-                6 &&
-
-            ly <
-                o.y +
-                o.height &&
-
-            ly + lh >
-                o.y + 5;
-
+        const hit=
+            lx<o.x+o.width-6 &&
+            lx+lw>o.x+6 &&
+            ly<o.y+o.height &&
+            ly+lh>o.y+5;
 
         if(hit){
-
             gameOver();
-
             return;
-
         }
-
     }
 
+    for(let i=coins.length-1;i>=0;i--){
 
-    /*
-       MOEDAS
-    */
+        const c=coins[i];
 
-    for(
-        let i =
-            coins.length - 1;
-        i >= 0;
-        i--
-    ){
+        const dx=(lion.x+lion.width/2)-c.x;
+        const dy=(lion.y+lion.height/2)-c.y;
 
-        const c =
-            coins[i];
+        if(Math.sqrt(dx*dx+dy*dy)<42){
 
+            score+=25;
+            distance+=250;
 
-        const dx =
-            (
-                lion.x +
-                lion.width / 2
-            ) -
-            c.x;
-
-
-        const dy =
-            (
-                lion.y +
-                lion.height / 2
-            ) -
-            c.y;
-
-
-        if(
-            Math.sqrt(
-                dx*dx +
-                dy*dy
-            ) < 52
-        ){
-
-            score += 25;
-
-            distance += 250;
-
-
-            for(
-                let j=0;
-                j<12;
-                j++
-            ){
-
+            for(let j=0;j<12;j++){
                 particles.push({
-
                     x:c.x,
-
                     y:c.y,
-
-                    vx:
-                        (
-                            Math.random()-.5
-                        ) * 180,
-
-                    vy:
-                        (
-                            Math.random()-.5
-                        ) * 180,
-
+                    vx:(Math.random()-.5)*180,
+                    vy:(Math.random()-.5)*180,
                     life:.6
-
                 });
-
             }
 
-
-            coins.splice(
-                i,
-                1
-            );
-
+            coins.splice(i,1);
         }
-
     }
-
 }
-
-
-/* =========================================================
-   CÉU
-========================================================= */
 
 function drawSky(){
 
-    const g =
-        ctx.createLinearGradient(
-            0,
-            0,
-            0,
-            H
-        );
+    const g=ctx.createLinearGradient(0,0,0,H);
+    g.addColorStop(0,"#20110c");
+    g.addColorStop(.45,"#75421d");
+    g.addColorStop(1,"#c0782b");
 
-
-    g.addColorStop(
-        0,
-        "#20110c"
-    );
-
-
-    g.addColorStop(
-        .45,
-        "#75421d"
-    );
-
-
-    g.addColorStop(
-        1,
-        "#c0782b"
-    );
-
-
-    ctx.fillStyle = g;
-
-    ctx.fillRect(
-        0,
-        0,
-        W,
-        H
-    );
-
-
-    /*
-       LUA / SOL
-    */
+    ctx.fillStyle=g;
+    ctx.fillRect(0,0,W,H);
 
     ctx.beginPath();
-
-    ctx.arc(
-        W - 150,
-        130,
-        52,
-        0,
-        Math.PI * 2
-    );
-
-    ctx.fillStyle =
-        "rgba(246,205,108,.9)";
-
+    ctx.arc(W-150,130,52,0,Math.PI*2);
+    ctx.fillStyle="rgba(246,205,108,.9)";
     ctx.fill();
 
-
-    /*
-       ESTRELAS
-    */
-
-    for(
-        let i=0;
-        i<35;
-        i++
-    ){
-
-        const x =
-            (i * 173) % W;
-
-
-        const y =
-            30 +
-            (i * 71) %
-            (H * .45);
-
-
-        ctx.fillStyle =
-            "rgba(255,235,170,.55)";
-
-
-        ctx.fillRect(
-            x,
-            y,
-            2,
-            2
-        );
-
+    for(let i=0;i<35;i++){
+        const x=(i*173)%W;
+        const y=30+(i*71)%(H*.45);
+        ctx.fillStyle="rgba(255,235,170,.55)";
+        ctx.fillRect(x,y,2,2);
     }
-
 }
-
-
-/* =========================================================
-   CIDADE DISTANTE
-========================================================= */
 
 function drawDistantCity(){
 
-    const y =
-        groundY();
+    const y=groundY();
 
+    ctx.fillStyle="#3d2115";
 
-    ctx.fillStyle =
-        "#3d2115";
-
-
-    for(
-        let x=-50;
-        x<W+100;
-        x+=90
-    ){
-
-        const h =
-            70 +
-            (x * 13 % 100);
-
-
-        ctx.fillRect(
-            x,
-            y-h,
-            55,
-            h
-        );
-
-
-        /*
-           TORRE
-        */
-
-        ctx.fillRect(
-            x+15,
-            y-h-35,
-            25,
-            35
-        );
-
-
-        /*
-           TOPO
-        */
+    for(let x=-50;x<W+100;x+=90){
+        const h=70+(x*13%100);
+        ctx.fillRect(x,y-h,55,h);
+        ctx.fillRect(x+15,y-h-35,25,35);
 
         ctx.beginPath();
-
-        ctx.moveTo(
-            x+10,
-            y-h-35
-        );
-
-        ctx.lineTo(
-            x+27,
-            y-h-60
-        );
-
-        ctx.lineTo(
-            x+44,
-            y-h-35
-        );
-
+        ctx.moveTo(x+10,y-h-35);
+        ctx.lineTo(x+27,y-h-60);
+        ctx.lineTo(x+44,y-h-35);
         ctx.fill();
-
     }
 
+    const zx=W*.55;
 
-    /*
-       ZIGURATE
-    */
-
-    const zx =
-        W * .55;
-
-
-    ctx.fillStyle =
-        "#542b18";
-
+    ctx.fillStyle="#542b18";
 
     ctx.beginPath();
-
-    ctx.moveTo(
-        zx-180,
-        y
-    );
-
-    ctx.lineTo(
-        zx-120,
-        y-95
-    );
-
-    ctx.lineTo(
-        zx+120,
-        y-95
-    );
-
-    ctx.lineTo(
-        zx+180,
-        y
-    );
-
+    ctx.moveTo(zx-180,y);
+    ctx.lineTo(zx-120,y-95);
+    ctx.lineTo(zx+120,y-95);
+    ctx.lineTo(zx+180,y);
     ctx.fill();
 
-
-    ctx.fillStyle =
-        "#6d381d";
-
-
-    ctx.fillRect(
-        zx-85,
-        y-150,
-        170,
-        55
-    );
-
-
-    ctx.fillRect(
-        zx-48,
-        y-195,
-        96,
-        45
-    );
-
+    ctx.fillStyle="#6d381d";
+    ctx.fillRect(zx-85,y-150,170,55);
+    ctx.fillRect(zx-48,y-195,96,45);
 
     ctx.beginPath();
-
-    ctx.moveTo(
-        zx-55,
-        y-195
-    );
-
-    ctx.lineTo(
-        zx,
-        y-240
-    );
-
-    ctx.lineTo(
-        zx+55,
-        y-195
-    );
-
+    ctx.moveTo(zx-55,y-195);
+    ctx.lineTo(zx,y-240);
+    ctx.lineTo(zx+55,y-195);
     ctx.fill();
-
 }
-
-
-/* =========================================================
-   TERRENO
-========================================================= */
 
 function drawGround(){
 
-    const y =
-        groundY();
+    const y=groundY();
 
+    ctx.fillStyle="#9a5420";
+    ctx.fillRect(0,y,W,groundHeight);
 
-    ctx.fillStyle =
-        "#9a5420";
+    ctx.fillStyle="#743b1b";
 
+    const offset=-(distance*1.8)%80;
 
-    ctx.fillRect(
-        0,
-        y,
-        W,
-        groundHeight
-    );
-
-
-    /*
-       FAIXAS
-    */
-
-    ctx.fillStyle =
-        "#743b1b";
-
-
-    const offset =
-        -(distance * 1.8) % 80;
-
-
-    for(
-        let x=offset;
-        x<W;
-        x+=80
-    ){
-
-        ctx.fillRect(
-            x,
-            y+20,
-            45,
-            7
-        );
-
-
-        ctx.fillRect(
-            x+25,
-            y+65,
-            35,
-            7
-        );
-
+    for(let x=offset;x<W;x+=80){
+        ctx.fillRect(x,y+20,45,7);
+        ctx.fillRect(x+25,y+65,35,7);
     }
 
+    ctx.fillStyle="#e0a13e";
+    ctx.fillRect(0,y,W,5);
 
-    /*
-       LINHA SUPERIOR
-    */
-
-    ctx.fillStyle =
-        "#e0a13e";
-
-
-    ctx.fillRect(
-        0,
-        y,
-        W,
-        5
-    );
-
-
-    /*
-       PEDRAS
-    */
-
-    for(
-        let x=-(distance*2)%120;
-        x<W;
-        x+=120
-    ){
-
-        ctx.fillStyle =
-            "#673516";
-
-
-        ctx.fillRect(
-            x,
-            y+95,
-            20,
-            5
-        );
-
+    for(let x=-(distance*2)%120;x<W;x+=120){
+        ctx.fillStyle="#673516";
+        ctx.fillRect(x,y+95,20,5);
     }
-
 }
 
-
-/* =========================================================
-   LEÃO
-========================================================= */
-
+// NOVO LEÃO BABILÔNICO (INSPIRADO NA PORTA DE ISHTAR)
 function drawLion(){
 
-    const x =
-        lion.x;
+    let x=lion.x;
+    let y=lion.y;
 
+    const bob=lion.grounded ? Math.sin(lion.frame)*2 : 0;
+    y+=bob;
 
-    const baseY =
-        lion.y;
-
-
-    const bob =
-        lion.grounded
-        ? Math.sin(lion.frame) * 1.5
-        : 0;
-
-
-    const y =
-        baseY + bob;
-
+    const duck=lion.duck;
 
     ctx.save();
 
-
-    /*
-       SOMBRA
-    */
-
+    // Sombra projetada
     ctx.beginPath();
-
-    ctx.ellipse(
-        x + lion.width*.47,
-        groundY()+4,
-        lion.duck ? 55 : 62,
-        8,
-        0,
-        0,
-        Math.PI*2
-    );
-
-
-    ctx.fillStyle =
-        "rgba(0,0,0,.35)";
-
-
+    ctx.ellipse(x+45, groundY()+4, duck?50:52, 8, 0, 0, Math.PI*2);
+    ctx.fillStyle="rgba(0,0,0,.35)";
     ctx.fill();
 
+    // CAUDA LONGA E ARQUEADA
+    ctx.strokeStyle="#e2d8c3";
+    ctx.lineWidth=5;
+    ctx.lineCap="round";
+    ctx.beginPath();
+    ctx.moveTo(x+10, y+35);
+    ctx.bezierCurveTo(x-20, y+45, x-40, y+60, x-25, y+62);
+    ctx.stroke();
 
-    /*
-       LEÃO DO MOSAICO
-    */
+    // Borla da cauda
+    ctx.beginPath();
+    ctx.arc(x-24, y+62, 6, 0, Math.PI*2);
+    ctx.fillStyle="#c2852a";
+    ctx.fill();
 
-    if(lionImageReady){
-
-        const drawWidth =
-            lion.width;
-
-
-        const drawHeight =
-            lion.duck
-            ? lion.height * .72
-            : lion.height;
-
-
-        const drawY =
-            lion.duck
-            ? y +
-              lion.height -
-              drawHeight
-            : y;
-
-
-        ctx.drawImage(
-            lionImage,
-            x,
-            drawY,
-            drawWidth,
-            drawHeight
-        );
-
+    // CORPO (Creme/Bege com textura de tijolo babilônico)
+    ctx.fillStyle="#ebdcc2";
+    if(duck){
+        ctx.beginPath();
+        ctx.roundRect(x+10, y+25, 65, 30, 12);
+        ctx.fill();
+    }else{
+        ctx.beginPath();
+        ctx.roundRect(x+15, y+22, 60, 32, 14);
+        ctx.fill();
     }
 
+    // Costelas / Detalhes anatômicos do relevo
+    ctx.strokeStyle="#c4b193";
+    ctx.lineWidth=2;
+    ctx.beginPath();
+    ctx.moveTo(x+40, y+27);
+    ctx.lineTo(x+37, y+45);
+    ctx.moveTo(x+47, y+27);
+    ctx.lineTo(x+44, y+45);
+    ctx.moveTo(x+54, y+27);
+    ctx.lineTo(x+51, y+45);
+    ctx.stroke();
+
+    // JUBA DETALHADA E FLAMEJANTE (Dourado/Laranja/Brown)
+    ctx.fillStyle="#c2852a";
+    ctx.beginPath();
+    ctx.ellipse(x+55, y+22, 22, 25, 0, 0, Math.PI*2);
+    ctx.fill();
+
+    // Camadas de franja da juba (estilo mesopotâmico)
+    ctx.fillStyle="#8c5119";
+    for(let i=0; i<6; i++){
+        ctx.beginPath();
+        ctx.arc(x+42+(i*4), y+8+(i*5), 6, 0, Math.PI*2);
+        ctx.fill();
+    }
+
+    ctx.fillStyle="#d99938";
+    for(let i=0; i<5; i++){
+        ctx.beginPath();
+        ctx.arc(x+46+(i*4), y+12+(i*5), 5, 0, Math.PI*2);
+        ctx.fill();
+    }
+
+    // CABEÇA
+    ctx.fillStyle="#ebdcc2";
+    ctx.beginPath();
+    ctx.ellipse(x+72, y+18, 16, 14, 0, 0, Math.PI*2);
+    ctx.fill();
+
+    // FOCINHO E BOCA ABERTA (RUGIDO)
+    ctx.fillStyle="#ebdcc2";
+    ctx.beginPath();
+    ctx.fillRect(x+78, y+10, 16, 10); // Mandíbula superior
+    ctx.fillRect(x+78, y+22, 14, 6);  // Mandíbula inferior
+
+    // Interior da boca
+    ctx.fillStyle="#611d13";
+    ctx.fillRect(x+80, y+18, 12, 6);
+
+    // Dentes à mostra
+    ctx.fillStyle="#ffffff";
+    ctx.beginPath();
+    ctx.moveTo(x+84, y+18);
+    ctx.lineTo(x+86, y+20);
+    ctx.lineTo(x+88, y+18);
+    ctx.fill();
+
+    // OLHO
+    ctx.beginPath();
+    ctx.arc(x+72, y+14, 3, 0, Math.PI*2);
+    ctx.fillStyle="#1c130b";
+    ctx.fill();
+
+    // ORELHA
+    ctx.beginPath();
+    ctx.ellipse(x+62, y+8, 4, 6, -0.3, 0, Math.PI*2);
+    ctx.fillStyle="#c2852a";
+    ctx.fill();
+
+    // PERNAS (Passo de caminhada babilônico)
+    if(!duck){
+        const step=Math.sin(lion.frame)*10;
+
+        ctx.strokeStyle="#ebdcc2";
+        ctx.lineWidth=8;
+
+        // Pernas traseiras
+        ctx.beginPath();
+        ctx.moveTo(x+28, y+48);
+        ctx.lineTo(x+22+step, y+68);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(x+40, y+48);
+        ctx.lineTo(x+42-step, y+68);
+        ctx.stroke();
+
+        // Pernas dianteiras
+        ctx.beginPath();
+        ctx.moveTo(x+62, y+45);
+        ctx.lineTo(x+58+step, y+68);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(x+74, y+45);
+        ctx.lineTo(x+78-step, y+68);
+        ctx.stroke();
+
+        // Patas
+        ctx.fillStyle="#ebdcc2";
+        ctx.fillRect(x+18+step, y+65, 8, 4);
+        ctx.fillRect(x+38-step, y+65, 8, 4);
+        ctx.fillRect(x+54+step, y+65, 8, 4);
+        ctx.fillRect(x+74-step, y+65, 8, 4);
+    }
 
     ctx.restore();
-
 }
-
-
-/* =========================================================
-   OBSTÁCULOS
-========================================================= */
 
 function drawObstacle(o){
 
-    if(
-        o.type === "column"
-    ){
+    if(o.type==="column"){
 
-        /*
-           COLUNA
-        */
+        ctx.fillStyle="#6b3920";
+        ctx.fillRect(o.x,o.y,o.width,o.height);
 
-        ctx.fillStyle =
-            "#6b3920";
-
-
-        ctx.fillRect(
-            o.x,
-            o.y,
-            o.width,
-            o.height
-        );
-
-
-        /*
-           TOPO
-        */
-
-        ctx.fillStyle =
-            "#9a5a2b";
-
-
-        ctx.fillRect(
-            o.x-7,
-            o.y-8,
-            o.width+14,
-            12
-        );
-
-
-        /*
-           BASE
-        */
+        ctx.fillStyle="#9a5a2b";
+        ctx.fillRect(o.x-7,o.y-8,o.width+14,12);
 
         ctx.fillRect(
             o.x-7,
@@ -1638,352 +776,120 @@ function drawObstacle(o){
             10
         );
 
+        ctx.fillStyle="#d08b3d";
 
-        /*
-           MARCAS
-        */
-
-        ctx.fillStyle =
-            "#d08b3d";
-
-
-        for(
-            let y=o.y+15;
-            y<o.y+o.height-10;
-            y+=18
-        ){
-
-            ctx.fillRect(
-                o.x+18,
-                y,
-                7,
-                7
-            );
-
+        for(let y=o.y+15;y<o.y+o.height-10;y+=18){
+            ctx.fillRect(o.x+18,y,7,7);
         }
 
     }else{
 
-        /*
-           BLOCO
-        */
+        ctx.fillStyle="#713718";
+        ctx.fillRect(o.x,o.y,o.width,o.height);
 
-        ctx.fillStyle =
-            "#713718";
+        ctx.strokeStyle="#a96128";
+        ctx.lineWidth=3;
 
-
-        ctx.fillRect(
-            o.x,
-            o.y,
-            o.width,
-            o.height
-        );
-
-
-        ctx.strokeStyle =
-            "#a96128";
-
-
-        ctx.lineWidth = 3;
-
-
-        for(
-            let y=o.y+15;
-            y<o.y+o.height;
-            y+=15
-        ){
-
+        for(let y=o.y+15;y<o.y+o.height;y+=15){
             ctx.beginPath();
-
-            ctx.moveTo(
-                o.x,
-                y
-            );
-
-            ctx.lineTo(
-                o.x+o.width,
-                y
-            );
-
+            ctx.moveTo(o.x,y);
+            ctx.lineTo(o.x+o.width,y);
             ctx.stroke();
-
         }
 
-
-        for(
-            let x=o.x+15;
-            x<o.x+o.width;
-            x+=25
-        ){
-
+        for(let x=o.x+15;x<o.x+o.width;x+=25){
             ctx.beginPath();
-
-            ctx.moveTo(
-                x,
-                o.y
-            );
-
-            ctx.lineTo(
-                x,
-                o.y+o.height
-            );
-
+            ctx.moveTo(x,o.y);
+            ctx.lineTo(x,o.y+o.height);
             ctx.stroke();
-
         }
-
     }
-
 }
-
-
-/* =========================================================
-   MOEDA
-========================================================= */
 
 function drawCoin(c){
 
-    const squash =
-        Math.abs(
-            Math.cos(c.spin)
-        );
-
+    const squash=Math.abs(Math.cos(c.spin));
 
     ctx.save();
 
-
-    ctx.translate(
-        c.x,
-        c.y
-    );
-
-
-    ctx.scale(
-        .35 +
-        .65*squash,
-        1
-    );
-
+    ctx.translate(c.x,c.y);
+    ctx.scale(.35+.65*squash,1);
 
     ctx.beginPath();
+    ctx.arc(0,0,c.r,0,Math.PI*2);
 
-    ctx.arc(
-        0,
-        0,
-        c.r,
-        0,
-        Math.PI*2
-    );
-
-
-    ctx.fillStyle =
-        "#f2c34e";
-
-
+    ctx.fillStyle="#f2c34e";
     ctx.fill();
 
-
-    ctx.strokeStyle =
-        "#fff0a2";
-
-
-    ctx.lineWidth = 2;
-
+    ctx.strokeStyle="#fff0a2";
+    ctx.lineWidth=2;
     ctx.stroke();
 
-
-    ctx.fillStyle =
-        "#875015";
-
-
-    ctx.font =
-        "bold 13px Arial";
-
-
-    ctx.textAlign =
-        "center";
-
-
-    ctx.textBaseline =
-        "middle";
-
-
-    ctx.fillText(
-        "𒀭",
-        0,
-        1
-    );
-
+    ctx.fillStyle="#875015";
+    ctx.font="bold 13px Arial";
+    ctx.textAlign="center";
+    ctx.textBaseline="middle";
+    ctx.fillText("𒀭",0,1);
 
     ctx.restore();
-
 }
-
-
-/* =========================================================
-   PARTÍCULAS
-========================================================= */
 
 function drawParticles(){
 
-    for(
-        const p of particles
-    ){
+    for(const p of particles){
 
-        ctx.globalAlpha =
-            Math.max(
-                0,
-                p.life/.6
-            );
+        ctx.globalAlpha=Math.max(0,p.life/.6);
 
-
-        ctx.fillStyle =
-            "#f4c45c";
-
+        ctx.fillStyle="#f4c45c";
 
         ctx.beginPath();
-
-        ctx.arc(
-            p.x,
-            p.y,
-            3,
-            0,
-            Math.PI*2
-        );
-
+        ctx.arc(p.x,p.y,3,0,Math.PI*2);
         ctx.fill();
-
     }
 
-
-    ctx.globalAlpha = 1;
-
+    ctx.globalAlpha=1;
 }
-
-
-/* =========================================================
-   DESENHO
-========================================================= */
 
 function draw(){
 
-    ctx.clearRect(
-        0,
-        0,
-        W,
-        H
-    );
-
+    ctx.clearRect(0,0,W,H);
 
     drawSky();
-
     drawDistantCity();
-
     drawGround();
 
-
-    for(
-        const c of coins
-    ){
-
-        drawCoin(c);
-
-    }
-
-
-    for(
-        const o of obstacles
-    ){
-
-        drawObstacle(o);
-
-    }
-
+    for(const c of coins)drawCoin(c);
+    for(const o of obstacles)drawObstacle(o);
 
     drawLion();
-
     drawParticles();
 
-
-    /*
-       VINHETA
-    */
-
-    const v =
-        ctx.createRadialGradient(
-            W/2,
-            H/2,
-            Math.min(W,H)*.25,
-            W/2,
-            H/2,
-            Math.max(W,H)*.75
-        );
-
-
-    v.addColorStop(
-        0,
-        "rgba(0,0,0,0)"
+    const v=ctx.createRadialGradient(
+        W/2,H/2,Math.min(W,H)*.25,
+        W/2,H/2,Math.max(W,H)*.75
     );
 
+    v.addColorStop(0,"rgba(0,0,0,0)");
+    v.addColorStop(1,"rgba(0,0,0,.42)");
 
-    v.addColorStop(
-        1,
-        "rgba(0,0,0,.42)"
-    );
-
-
-    ctx.fillStyle = v;
-
-
-    ctx.fillRect(
-        0,
-        0,
-        W,
-        H
-    );
-
+    ctx.fillStyle=v;
+    ctx.fillRect(0,0,W,H);
 }
-
-
-/* =========================================================
-   GAME LOOP
-========================================================= */
 
 function loop(time){
 
-    if(!running)
-        return;
+    if(!running)return;
 
+    let dt=(time-lastTime)/1000;
+    lastTime=time;
 
-    let dt =
-        (time-lastTime)/1000;
-
-
-    lastTime = time;
-
-
-    dt =
-        Math.min(
-            dt,
-            .035
-        );
-
+    dt=Math.min(dt,.035);
 
     update(dt);
-
     draw();
 
-
-    requestAnimationFrame(
-        loop
-    );
-
+    requestAnimationFrame(loop);
 }
-
-
-/* =========================================================
-   DESENHO INICIAL
-========================================================= */
 
 draw();
 
