@@ -626,7 +626,6 @@ function drawGround(){
 
 const lionFrames = [];
 
-// Cole os 25 links ou nomes dos seus arquivos PNG aqui:
 const frameURLs = [
   "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-001.png", "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-002.png", "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-003.png", "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-004.png", "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-005.png",
   "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-006.png", "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-007.png", "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-008.png", "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-009.png", "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-010.png",
@@ -635,37 +634,13 @@ const frameURLs = [
   "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-021.png", "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-022.png", "https://ia803104.us.archive.org/10/items/ezgif-frame-013/ezgif-frame-023.png", "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-024.png", "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-025.png"
 ];
 
-// Função que recebe uma imagem e remove todo o fundo branco puro
-function removeWhiteBackground(img) {
-    const offCanvas = document.createElement('canvas');
-    offCanvas.width = img.width;
-    offCanvas.height = img.height;
-    const offCtx = offCanvas.getContext('canvas');
-   
-    offCtx.drawImage(img, 0, 0);
-    const imgData = offCtx.getImageData(0, 0, offCanvas.width, offCanvas.height);
-    const data = imgData.data;
-   
-    // Varre pixel por pixel: se for branco (R > 240, G > 240, B > 240), deixa transparente
-    for (let i = 0; i < data.length; i += 4) {
-        if (data[i] > 240 && data[i + 1] > 240 && data[i + 2] > 240) {
-            data[i + 3] = 0; // Transparência total
-        }
-    }
-   
-    offCtx.putImageData(imgData, 0, 0);
-    return offCanvas; // Retorna a imagem limpa
-}
-
-// Carrega as 25 imagens e processa a transparência de cada uma
+// Carregamento simples e direto das 25 imagens
 frameURLs.forEach((url, index) => {
     const img = new Image();
+    img.crossOrigin = "Anonymous";
     img.src = url;
-    img.onload = () => {
-        lionFrames[index] = removeWhiteBackground(img);
-    };
+    lionFrames[index] = img;
 });
-
 
 function drawLion(){
     let x = lion.x;
@@ -676,18 +651,19 @@ function drawLion(){
 
     ctx.save();
 
-    // Sombra suave no chão
+    // Sombra no chão
     ctx.beginPath();
     ctx.ellipse(x + 60, groundY() + 4, 55, 8, 0, 0, Math.PI * 2);
     ctx.fillStyle = "rgba(0,0,0,.35)";
     ctx.fill();
 
-    // Alterna entre os 25 quadros a cada 2 frames do jogo
+    // Seleciona o frame correto do ciclo
     const currentFrameIndex = Math.floor(lion.frame / 2) % frameURLs.length;
     const currentImg = lionFrames[currentFrameIndex];
 
-    // Desenha a imagem tratada (sem o fundo branco)
-    if (currentImg) {
+    if (currentImg && currentImg.complete) {
+        // Aplica o filtro que oculta a cor branca mantendo o leão visível
+        ctx.globalCompositeOperation = "multiply";
         ctx.drawImage(currentImg, x, y, 120, 65);
     }
 
