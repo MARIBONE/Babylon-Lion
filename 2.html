@@ -644,7 +644,7 @@ frameURLs.forEach((url, index) => {
 
 function drawLion(){
     let x = lion.x;
-    let y = lion.y;
+    let y = lion.y - 130; // Subtrai o valor para subir o leão
 
     const bob = lion.grounded ? Math.sin(lion.frame * 0.2) * 2 : 0;
     y += bob;
