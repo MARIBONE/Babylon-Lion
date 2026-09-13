@@ -221,6 +221,29 @@ button:active{
 </div>
 
 <script>
+
+function enterFullscreenAndLock() {
+    const elem = document.documentElement;
+
+    // Entra em Tela Cheia
+    if (elem.requestFullscreen) {
+        elem.requestFullscreen();
+    } else if (elem.webkitRequestFullscreen) { /* Safari */
+        elem.webkitRequestFullscreen();
+    }
+
+    // Trava a orientação em modo horizontal (Landscape)
+    if (screen.orientation && screen.orientation.lock) {
+        screen.orientation.lock("landscape").catch(err => {
+            console.log("Bloqueio de orientação não suportado ou negado:", err);
+        });
+    }
+}
+
+// Ativa a rotação no primeiro toque/clique na tela
+window.addEventListener("touchstart", enterFullscreenAndLock, { once: true });
+window.addEventListener("click", enterFullscreenAndLock, { once: true });
+    
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
