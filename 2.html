@@ -665,9 +665,13 @@ frameURLs.forEach((url, index) => {
     lionFrames[index] = img;
 });
 
+// Canvas invisível criado apenas uma vez fora da função
+const tintCanvas = document.createElement('canvas');
+const tintCtx = tintCanvas.getContext('2d');
+
 function drawLion(){
     let x = lion.x;
-    let y = lion.y - 130; // Subtrai o valor para subir o leão
+    let y = lion.y - 130;
 
     const bob = lion.grounded ? Math.sin(lion.frame * 0.2) * 2 : 0;
     y += bob;
@@ -676,20 +680,34 @@ function drawLion(){
 
     // Sombra no chão
     ctx.beginPath();
-    ctx.ellipse(x + 60, groundY() + 4, 55, 8, 0, 0, Math.PI * 2);
+    ctx.ellipse(x + 180, groundY() + 4, 160, 15, 0, 0, Math.PI * 2);
     ctx.fillStyle = "rgba(0,0,0,.35)";
     ctx.fill();
 
-    // Seleciona o frame correto do ciclo
     const currentFrameIndex = Math.floor(lion.frame / 2) % frameURLs.length;
     const currentImg = lionFrames[currentFrameIndex];
 
     if (currentImg && currentImg.complete) {
-        // Aplica o filtro que oculta a cor branca mantendo o leão visível
-        ctx.globalCompositeOperation = "multiply";
-        ctx.filter = "sepia(1) saturate(6) hue-rotate(10deg) brightness(1.1)";
-        ctx.drawImage(currentImg, x, y, 360, 195);
-        ctx.filter = "none";
+        // Redimensiona o canvas invisível para a proporção do leão
+        tintCanvas.width = 360;
+        tintCanvas.height = 195;
+
+        // 1. Oculta o fundo branco no canvas invisível
+        tintCtx.clearRect(0, 0, 360, 195);
+        tintCtx.globalCompositeOperation = "source-over";
+        tintCtx.filter = "none";
+        tintCtx.drawImage(currentImg, 0, 0, 360, 195);
+        tintCtx.globalCompositeOperation = "multiply";
+        tintCtx.fillStyle = "#ffffff";
+        tintCtx.fillRect(0, 0, 360, 195);
+
+        // 2. Aplica o filtro dourado apenas no leão sem fundo
+        tintCtx.globalCompositeOperation = "source-atop";
+        tintCtx.filter = "sepia(1) saturate(6) hue-rotate(10deg) brightness(1.1)";
+        tintCtx.drawImage(tintCanvas, 0, 0);
+
+        // 3. Desenha o leão finalizado e transparente no jogo
+        ctx.drawImage(tintCanvas, x, y);
     }
 
     ctx.restore();
