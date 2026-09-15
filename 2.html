@@ -669,6 +669,10 @@ frameURLs.forEach((url, index) => {
 const tintCanvas = document.createElement('canvas');
 const tintCtx = tintCanvas.getContext('2d');
 
+// Canvas temporário em memória para processar a transparência perfeita
+const tintCanvas = document.createElement('canvas');
+const tintCtx = tintCanvas.getContext('2d');
+
 function drawLion(){
     let x = lion.x;
     let y = lion.y - 130;
@@ -688,26 +692,31 @@ function drawLion(){
     const currentImg = lionFrames[currentFrameIndex];
 
     if (currentImg && currentImg.complete) {
-        // Redimensiona o canvas invisível para a proporção do leão
         tintCanvas.width = 360;
         tintCanvas.height = 195;
 
-        // 1. Oculta o fundo branco no canvas invisível
-        tintCtx.clearRect(0, 0, 360, 195);
-        tintCtx.globalCompositeOperation = "source-over";
+        // 1. Limpa o buffer
         tintCtx.filter = "none";
+        tintCtx.globalCompositeOperation = "source-over";
+        tintCtx.clearRect(0, 0, 360, 195);
+        
+        // 2. Desenha o frame original
         tintCtx.drawImage(currentImg, 0, 0, 360, 195);
-        tintCtx.globalCompositeOperation = "multiply";
-        tintCtx.fillStyle = "#ffffff";
-        tintCtx.fillRect(0, 0, 360, 195);
 
-        // 2. Aplica o filtro dourado apenas no leão sem fundo
+        // 3. Aplica o filtro de cor dourada
         tintCtx.globalCompositeOperation = "source-atop";
         tintCtx.filter = "sepia(1) saturate(6) hue-rotate(10deg) brightness(1.1)";
         tintCtx.drawImage(tintCanvas, 0, 0);
 
-        // 3. Desenha o leão finalizado e transparente no jogo
+        // 4. Desenha na tela principal usando 'destination-out' no modo invertido
+        // para cortar tudo que for extremamente claro/branco
+        ctx.save();
         ctx.drawImage(tintCanvas, x, y);
+        
+        // Aplica o filtro 'multiply' direto na tela final para apagar qualquer sobra de branco
+        ctx.globalCompositeOperation = "multiply";
+        ctx.drawImage(tintCanvas, x, y);
+        ctx.restore();
     }
 
     ctx.restore();
