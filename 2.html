@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -6,7 +7,11 @@
 <title>Babylon Lion</title>
 
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
 
 html,body{
     width:100%;
@@ -85,7 +90,9 @@ canvas{
         radial-gradient(circle at center,rgba(117,69,24,.25),rgba(10,5,3,.9));
 }
 
-#gameover{display:none}
+#gameover{
+    display:none;
+}
 
 .logo{
     font-size:clamp(48px,9vw,105px);
@@ -170,10 +177,24 @@ button:active{
 }
 
 @media(max-width:700px){
-    #mobileControls{display:flex}
-    #hud{top:10px;left:10px;right:10px}
-    .panel{padding:7px 11px}
-    .value{font-size:19px}
+
+    #mobileControls{
+        display:flex;
+    }
+
+    #hud{
+        top:10px;
+        left:10px;
+        right:10px;
+    }
+
+    .panel{
+        padding:7px 11px;
+    }
+
+    .value{
+        font-size:19px;
+    }
 }
 </style>
 </head>
@@ -185,6 +206,7 @@ button:active{
 <canvas id="canvas"></canvas>
 
 <div id="hud">
+
     <div class="panel">
         <div class="label">Pontuação</div>
         <div class="value" id="score">0</div>
@@ -194,65 +216,125 @@ button:active{
         <div class="label">Recorde</div>
         <div class="value" id="best">0</div>
     </div>
+
 </div>
 
 <div id="menu">
+
     <div class="logo">BABYLON</div>
+
     <div class="subtitle">LION</div>
-    <button id="startBtn">ENTRAR NA ARENA</button>
+
+    <button id="startBtn">
+        ENTRAR NA ARENA
+    </button>
+
     <div class="instructions">
         Espaço / ↑ para saltar • ↓ para abaixar
     </div>
+
 </div>
 
 <div id="gameover">
-    <div class="subtitle">O LEÃO CAIU</div>
-    <div id="finalScore">0</div>
-    <div class="instructions">PONTOS</div>
-    <div id="bestScore">Recorde: 0</div>
-    <button id="restartBtn">CORRER NOVAMENTE</button>
+
+    <div class="subtitle">
+        O LEÃO CAIU
+    </div>
+
+    <div id="finalScore">
+        0
+    </div>
+
+    <div class="instructions">
+        PONTOS
+    </div>
+
+    <div id="bestScore">
+        Recorde: 0
+    </div>
+
+    <button id="restartBtn">
+        CORRER NOVAMENTE
+    </button>
+
 </div>
 
 <div id="mobileControls">
-    <button class="mobileBtn" id="jumpBtn">↑</button>
-    <button class="mobileBtn" id="duckBtn">↓</button>
+
+    <button class="mobileBtn" id="jumpBtn">
+        ↑
+    </button>
+
+    <button class="mobileBtn" id="duckBtn">
+        ↓
+    </button>
+
 </div>
 
 </div>
 
 <script>
 
-function enterFullscreenAndLock() {
-    const elem = document.documentElement;
+/* =========================================================
+   TELA CHEIA + LANDSCAPE
+========================================================= */
 
-    // Entra em Tela Cheia
-    if (elem.requestFullscreen) {
-        elem.requestFullscreen();
-    } else if (elem.webkitRequestFullscreen) { /* Safari */
+function enterFullscreenAndLock(){
+
+    const elem=document.documentElement;
+
+    if(elem.requestFullscreen){
+
+        elem.requestFullscreen().catch(()=>{});
+
+    }else if(elem.webkitRequestFullscreen){
+
         elem.webkitRequestFullscreen();
+
     }
 
-    // Trava a orientação em modo horizontal (Landscape)
-    if (screen.orientation && screen.orientation.lock) {
-        screen.orientation.lock("landscape").catch(err => {
-            console.log("Bloqueio de orientação não suportado ou negado:", err);
-        });
+    if(
+        screen.orientation &&
+        screen.orientation.lock
+    ){
+
+        screen.orientation
+            .lock("landscape")
+            .catch(()=>{});
+
     }
 }
 
-// Ativa a rotação no primeiro toque/clique na tela
-window.addEventListener("touchstart", enterFullscreenAndLock, { once: true });
-window.addEventListener("click", enterFullscreenAndLock, { once: true });
-    
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
+window.addEventListener(
+    "touchstart",
+    enterFullscreenAndLock,
+    {once:true}
+);
+
+window.addEventListener(
+    "click",
+    enterFullscreenAndLock,
+    {once:true}
+);
+
+
+/* =========================================================
+   CANVAS
+========================================================= */
+
+const canvas=document.getElementById("canvas");
+const ctx=canvas.getContext("2d");
 
 let W,H;
+
 let running=false;
 let lastTime=0;
 
 let score=0;
-let best=Number(localStorage.getItem("babylonLionBest")||0);
+
+let best=Number(
+    localStorage.getItem("babylonLionBest")||0
+);
 
 let speed=7;
 let distance=0;
@@ -266,310 +348,725 @@ let coinTimer=0;
 
 const groundHeight=115;
 
+
+/* =========================================================
+   LEÃO
+========================================================= */
+
 const lion={
+
     x:160,
+
     y:0,
-    width:78,
-    height:68,
+
+    /*
+       Área lógica do personagem.
+       Agora está mais próxima do tamanho
+       visual efetivo do leão.
+    */
+
+    width:90,
+    height:70,
+
     vy:0,
+
     gravity:1900,
+
     jumpPower:-720,
+
     grounded:true,
+
     duck:false,
+
     frame:0
+
 };
 
-document.getElementById("best").textContent=best;
+
+/* =========================================================
+   RESIZE
+========================================================= */
 
 function resize(){
-    W=canvas.width=canvas.clientWidth*devicePixelRatio;
-    H=canvas.height=canvas.clientHeight*devicePixelRatio;
 
-    ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+    const dpr=
+        window.devicePixelRatio||1;
+
+    canvas.width=
+        canvas.clientWidth*dpr;
+
+    canvas.height=
+        canvas.clientHeight*dpr;
+
+    ctx.setTransform(
+        dpr,
+        0,
+        0,
+        dpr,
+        0,
+        0
+    );
 
     W=canvas.clientWidth;
     H=canvas.clientHeight;
 
-    lion.y=H-groundHeight-lion.height;
+    lion.y=
+        H-
+        groundHeight-
+        lion.height;
 }
 
-window.addEventListener("resize",resize);
+window.addEventListener(
+    "resize",
+    resize
+);
+
 resize();
 
+
 function groundY(){
+
     return H-groundHeight;
+
 }
+
+
+/* =========================================================
+   JOGO
+========================================================= */
 
 function startGame(){
 
     running=true;
+
     score=0;
+
     distance=0;
+
     speed=7;
+
     obstacles=[];
+
     coins=[];
+
     particles=[];
 
-    lion.y=groundY()-lion.height;
+    lion.y=
+        groundY()-
+        lion.height;
+
     lion.vy=0;
+
     lion.grounded=true;
+
     lion.duck=false;
 
-    document.getElementById("menu").style.display="none";
-    document.getElementById("gameover").style.display="none";
+    document.getElementById(
+        "menu"
+    ).style.display="none";
 
-    lastTime=performance.now();
+    document.getElementById(
+        "gameover"
+    ).style.display="none";
+
+    lastTime=
+        performance.now();
+
     requestAnimationFrame(loop);
 }
+
 
 function gameOver(){
 
     running=false;
 
     if(score>best){
+
         best=score;
-        localStorage.setItem("babylonLionBest",best);
+
+        localStorage.setItem(
+            "babylonLionBest",
+            best
+        );
+
     }
 
-    document.getElementById("finalScore").textContent=score;
-    document.getElementById("bestScore").textContent="Recorde: "+best;
-    document.getElementById("best").textContent=best;
+    document.getElementById(
+        "finalScore"
+    ).textContent=score;
 
-    document.getElementById("gameover").style.display="flex";
+    document.getElementById(
+        "bestScore"
+    ).textContent=
+        "Recorde: "+best;
+
+    document.getElementById(
+        "best"
+    ).textContent=best;
+
+    document.getElementById(
+        "gameover"
+    ).style.display="flex";
 }
+
+
+/* =========================================================
+   CONTROLES
+========================================================= */
 
 function jump(){
 
     if(!running)return;
 
     if(lion.grounded){
-        lion.vy=lion.jumpPower;
+
+        lion.vy=
+            lion.jumpPower;
+
         lion.grounded=false;
 
         for(let i=0;i<7;i++){
+
             particles.push({
-                x:lion.x+25,
+
+                x:lion.x+30,
+
                 y:groundY(),
+
                 vx:-Math.random()*100,
+
                 vy:-Math.random()*100,
+
                 life:.5
+
             });
+
         }
     }
 }
 
+
 function duck(state){
+
     lion.duck=state;
+
 }
 
-window.addEventListener("keydown",e=>{
 
-    if(e.code==="Space" || e.code==="ArrowUp"){
-        e.preventDefault();
-        jump();
+window.addEventListener(
+    "keydown",
+    e=>{
+
+        if(
+            e.code==="Space" ||
+            e.code==="ArrowUp"
+        ){
+
+            e.preventDefault();
+
+            jump();
+
+        }
+
+        if(e.code==="ArrowDown"){
+
+            e.preventDefault();
+
+            duck(true);
+
+        }
+
+        if(
+            e.code==="Enter" &&
+            !running
+        ){
+
+            startGame();
+
+        }
+
     }
+);
 
-    if(e.code==="ArrowDown"){
-        e.preventDefault();
-        duck(true);
+
+window.addEventListener(
+    "keyup",
+    e=>{
+
+        if(e.code==="ArrowDown"){
+
+            duck(false);
+
+        }
+
     }
+);
 
-    if(e.code==="Enter" && !running){
-        startGame();
-    }
-});
 
-window.addEventListener("keyup",e=>{
-    if(e.code==="ArrowDown")duck(false);
-});
+document.getElementById(
+    "startBtn"
+).onclick=startGame;
 
-document.getElementById("startBtn").onclick=startGame;
-document.getElementById("restartBtn").onclick=startGame;
 
-document.getElementById("jumpBtn").ontouchstart=e=>{
+document.getElementById(
+    "restartBtn"
+).onclick=startGame;
+
+
+document.getElementById(
+    "jumpBtn"
+).ontouchstart=e=>{
+
     e.preventDefault();
+
     jump();
+
 };
 
-document.getElementById("duckBtn").ontouchstart=e=>{
+
+document.getElementById(
+    "duckBtn"
+).ontouchstart=e=>{
+
     e.preventDefault();
+
     duck(true);
+
 };
 
-document.getElementById("duckBtn").ontouchend=e=>{
+
+document.getElementById(
+    "duckBtn"
+).ontouchend=e=>{
+
     e.preventDefault();
+
     duck(false);
+
 };
+
+
+/* =========================================================
+   OBSTÁCULOS
+========================================================= */
 
 function spawnObstacle(){
 
-    const tall=Math.random()<.6;
+    const tall=
+        Math.random()<.6;
 
     obstacles.push({
+
         x:W+80,
-        y:groundY()-(tall?65:45),
-        width:tall?42:65,
-        height:tall?65:45,
-        type:tall?"column":"brick"
+
+        y:
+            groundY()-
+            (tall?65:45),
+
+        width:
+            tall?42:65,
+
+        height:
+            tall?65:45,
+
+        type:
+            tall?"column":"brick"
+
     });
+
 }
+
 
 function spawnCoin(){
 
-    const y=groundY()-100-Math.random()*130;
+    const y=
+        groundY()-
+        100-
+        Math.random()*130;
 
     coins.push({
+
         x:W+50,
-        y,
+
+        y:y,
+
         r:12,
-        spin:Math.random()*Math.PI*2
+
+        spin:
+            Math.random()*
+            Math.PI*2
+
     });
+
 }
+
+
+/* =========================================================
+   UPDATE
+========================================================= */
 
 function update(dt){
 
     distance+=speed*dt;
 
-    score=Math.floor(distance/10);
+    score=
+        Math.floor(distance/10);
 
-    speed=7+Math.min(10,score/250);
+    speed=
+        7+
+        Math.min(
+            10,
+            score/250
+        );
 
-    document.getElementById("score").textContent=score;
+    document.getElementById(
+        "score"
+    ).textContent=score;
+
 
     lion.frame+=dt*12;
 
-    lion.vy+=lion.gravity*dt;
-    lion.y+=lion.vy*dt;
+    lion.vy+=
+        lion.gravity*dt;
 
-    const targetGround=groundY()-lion.height;
+    lion.y+=
+        lion.vy*dt;
+
+
+    const targetGround=
+        groundY()-
+        lion.height;
+
 
     if(lion.y>=targetGround){
+
         lion.y=targetGround;
+
         lion.vy=0;
+
         lion.grounded=true;
+
     }
 
+
     spawnTimer-=dt;
+
     coinTimer-=dt;
 
+
     if(spawnTimer<=0){
+
         spawnObstacle();
 
         spawnTimer=
-            Math.max(.65,1.35-Math.min(.55,score/600))
-            +Math.random()*.65;
+            Math.max(
+                .65,
+                1.35-
+                Math.min(
+                    .55,
+                    score/600
+                )
+            )+
+            Math.random()*.65;
+
     }
+
 
     if(coinTimer<=0){
+
         spawnCoin();
-        coinTimer=.8+Math.random()*1.2;
+
+        coinTimer=
+            .8+
+            Math.random()*1.2;
+
     }
+
 
     for(const o of obstacles){
-        o.x-=speed*60*dt;
+
+        o.x-=
+            speed*
+            60*
+            dt;
+
     }
+
 
     for(const c of coins){
-        c.x-=speed*60*dt;
+
+        c.x-=
+            speed*
+            60*
+            dt;
+
         c.spin+=dt*7;
+
     }
 
-    obstacles=obstacles.filter(o=>o.x>-120);
-    coins=coins.filter(c=>c.x>-50);
+
+    obstacles=
+        obstacles.filter(
+            o=>o.x>-120
+        );
+
+
+    coins=
+        coins.filter(
+            c=>c.x>-50
+        );
+
 
     checkCollisions();
 
+
     for(const p of particles){
+
         p.x+=p.vx*dt;
+
         p.y+=p.vy*dt;
+
         p.vy+=400*dt;
+
         p.life-=dt;
+
     }
 
-    particles=particles.filter(p=>p.life>0);
+
+    particles=
+        particles.filter(
+            p=>p.life>0
+        );
+
 }
+
+
+/* =========================================================
+   COLISÕES
+========================================================= */
 
 function checkCollisions(){
 
-    const ducked=lion.duck;
+    const ducked=
+        lion.duck;
 
-    const lx=lion.x+15;
-    const ly=lion.y+(ducked?25:5);
-    const lw=lion.width-25;
-    const lh=ducked?lion.height-25:lion.height-8;
+
+    const lx=
+        lion.x+15;
+
+    const ly=
+        lion.y+
+        (ducked?25:5);
+
+    const lw=
+        lion.width-25;
+
+    const lh=
+        ducked?
+        lion.height-25:
+        lion.height-8;
+
 
     for(const o of obstacles){
 
         const hit=
-            lx<o.x+o.width-6 &&
-            lx+lw>o.x+6 &&
-            ly<o.y+o.height &&
-            ly+lh>o.y+5;
+
+            lx<
+                o.x+
+                o.width-
+                6
+
+            &&
+
+            lx+
+            lw>
+                o.x+
+                6
+
+            &&
+
+            ly<
+                o.y+
+                o.height
+
+            &&
+
+            ly+
+            lh>
+                o.y+
+                5;
+
 
         if(hit){
+
             gameOver();
+
             return;
+
         }
+
     }
 
-    for(let i=coins.length-1;i>=0;i--){
+
+    for(
+        let i=coins.length-1;
+        i>=0;
+        i--
+    ){
 
         const c=coins[i];
 
-        const dx=(lion.x+lion.width/2)-c.x;
-        const dy=(lion.y+lion.height/2)-c.y;
+        const dx=
+            (lion.x+
+            lion.width/2)-
+            c.x;
 
-        if(Math.sqrt(dx*dx+dy*dy)<42){
+        const dy=
+            (lion.y+
+            lion.height/2)-
+            c.y;
+
+
+        if(
+            Math.sqrt(
+                dx*dx+
+                dy*dy
+            )<42
+        ){
 
             score+=25;
+
             distance+=250;
 
+
             for(let j=0;j<12;j++){
+
                 particles.push({
+
                     x:c.x,
+
                     y:c.y,
-                    vx:(Math.random()-.5)*180,
-                    vy:(Math.random()-.5)*180,
+
+                    vx:
+                        (Math.random()-.5)*
+                        180,
+
+                    vy:
+                        (Math.random()-.5)*
+                        180,
+
                     life:.6
+
                 });
+
             }
 
+
             coins.splice(i,1);
+
         }
+
     }
+
 }
+
+
+/* =========================================================
+   CENÁRIO
+========================================================= */
 
 function drawSky(){
 
-    const g=ctx.createLinearGradient(0,0,0,H);
-    g.addColorStop(0,"#0d2240");
-    g.addColorStop(.45,"#123e75");
-    g.addColorStop(1,"#1a549c");
+    const g=
+        ctx.createLinearGradient(
+            0,
+            0,
+            0,
+            H
+        );
+
+    g.addColorStop(
+        0,
+        "#0d2240"
+    );
+
+    g.addColorStop(
+        .45,
+        "#123e75"
+    );
+
+    g.addColorStop(
+        1,
+        "#1a549c"
+    );
+
 
     ctx.fillStyle=g;
-    ctx.fillRect(0,0,W,H);
 
-    ctx.strokeStyle = "rgba(10, 25, 50, 0.6)";
-    ctx.lineWidth = 2;
+    ctx.fillRect(
+        0,
+        0,
+        W,
+        H
+    );
 
-    const brickH = 18;
-    const brickW = 45;
 
-    for (let y = 0; y < H; y += brickH) {
+    ctx.strokeStyle=
+        "rgba(10,25,50,.6)";
+
+    ctx.lineWidth=2;
+
+
+    const brickH=18;
+
+    const brickW=45;
+
+
+    for(
+        let y=0;
+        y<H;
+        y+=brickH
+    ){
+
         ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(W, y);
+
+        ctx.moveTo(0,y);
+
+        ctx.lineTo(W,y);
+
         ctx.stroke();
 
-        const offsetX = (Math.floor(y / brickH) % 2) * (brickW / 2);
-        for (let x = offsetX; x < W; x += brickW) {
+
+        const offsetX=
+            (Math.floor(
+                y/brickH
+            )%2)*
+            (brickW/2);
+
+
+        for(
+            let x=offsetX;
+            x<W;
+            x+=brickW
+        ){
+
             ctx.beginPath();
-            ctx.moveTo(x, y);
-            ctx.lineTo(x, y + brickH);
+
+            ctx.moveTo(x,y);
+
+            ctx.lineTo(
+                x,
+                y+brickH
+            );
+
             ctx.stroke();
+
         }
+
     }
+
 }
+
 
 function drawDistantCity(){
 
@@ -577,133 +1074,639 @@ function drawDistantCity(){
 
     ctx.fillStyle="#3d2115";
 
-    for(let x=-50;x<W+100;x+=90){
 
-        const h=70+(x*13%100);
+    for(
+        let x=-50;
+        x<W+100;
+        x+=90
+    ){
 
-        ctx.fillRect(x,y-h,55,h);
+        const h=
+            70+
+            ((x*13)%100);
 
-        // torre
-        ctx.fillRect(x+15,y-h-35,25,35);
+        ctx.fillRect(
+            x,
+            y-h,
+            55,
+            h
+        );
+
+
+        ctx.fillRect(
+            x+15,
+            y-h-35,
+            25,
+            35
+        );
+
 
         ctx.beginPath();
-        ctx.moveTo(x+10,y-h-35);
-        ctx.lineTo(x+27,y-h-60);
-        ctx.lineTo(x+44,y-h-35);
+
+        ctx.moveTo(
+            x+10,
+            y-h-35
+        );
+
+        ctx.lineTo(
+            x+27,
+            y-h-60
+        );
+
+        ctx.lineTo(
+            x+44,
+            y-h-35
+        );
+
         ctx.fill();
+
     }
 
-    // Zigurate
+
     const zx=W*.55;
+
 
     ctx.fillStyle="#542b18";
 
+
     ctx.beginPath();
-    ctx.moveTo(zx-180,y);
-    ctx.lineTo(zx-120,y-95);
-    ctx.lineTo(zx+120,y-95);
-    ctx.lineTo(zx+180,y);
+
+    ctx.moveTo(
+        zx-180,
+        y
+    );
+
+    ctx.lineTo(
+        zx-120,
+        y-95
+    );
+
+    ctx.lineTo(
+        zx+120,
+        y-95
+    );
+
+    ctx.lineTo(
+        zx+180,
+        y
+    );
+
     ctx.fill();
+
 
     ctx.fillStyle="#6d381d";
 
-    ctx.fillRect(zx-85,y-150,170,55);
 
-    ctx.fillRect(zx-48,y-195,96,45);
+    ctx.fillRect(
+        zx-85,
+        y-150,
+        170,
+        55
+    );
+
+
+    ctx.fillRect(
+        zx-48,
+        y-195,
+        96,
+        45
+    );
+
 
     ctx.beginPath();
-    ctx.moveTo(zx-55,y-195);
-    ctx.lineTo(zx,y-240);
-    ctx.lineTo(zx+55,y-195);
+
+    ctx.moveTo(
+        zx-55,
+        y-195
+    );
+
+    ctx.lineTo(
+        zx,
+        y-240
+    );
+
+    ctx.lineTo(
+        zx+55,
+        y-195
+    );
+
     ctx.fill();
+
 }
+
 
 function drawGround(){
 
     const y=groundY();
 
-    ctx.fillStyle="#9a5420";
-    ctx.fillRect(0,y,W,groundHeight);
 
-    // faixas
+    ctx.fillStyle="#9a5420";
+
+    ctx.fillRect(
+        0,
+        y,
+        W,
+        groundHeight
+    );
+
+
     ctx.fillStyle="#743b1b";
 
-    const offset=-(distance*1.8)%80;
 
-    for(let x=offset;x<W;x+=80){
-        ctx.fillRect(x,y+20,45,7);
-        ctx.fillRect(x+25,y+65,35,7);
+    const offset=
+        -(distance*1.8)%80;
+
+
+    for(
+        let x=offset;
+        x<W;
+        x+=80
+    ){
+
+        ctx.fillRect(
+            x,
+            y+20,
+            45,
+            7
+        );
+
+        ctx.fillRect(
+            x+25,
+            y+65,
+            35,
+            7
+        );
+
     }
 
-    // linha superior
+
     ctx.fillStyle="#e0a13e";
-    ctx.fillRect(0,y,W,5);
 
-    // pequenas pedras
-    for(let x=-(distance*2)%120;x<W;x+=120){
+    ctx.fillRect(
+        0,
+        y,
+        W,
+        5
+    );
+
+
+    for(
+        let x=-(distance*2)%120;
+        x<W;
+        x+=120
+    ){
+
         ctx.fillStyle="#673516";
-        ctx.fillRect(x,y+95,20,5);
+
+        ctx.fillRect(
+            x,
+            y+95,
+            20,
+            5
+        );
+
     }
+
 }
 
 
-const lionFrames = [];
+/* =========================================================
+   FRAMES DO LEÃO
+========================================================= */
 
-const frameURLs = [
-  "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-001.png", "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-002.png", "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-003.png", "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-004.png", "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-005.png",
-  "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-006.png", "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-007.png", "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-008.png", "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-009.png", "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-010.png",
-  "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-011.png", "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-012.png", "https://archive.org/download/ezgif-frame-013/ezgif-frame-013.png", "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-014.png", "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-015.png",
-  "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-016.png", "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-017.png", "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-018.png", "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-019.png", "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-020.png",
-  "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-021.png", "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-022.png", "https://ia803104.us.archive.org/10/items/ezgif-frame-013/ezgif-frame-023.png", "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-024.png", "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-025.png"
+const lionFrames=[];
+
+const processedFrames=[];
+
+
+const frameURLs=[
+
+"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-001.png",
+"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-002.png",
+"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-003.png",
+"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-004.png",
+"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-005.png",
+
+"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-006.png",
+"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-007.png",
+"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-008.png",
+"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-009.png",
+"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-010.png",
+
+"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-011.png",
+"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-012.png",
+"https://archive.org/download/ezgif-frame-013/ezgif-frame-013.png",
+"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-014.png",
+"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-015.png",
+
+"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-016.png",
+"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-017.png",
+"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-018.png",
+"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-019.png",
+"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-020.png",
+
+"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-021.png",
+"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-022.png",
+"https://ia803104.us.archive.org/10/items/ezgif-frame-013/ezgif-frame-023.png",
+"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-024.png",
+"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-025.png"
+
 ];
 
-// Carregamento simples e direto das 25 imagens
-frameURLs.forEach((url, index) => {
-    const img = new Image();
-    img.crossOrigin = "Anonymous";
-    img.src = url;
-    lionFrames[index] = img;
-});
+
+/* =========================================================
+   PROCESSAMENTO DOURADO
+========================================================= */
+
+function processLionImage(img,index){
+
+    try{
+
+        const w=img.naturalWidth;
+        const h=img.naturalHeight;
+
+        if(!w || !h)return;
+
+
+        const off=document.createElement(
+            "canvas"
+        );
+
+        off.width=w;
+        off.height=h;
+
+
+        const octx=
+            off.getContext("2d");
+
+        octx.clearRect(
+            0,
+            0,
+            w,
+            h
+        );
+
+
+        octx.drawImage(
+            img,
+            0,
+            0
+        );
+
+
+        let data;
+
+
+        try{
+
+            data=
+                octx.getImageData(
+                    0,
+                    0,
+                    w,
+                    h
+                );
+
+        }catch(error){
+
+            /*
+              Se o servidor não permitir
+              leitura dos pixels, usamos
+              o frame original.
+            */
+
+            processedFrames[index]=img;
+
+            return;
+
+        }
+
+
+        const pixels=data.data;
+
+
+        for(
+            let i=0;
+            i<pixels.length;
+            i+=4
+        ){
+
+            const r=pixels[i];
+            const g=pixels[i+1];
+            const b=pixels[i+2];
+
+
+            /*
+              Detecta fundos muito claros.
+
+              Esses pixels ficam transparentes.
+            */
+
+            const bright=
+                (r+g+b)/3;
+
+            const nearWhite=
+                r>225 &&
+                g>225 &&
+                b>225;
+
+
+            if(
+                nearWhite ||
+                bright>242
+            ){
+
+                pixels[i+3]=0;
+
+                continue;
+
+            }
+
+
+            /*
+              Luminância original.
+            */
+
+            const lum=
+                0.299*r+
+                0.587*g+
+                0.114*b;
+
+
+            /*
+              Mapeamento dourado.
+
+              Sombras:
+              marrom escuro
+
+              Meios tons:
+              ouro
+
+              Luz:
+              dourado claro
+            */
+
+            let nr;
+            let ng;
+            let nb;
+
+
+            if(lum<45){
+
+                nr=75;
+                ng=42;
+                nb=12;
+
+            }else if(lum<100){
+
+                nr=125;
+                ng=72;
+                nb=18;
+
+            }else if(lum<160){
+
+                nr=184;
+                ng=119;
+                nb=29;
+
+            }else if(lum<210){
+
+                nr=218;
+                ng=157;
+                nb=55;
+
+            }else{
+
+                nr=247;
+                ng=202;
+                nb=91;
+
+            }
+
+
+            pixels[i]=nr;
+            pixels[i+1]=ng;
+            pixels[i+2]=nb;
+
+        }
+
+
+        octx.putImageData(
+            data,
+            0,
+            0
+        );
+
+
+        const processed=
+            new Image();
+
+        processed.src=
+            off.toDataURL(
+                "image/png"
+            );
+
+        processedFrames[index]=
+            processed;
+
+
+    }catch(error){
+
+        processedFrames[index]=img;
+
+    }
+
+}
+
+
+/* =========================================================
+   CARREGAMENTO
+========================================================= */
+
+frameURLs.forEach(
+    (url,index)=>{
+
+        const img=new Image();
+
+        img.crossOrigin=
+            "anonymous";
+
+
+        img.onload=()=>{
+
+            lionFrames[index]=img;
+
+            processLionImage(
+                img,
+                index
+            );
+
+        };
+
+
+        img.onerror=()=>{
+
+            console.log(
+                "Falha ao carregar frame:",
+                index+1
+            );
+
+        };
+
+
+        img.src=url;
+
+    }
+);
+
+
+/* =========================================================
+   DESENHO DO LEÃO
+========================================================= */
 
 function drawLion(){
-    let x = lion.x;
-    let y = lion.y - 130; // Subtrai o valor para subir o leão
 
-    const bob = lion.grounded ? Math.sin(lion.frame * 0.2) * 2 : 0;
-    y += bob;
+    /*
+       Tamanho visual.
+       Mantém proporção aproximada
+       do leão original.
+    */
+
+    const drawWidth=150;
+    const drawHeight=82;
+
+
+    /*
+       Centraliza o desenho em relação
+       à área lógica do personagem.
+    */
+
+    let x=
+        lion.x-
+        25;
+
+    let y=
+        lion.y-
+        8;
+
+
+    /*
+       Pequeno movimento natural.
+    */
+
+    const bob=
+        lion.grounded
+        ?
+        Math.sin(
+            lion.frame*.2
+        )*2
+        :
+        0;
+
+    y+=bob;
+
 
     ctx.save();
 
-    // Sombra no chão
+
+    /*
+       Sombra.
+    */
+
     ctx.beginPath();
-    ctx.ellipse(x + 60, groundY() + 4, 55, 8, 0, 0, Math.PI * 2);
-    ctx.fillStyle = "rgba(0,0,0,.35)";
+
+    ctx.ellipse(
+        lion.x+45,
+        groundY()+4,
+        48,
+        7,
+        0,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fillStyle=
+        "rgba(0,0,0,.35)";
+
     ctx.fill();
 
-    // Seleciona o frame correto do ciclo
-    const currentFrameIndex = Math.floor(lion.frame / 2) % frameURLs.length;
-    const currentImg = lionFrames[currentFrameIndex];
 
-    if (currentImg && currentImg.complete) {
-        // Aplica o filtro que oculta a cor branca mantendo o leão visível
-        ctx.globalCompositeOperation = "multiply";
-        ctx.drawImage(currentImg, x, y, 360, 195);
+    /*
+       Seleciona frame.
+    */
+
+    const currentFrameIndex=
+        Math.floor(
+            lion.frame/2
+        )%
+        frameURLs.length;
+
+
+    const currentImg=
+        processedFrames[
+            currentFrameIndex
+        ]||
+        lionFrames[
+            currentFrameIndex
+        ];
+
+
+    if(
+        currentImg &&
+        currentImg.complete
+    ){
+
+        /*
+           O frame já foi convertido
+           para dourado no carregamento.
+        */
+
+        ctx.globalCompositeOperation=
+            "source-over";
+
+        ctx.drawImage(
+            currentImg,
+            x,
+            y,
+            drawWidth,
+            drawHeight
+        );
+
     }
 
+
     ctx.restore();
+
 }
 
-    
+
+/* =========================================================
+   OBSTÁCULOS
+========================================================= */
+
 function drawObstacle(o){
 
     if(o.type==="column"){
 
-        // coluna
         ctx.fillStyle="#6b3920";
-        ctx.fillRect(o.x,o.y,o.width,o.height);
+
+        ctx.fillRect(
+            o.x,
+            o.y,
+            o.width,
+            o.height
+        );
+
 
         ctx.fillStyle="#9a5a2b";
-        ctx.fillRect(o.x-7,o.y-8,o.width+14,12);
+
+        ctx.fillRect(
+            o.x-7,
+            o.y-8,
+            o.width+14,
+            12
+        );
+
 
         ctx.fillRect(
             o.x-7,
@@ -712,129 +1715,331 @@ function drawObstacle(o){
             10
         );
 
-        // hieróglifos
+
         ctx.fillStyle="#d08b3d";
 
-        for(let y=o.y+15;y<o.y+o.height-10;y+=18){
-            ctx.fillRect(o.x+18,y,7,7);
+
+        for(
+            let y=o.y+15;
+            y<o.y+o.height-10;
+            y+=18
+        ){
+
+            ctx.fillRect(
+                o.x+18,
+                y,
+                7,
+                7
+            );
+
         }
+
 
     }else{
 
         ctx.fillStyle="#713718";
-        ctx.fillRect(o.x,o.y,o.width,o.height);
+
+        ctx.fillRect(
+            o.x,
+            o.y,
+            o.width,
+            o.height
+        );
+
 
         ctx.strokeStyle="#a96128";
+
         ctx.lineWidth=3;
 
-        for(let y=o.y+15;y<o.y+o.height;y+=15){
+
+        for(
+            let y=o.y+15;
+            y<o.y+o.height;
+            y+=15
+        ){
+
             ctx.beginPath();
-            ctx.moveTo(o.x,y);
-            ctx.lineTo(o.x+o.width,y);
+
+            ctx.moveTo(
+                o.x,
+                y
+            );
+
+            ctx.lineTo(
+                o.x+o.width,
+                y
+            );
+
             ctx.stroke();
+
         }
 
-        for(let x=o.x+15;x<o.x+o.width;x+=25){
+
+        for(
+            let x=o.x+15;
+            x<o.x+o.width;
+            x+=25
+        ){
+
             ctx.beginPath();
-            ctx.moveTo(x,o.y);
-            ctx.lineTo(x,o.y+o.height);
+
+            ctx.moveTo(
+                x,
+                o.y
+            );
+
+            ctx.lineTo(
+                x,
+                o.y+o.height
+            );
+
             ctx.stroke();
+
         }
+
     }
+
 }
+
+
+/* =========================================================
+   MOEDA
+========================================================= */
 
 function drawCoin(c){
 
-    const squash=Math.abs(Math.cos(c.spin));
+    const squash=
+        Math.abs(
+            Math.cos(c.spin)
+        );
+
 
     ctx.save();
 
-    ctx.translate(c.x,c.y);
-    ctx.scale(.35+.65*squash,1);
+
+    ctx.translate(
+        c.x,
+        c.y
+    );
+
+
+    ctx.scale(
+        .35+
+        .65*squash,
+        1
+    );
+
 
     ctx.beginPath();
-    ctx.arc(0,0,c.r,0,Math.PI*2);
+
+    ctx.arc(
+        0,
+        0,
+        c.r,
+        0,
+        Math.PI*2
+    );
+
 
     ctx.fillStyle="#f2c34e";
+
     ctx.fill();
 
+
     ctx.strokeStyle="#fff0a2";
+
     ctx.lineWidth=2;
+
     ctx.stroke();
 
+
     ctx.fillStyle="#875015";
-    ctx.font="bold 13px Arial";
+
+    ctx.font=
+        "bold 13px Arial";
+
     ctx.textAlign="center";
+
     ctx.textBaseline="middle";
-    ctx.fillText("𒀭",0,1);
+
+    ctx.fillText(
+        "𒀭",
+        0,
+        1
+    );
+
 
     ctx.restore();
+
 }
+
+
+/* =========================================================
+   PARTÍCULAS
+========================================================= */
 
 function drawParticles(){
 
     for(const p of particles){
 
-        ctx.globalAlpha=Math.max(0,p.life/.6);
+        ctx.globalAlpha=
+            Math.max(
+                0,
+                p.life/.6
+            );
+
 
         ctx.fillStyle="#f4c45c";
 
+
         ctx.beginPath();
-        ctx.arc(p.x,p.y,3,0,Math.PI*2);
+
+        ctx.arc(
+            p.x,
+            p.y,
+            3,
+            0,
+            Math.PI*2
+        );
+
         ctx.fill();
+
     }
 
+
     ctx.globalAlpha=1;
+
 }
+
+
+/* =========================================================
+   DRAW
+========================================================= */
 
 function draw(){
 
-    ctx.clearRect(0,0,W,H);
-
-    drawSky();
-    drawDistantCity();
-    drawGround();
-
-    for(const c of coins)drawCoin(c);
-    for(const o of obstacles)drawObstacle(o);
-
-    drawLion();
-    drawParticles();
-
-    // vinheta
-    const v=ctx.createRadialGradient(
-        W/2,H/2,Math.min(W,H)*.25,
-        W/2,H/2,Math.max(W,H)*.75
+    ctx.clearRect(
+        0,
+        0,
+        W,
+        H
     );
 
-    v.addColorStop(0,"rgba(0,0,0,0)");
-    v.addColorStop(1,"rgba(0,0,0,.42)");
+
+    drawSky();
+
+    drawDistantCity();
+
+    drawGround();
+
+
+    for(const c of coins){
+
+        drawCoin(c);
+
+    }
+
+
+    for(const o of obstacles){
+
+        drawObstacle(o);
+
+    }
+
+
+    drawLion();
+
+    drawParticles();
+
+
+    /*
+       Vinheta.
+    */
+
+    const v=
+        ctx.createRadialGradient(
+            W/2,
+            H/2,
+            Math.min(W,H)*.25,
+            W/2,
+            H/2,
+            Math.max(W,H)*.75
+        );
+
+
+    v.addColorStop(
+        0,
+        "rgba(0,0,0,0)"
+    );
+
+
+    v.addColorStop(
+        1,
+        "rgba(0,0,0,.42)"
+    );
+
 
     ctx.fillStyle=v;
-    ctx.fillRect(0,0,W,H);
+
+    ctx.fillRect(
+        0,
+        0,
+        W,
+        H
+    );
+
 }
+
+
+/* =========================================================
+   LOOP
+========================================================= */
 
 function loop(time){
 
     if(!running)return;
 
-    let dt=(time-lastTime)/1000;
+
+    let dt=
+        (time-lastTime)/
+        1000;
+
+
     lastTime=time;
 
-    dt=Math.min(dt,.035);
+
+    dt=
+        Math.min(
+            dt,
+            .035
+        );
+
 
     update(dt);
+
     draw();
 
-    requestAnimationFrame(loop);
+
+    requestAnimationFrame(
+        loop
+    );
+
 }
 
-// desenho inicial
+
+/* =========================================================
+   DESENHO INICIAL
+========================================================= */
+
+document.getElementById(
+    "best"
+).textContent=best;
+
+
 draw();
 
 </script>
 
 </body>
 </html>
-
-
+```
