@@ -673,7 +673,7 @@ const tintCtx = tintCanvas.getContext('2d');
 const tintCanvas = document.createElement('canvas');
 const tintCtx = tintCanvas.getContext('2d');
 
-function drawLion(){
+function drawLion() {
     let x = lion.x;
     let y = lion.y - 130;
 
@@ -682,44 +682,23 @@ function drawLion(){
 
     ctx.save();
 
-    // Sombra no chão
+    // 1. Sombra no chão
     ctx.beginPath();
     ctx.ellipse(x + 180, groundY() + 4, 160, 15, 0, 0, Math.PI * 2);
     ctx.fillStyle = "rgba(0,0,0,.35)";
     ctx.fill();
 
+    // 2. Desenho do leão sem fundo branco
     const currentFrameIndex = Math.floor(lion.frame / 2) % frameURLs.length;
     const currentImg = lionFrames[currentFrameIndex];
 
     if (currentImg && currentImg.complete) {
-        tintCanvas.width = 360;
-        tintCanvas.height = 195;
-
-        // 1. Limpa o buffer
-        tintCtx.filter = "none";
-        tintCtx.globalCompositeOperation = "source-over";
-        tintCtx.clearRect(0, 0, 360, 195);
-        
-        // 2. Desenha o frame original
-        tintCtx.drawImage(currentImg, 0, 0, 360, 195);
-
-        // 3. Aplica o filtro de cor dourada
-        tintCtx.globalCompositeOperation = "source-atop";
-        tintCtx.filter = "sepia(1) saturate(6) hue-rotate(10deg) brightness(1.1)";
-        tintCtx.drawImage(tintCanvas, 0, 0);
-
-        // 4. Desenha na tela principal usando 'destination-out' no modo invertido
-        // para cortar tudo que for extremamente claro/branco
-        ctx.save();
-        ctx.drawImage(tintCanvas, x, y);
-        
-        // Aplica o filtro 'multiply' direto na tela final para apagar qualquer sobra de branco
+        // Apaga o fundo branco puro instantaneamente no Canvas
         ctx.globalCompositeOperation = "multiply";
-        ctx.drawImage(tintCanvas, x, y);
-        ctx.restore();
+        ctx.drawImage(currentImg, x, y, 360, 195);
     }
 
-    ctx.restore();
+    ctx.restore(); // Limpa as configurações para o resto do jogo continuar normal
 }
 
     
