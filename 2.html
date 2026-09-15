@@ -2,22 +2,25 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
 <title>Babylon Lion</title>
 
 <style>
+
 *{
     box-sizing:border-box;
     margin:0;
     padding:0;
 }
 
-html,body{
+html,
+body{
     width:100%;
     height:100%;
     overflow:hidden;
-    background:#120b08;
+    background:#08090d;
     font-family:Arial,Helvetica,sans-serif;
+    touch-action:none;
 }
 
 body{
@@ -32,7 +35,7 @@ body{
     height:100vh;
     max-width:1400px;
     overflow:hidden;
-    background:#24130c;
+    background:#dfe2e6;
 }
 
 canvas{
@@ -48,24 +51,25 @@ canvas{
     right:22px;
     display:flex;
     justify-content:space-between;
+    align-items:flex-start;
     pointer-events:none;
     color:white;
     z-index:5;
 }
 
 .panel{
-    background:rgba(25,12,6,.72);
-    border:2px solid rgba(241,190,75,.55);
+    background:rgba(20,18,17,.72);
+    border:2px solid rgba(241,190,75,.65);
     border-radius:12px;
     padding:10px 16px;
     box-shadow:0 5px 20px rgba(0,0,0,.3);
-    backdrop-filter:blur(4px);
+    backdrop-filter:blur(5px);
 }
 
 .label{
     font-size:11px;
     letter-spacing:2px;
-    color:#e7bb54;
+    color:#f1c35a;
     text-transform:uppercase;
 }
 
@@ -75,33 +79,82 @@ canvas{
     margin-top:2px;
 }
 
-#menu,
-#gameover{
+#pauseBtn{
     position:absolute;
+    top:22px;
+    left:50%;
+    transform:translateX(-50%);
+    z-index:8;
+
+    margin:0;
+    padding:10px 22px;
+
+    border:2px solid #f3ca67;
+    border-radius:999px;
+
+    background:rgba(40,28,18,.82);
+
+    color:#fff3c8;
+
+    font-size:13px;
+    font-weight:bold;
+
+    letter-spacing:2px;
+
+    cursor:pointer;
+
+    box-shadow:
+        0 5px 18px rgba(0,0,0,.35);
+
+    backdrop-filter:blur(5px);
+}
+
+#pauseBtn:hover{
+    filter:brightness(1.15);
+}
+
+#menu,
+#gameover,
+#pauseScreen{
+
+    position:absolute;
+
     inset:0;
+
     display:flex;
+
     flex-direction:column;
+
     align-items:center;
+
     justify-content:center;
+
     text-align:center;
+
     z-index:10;
+
     background:
         radial-gradient(
             circle at center,
-            rgba(117,69,24,.25),
-            rgba(10,5,3,.9)
+            rgba(120,90,35,.25),
+            rgba(10,8,6,.9)
         );
 }
 
-#gameover{
+#gameover,
+#pauseScreen{
     display:none;
 }
 
 .logo{
     font-size:clamp(48px,9vw,105px);
+
     font-weight:900;
+
     letter-spacing:-5px;
+
     color:#f0bd4e;
+
     text-shadow:
         0 4px 0 #7b4515,
         0 8px 25px rgba(0,0,0,.8);
@@ -109,29 +162,57 @@ canvas{
 
 .subtitle{
     margin-top:-5px;
+
     color:#fff1c8;
-    font-size:clamp(13px,2vw,20px);
+
+    font-size:
+        clamp(
+            13px,
+            2vw,
+            20px
+        );
+
     letter-spacing:6px;
+
     text-transform:uppercase;
 }
 
 button{
     margin-top:35px;
+
     padding:16px 42px;
+
     border:2px solid #f3ca67;
+
     border-radius:999px;
-    background:linear-gradient(#d99a30,#9b5c16);
+
+    background:
+        linear-gradient(
+            #d99a30,
+            #9b5c16
+        );
+
     color:white;
+
     font-size:18px;
+
     font-weight:bold;
+
     letter-spacing:2px;
+
     cursor:pointer;
-    box-shadow:0 7px 20px rgba(0,0,0,.4);
+
+    box-shadow:
+        0 7px 20px rgba(0,0,0,.4);
+
     transition:.15s;
 }
 
 button:hover{
-    transform:translateY(-2px) scale(1.03);
+    transform:
+        translateY(-2px)
+        scale(1.03);
+
     filter:brightness(1.12);
 }
 
@@ -141,64 +222,100 @@ button:active{
 
 .instructions{
     margin-top:18px;
+
     color:#d7c39a;
+
     font-size:13px;
 }
 
 #finalScore{
+
     font-size:58px;
+
     color:#f0bd4e;
+
     font-weight:900;
+
     margin-top:8px;
 }
 
 #bestScore{
+
     color:#ddd;
+
     margin-top:4px;
 }
 
-#mobileControls{
-    position:absolute;
-    bottom:25px;
-    left:0;
-    right:0;
-    display:none;
-    justify-content:center;
-    z-index:6;
-    pointer-events:none;
+#pauseTitle{
+
+    color:#f0bd4e;
+
+    font-size:
+        clamp(
+            42px,
+            8vw,
+            90px
+        );
+
+    font-weight:900;
+
+    letter-spacing:-3px;
+
+    text-shadow:
+        0 4px 0 #704015;
 }
 
-.mobileBtn{
-    pointer-events:auto;
-    width:72px;
-    height:72px;
-    border-radius:50%;
-    padding:0;
-    margin:0 8px;
-    font-size:28px;
-    opacity:.75;
+#pauseHint{
+
+    margin-top:12px;
+
+    color:#fff1c8;
+
+    letter-spacing:3px;
+
+    font-size:13px;
 }
 
 @media(max-width:700px){
 
-    #mobileControls{
-        display:flex;
-    }
-
     #hud{
+
         top:10px;
+
         left:10px;
+
         right:10px;
     }
 
     .panel{
-        padding:7px 11px;
+
+        padding:
+            7px
+            11px;
     }
 
     .value{
+
         font-size:19px;
     }
+
+    #pauseBtn{
+
+        top:10px;
+
+        padding:
+            8px
+            14px;
+
+        font-size:11px;
+    }
+
+    .logo{
+
+        letter-spacing:-3px;
+    }
 }
+
 </style>
 </head>
 
@@ -208,35 +325,84 @@ button:active{
 
 <canvas id="canvas"></canvas>
 
+
+<!-- =====================================================
+     HUD
+===================================================== -->
+
 <div id="hud">
 
     <div class="panel">
-        <div class="label">Pontuação</div>
-        <div class="value" id="score">0</div>
+
+        <div class="label">
+            Pontuação
+        </div>
+
+        <div
+            class="value"
+            id="score"
+        >
+            0
+        </div>
+
     </div>
 
+
     <div class="panel">
-        <div class="label">Recorde</div>
-        <div class="value" id="best">0</div>
+
+        <div class="label">
+            Recorde
+        </div>
+
+        <div
+            class="value"
+            id="best"
+        >
+            0
+        </div>
+
     </div>
 
 </div>
 
+
+<!-- =====================================================
+     PAUSE
+===================================================== -->
+
+<button id="pauseBtn">
+    PAUSE
+</button>
+
+
+<!-- =====================================================
+     MENU
+===================================================== -->
+
 <div id="menu">
 
-    <div class="logo">BABYLON</div>
+    <div class="logo">
+        BABYLON
+    </div>
 
-    <div class="subtitle">LION</div>
+    <div class="subtitle">
+        LION
+    </div>
 
     <button id="startBtn">
         ENTRAR NA ARENA
     </button>
 
     <div class="instructions">
-        Espaço / ↑ para saltar • ↓ para abaixar
+        Toque na tela para saltar
     </div>
 
 </div>
+
+
+<!-- =====================================================
+     GAME OVER
+===================================================== -->
 
 <div id="gameover">
 
@@ -262,34 +428,51 @@ button:active{
 
 </div>
 
-<div id="mobileControls">
 
-    <button class="mobileBtn" id="jumpBtn">
-        ↑
-    </button>
+<!-- =====================================================
+     PAUSE SCREEN
+===================================================== -->
 
-    <button class="mobileBtn" id="duckBtn">
-        ↓
+<div id="pauseScreen">
+
+    <div id="pauseTitle">
+        PAUSADO
+    </div>
+
+    <div id="pauseHint">
+        TOQUE EM CONTINUAR PARA VOLTAR À ARENA
+    </div>
+
+    <button id="resumeBtn">
+        CONTINUAR
     </button>
 
 </div>
 
-</div>
 
 <script>
 
 /* =========================================================
-   TELA CHEIA + ORIENTAÇÃO
+   TELA CHEIA
 ========================================================= */
 
 function enterFullscreenAndLock(){
 
-    const elem=document.documentElement;
+    const elem=
+        document.documentElement;
 
-    if(elem.requestFullscreen){
-        elem.requestFullscreen();
+    if(
+        elem.requestFullscreen
+    ){
+
+        elem.requestFullscreen()
+        .catch(()=>{});
     }
-    else if(elem.webkitRequestFullscreen){
+
+    else if(
+        elem.webkitRequestFullscreen
+    ){
+
         elem.webkitRequestFullscreen();
     }
 
@@ -297,66 +480,68 @@ function enterFullscreenAndLock(){
         screen.orientation &&
         screen.orientation.lock
     ){
-        screen.orientation.lock("landscape").catch(()=>{
-            console.log(
-                "Bloqueio de orientação não suportado."
-            );
-        });
+
+        screen.orientation
+            .lock("landscape")
+            .catch(()=>{});
     }
 }
-
-window.addEventListener(
-    "touchstart",
-    enterFullscreenAndLock,
-    {once:true}
-);
-
-window.addEventListener(
-    "click",
-    enterFullscreenAndLock,
-    {once:true}
-);
 
 
 /* =========================================================
    CANVAS
 ========================================================= */
 
-const canvas=document.getElementById("canvas");
-const ctx=canvas.getContext("2d");
+const canvas=
+    document.getElementById(
+        "canvas"
+    );
 
-let W,H;
+const ctx=
+    canvas.getContext("2d");
+
+let W;
+let H;
 
 
 /* =========================================================
-   ESTADO DO JOGO
+   ESTADO
 ========================================================= */
 
 let running=false;
+
+let paused=false;
+
 let lastTime=0;
 
 let score=0;
 
 let best=
     Number(
-        localStorage.getItem("babylonLionBest") || 0
+        localStorage.getItem(
+            "babylonLionBest"
+        ) || 0
     );
 
-let speed=15;
+let speed=14;
+
 let distance=0;
 
 let obstacles=[];
+
 let coins=[];
+
 let particles=[];
 
-let spawnTimer=0;
-let coinTimer=0;
+let spawnTimer=2.8;
+
+let coinTimer=.35;
 
 const groundHeight=115;
 
 
 /* =========================================================
-   LEÃO — AGORA GRANDE
+   LEÃO
 ========================================================= */
 
 const lion={
@@ -365,21 +550,12 @@ const lion={
 
     y:0,
 
-    /*
-       Área lógica do personagem.
-       O desenho é muito maior,
-       mas mantemos uma caixa de colisão
-       proporcional e confortável.
-    */
     width:115,
+
     height:95,
 
     vy:0,
 
-    /*
-       GRAVIDADE REDUZIDA + SALTO MAIS FORTE
-       para acompanhar o leão gigante.
-    */
     gravity:1650,
 
     jumpPower:-900,
@@ -393,7 +569,9 @@ const lion={
 };
 
 
-document.getElementById("best").textContent=best;
+document.getElementById(
+    "best"
+).textContent=best;
 
 
 /* =========================================================
@@ -422,6 +600,7 @@ function resize(){
     );
 
     W=canvas.clientWidth;
+
     H=canvas.clientHeight;
 
     lion.y=
@@ -440,23 +619,30 @@ resize();
 
 function groundY(){
 
-    return H-groundHeight;
+    return H-
+        groundHeight;
 }
 
 
 /* =========================================================
-   INICIAR
+   INICIAR JOGO
 ========================================================= */
 
 function startGame(){
 
     running=true;
 
+    paused=false;
+
     score=0;
 
     distance=0;
 
-    speed=15;
+    /*
+       VELOCIDADE 2X
+    */
+
+    speed=14;
 
     obstacles=[];
 
@@ -464,11 +650,15 @@ function startGame(){
 
     particles=[];
 
-    spawnTimer=.8;
+    /*
+       PRIMEIRO OBSTÁCULO
+       BEM DISTANTE
+    */
+
+    spawnTimer=4.0;
 
     /*
-       Começamos imediatamente
-       com moedas espalhadas.
+       MOEDAS COMEÇAM CEDO
     */
 
     coinTimer=.25;
@@ -491,6 +681,14 @@ function startGame(){
         "gameover"
     ).style.display="none";
 
+    document.getElementById(
+        "pauseScreen"
+    ).style.display="none";
+
+    document.getElementById(
+        "pauseBtn"
+    ).style.display="block";
+
     lastTime=
         performance.now();
 
@@ -506,7 +704,11 @@ function gameOver(){
 
     running=false;
 
-    if(score>best){
+    paused=false;
+
+    if(
+        score>best
+    ){
 
         best=score;
 
@@ -532,7 +734,74 @@ function gameOver(){
     document.getElementById(
         "gameover"
     ).style.display="flex";
+
+    document.getElementById(
+        "pauseBtn"
+    ).style.display="none";
 }
+
+
+/* =========================================================
+   PAUSE
+========================================================= */
+
+function pauseGame(){
+
+    if(!running){
+        return;
+    }
+
+    paused=true;
+
+    document.getElementById(
+        "pauseScreen"
+    ).style.display="flex";
+}
+
+
+function resumeGame(){
+
+    if(!running){
+        return;
+    }
+
+    paused=false;
+
+    document.getElementById(
+        "pauseScreen"
+    ).style.display="none";
+
+    lastTime=
+        performance.now();
+
+    requestAnimationFrame(loop);
+}
+
+
+document.getElementById(
+    "pauseBtn"
+).addEventListener(
+    "click",
+    e=>{
+
+        e.stopPropagation();
+
+        pauseGame();
+    }
+);
+
+
+document.getElementById(
+    "resumeBtn"
+).addEventListener(
+    "click",
+    e=>{
+
+        e.stopPropagation();
+
+        resumeGame();
+    }
+);
 
 
 /* =========================================================
@@ -541,25 +810,22 @@ function gameOver(){
 
 function jump(){
 
-    if(!running){
+    if(
+        !running ||
+        paused
+    ){
         return;
     }
 
-    if(lion.grounded){
-
-        /*
-           SALTO MAIS ALTO PARA O NOVO
-           TAMANHO DO LEÃO.
-        */
+    if(
+        lion.grounded
+    ){
 
         lion.vy=
             lion.jumpPower;
 
         lion.grounded=false;
 
-        /*
-           Poeira do salto
-        */
 
         for(
             let i=0;
@@ -594,17 +860,66 @@ function jump(){
 
 
 /* =========================================================
-   ABAIXAR
+   TOQUE NA TELA = PULO
 ========================================================= */
 
-function duck(state){
+document.addEventListener(
+    "touchstart",
+    function(e){
 
-    lion.duck=state;
-}
+        /*
+           Não interfere nos menus
+           nem no botão de pause.
+        */
+
+        if(
+            e.target.closest(
+                "button"
+            )
+        ){
+
+            return;
+        }
+
+        if(
+            running &&
+            !paused
+        ){
+
+            e.preventDefault();
+
+            jump();
+        }
+
+    },
+    {
+        passive:false
+    }
+);
+
+
+/*
+   Também permite clique no desktop
+   durante a partida.
+*/
+
+canvas.addEventListener(
+    "mousedown",
+    function(){
+
+        if(
+            running &&
+            !paused
+        ){
+
+            jump();
+        }
+    }
+);
 
 
 /* =========================================================
-   CONTROLES
+   TECLADO
 ========================================================= */
 
 window.addEventListener(
@@ -621,14 +936,6 @@ window.addEventListener(
             jump();
         }
 
-        if(
-            e.code==="ArrowDown"
-        ){
-
-            e.preventDefault();
-
-            duck(true);
-        }
 
         if(
             e.code==="Enter" &&
@@ -638,67 +945,58 @@ window.addEventListener(
             startGame();
         }
 
-    }
-);
-
-
-window.addEventListener(
-    "keyup",
-    e=>{
 
         if(
-            e.code==="ArrowDown"
+            e.code==="KeyP" ||
+            e.code==="Escape"
         ){
 
-            duck(false);
-        }
+            if(
+                running &&
+                !paused
+            ){
 
+                pauseGame();
+            }
+
+            else if(
+                running &&
+                paused
+            ){
+
+                resumeGame();
+            }
+        }
     }
 );
 
 
 document.getElementById(
     "startBtn"
-).onclick=startGame;
+).onclick=e=>{
+
+    e.stopPropagation();
+
+    enterFullscreenAndLock();
+
+    startGame();
+};
 
 
 document.getElementById(
     "restartBtn"
-).onclick=startGame;
+).onclick=e=>{
 
+    e.stopPropagation();
 
-document.getElementById(
-    "jumpBtn"
-).ontouchstart=e=>{
+    enterFullscreenAndLock();
 
-    e.preventDefault();
-
-    jump();
-};
-
-
-document.getElementById(
-    "duckBtn"
-).ontouchstart=e=>{
-
-    e.preventDefault();
-
-    duck(true);
-};
-
-
-document.getElementById(
-    "duckBtn"
-).ontouchend=e=>{
-
-    e.preventDefault();
-
-    duck(false);
+    startGame();
 };
 
 
 /* =========================================================
-   OBSTÁCULOS
+   ALTARES BABILÔNICOS
 ========================================================= */
 
 function spawnObstacle(){
@@ -706,41 +1004,55 @@ function spawnObstacle(){
     const tall=
         Math.random()<.6;
 
+
     obstacles.push({
 
-        x:W+80,
+        /*
+           ALTAR COMEÇA LONGE
+        */
+
+        x:
+            W+260,
 
         y:
             groundY()-
             (
                 tall
-                ? 65
-                : 45
+                ? 105
+                : 85
             ),
 
         width:
             tall
-            ? 42
-            : 65,
+            ? 82
+            : 100,
 
         height:
             tall
-            ? 65
-            : 45,
+            ? 105
+            : 85,
 
         type:
             tall
-            ? "column"
-            : "brick"
+            ? "altar"
+            : "altarLow",
+
+        flame:
+            Math.random()*
+            Math.PI*
+            2
     });
 }
 
 
 /* =========================================================
-   MOEDA INDIVIDUAL
+   MOEDAS
 ========================================================= */
 
-function createCoin(x,y){
+function createCoin(
+    x,
+    y
+){
 
     coins.push({
 
@@ -759,18 +1071,10 @@ function createCoin(x,y){
 
 
 /* =========================================================
-   MUITAS MOEDAS
+   PADRÕES DE MOEDAS
 ========================================================= */
 
 function spawnCoin(){
-
-    /*
-       Agora existem vários formatos
-       de grupos de moedas.
-
-       Isso deixa o percurso muito mais
-       interessante para o jogador.
-    */
 
     const pattern=
         Math.floor(
@@ -779,10 +1083,12 @@ function spawnCoin(){
 
 
     /*
-       1 — linha horizontal
+       LINHA
     */
 
-    if(pattern===0){
+    if(
+        pattern===0
+    ){
 
         const y=
             groundY()-
@@ -791,7 +1097,7 @@ function spawnCoin(){
 
         for(
             let i=0;
-            i<6;
+            i<7;
             i++
         ){
 
@@ -804,17 +1110,19 @@ function spawnCoin(){
 
 
     /*
-       2 — escadinha subindo
+       ESCADA SUBINDO
     */
 
-    else if(pattern===1){
+    else if(
+        pattern===1
+    ){
 
         const base=
             groundY()-75;
 
         for(
             let i=0;
-            i<7;
+            i<8;
             i++
         ){
 
@@ -827,17 +1135,19 @@ function spawnCoin(){
 
 
     /*
-       3 — escadinha descendo
+       ESCADA DESCENDO
     */
 
-    else if(pattern===2){
+    else if(
+        pattern===2
+    ){
 
         const base=
             groundY()-205;
 
         for(
             let i=0;
-            i<7;
+            i<8;
             i++
         ){
 
@@ -850,27 +1160,32 @@ function spawnCoin(){
 
 
     /*
-       4 — arco de moedas
+       ARCO
     */
 
-    else if(pattern===3){
+    else if(
+        pattern===3
+    ){
 
-        const centerX=W+180;
+        const centerX=
+            W+180;
 
         const centerY=
             groundY()-125;
 
         for(
             let i=0;
-            i<9;
+            i<10;
             i++
         ){
 
             const angle=
                 Math.PI-
-                (Math.PI*i/8);
+                (
+                    Math.PI*i/9
+                );
 
-            const radius=115;
+            const radius=120;
 
             createCoin(
 
@@ -887,14 +1202,16 @@ function spawnCoin(){
 
 
     /*
-       5 — corredor de moedas
+       ONDA
     */
 
-    else if(pattern===4){
+    else if(
+        pattern===4
+    ){
 
         for(
             let i=0;
-            i<10;
+            i<11;
             i++
         ){
 
@@ -912,14 +1229,14 @@ function spawnCoin(){
 
 
     /*
-       6 — grande sequência
+       LONGA SEQUÊNCIA
     */
 
     else{
 
         for(
             let i=0;
-            i<12;
+            i<13;
             i++
         ){
 
@@ -947,26 +1264,34 @@ function update(dt){
         speed*
         dt;
 
+
     score=
         Math.floor(
             distance/10
         );
 
+
+    /*
+       VELOCIDADE MANTÉM O DOBRO
+       E AUMENTA GRADUALMENTE.
+    */
+
     speed=
-        7+
+        14+
         Math.min(
-            10,
-            score/250
+            12,
+            score/180
         );
+
 
     document.getElementById(
         "score"
     ).textContent=score;
 
 
-    /*
-       FÍSICA DO LEÃO
-    */
+    /* -----------------------------------------------------
+       FÍSICA
+    ----------------------------------------------------- */
 
     lion.frame+=
         dt*12;
@@ -998,43 +1323,50 @@ function update(dt){
     }
 
 
-    /*
+    /* -----------------------------------------------------
        OBSTÁCULOS
-    */
+    ----------------------------------------------------- */
 
     spawnTimer-=dt;
 
-    if(spawnTimer<=0){
 
-    spawnObstacle();
+    if(
+        spawnTimer<=0
+    ){
 
-    spawnTimer=
-        Math.max(
-            1.3,
-            2.6-
-            Math.min(
-                1.0,
-                score/500
-            )
-        )+
-        Math.random()*1.2;
-}
+        spawnObstacle();
 
 
-    /*
-       MOEDAS — MUITO MAIS FREQUENTES
-    */
+        /*
+           ESPAÇAMENTO GRANDE
+           PARA COMPENSAR 2X DE VELOCIDADE
+        */
+
+        spawnTimer=
+            Math.max(
+                1.7,
+                3.3-
+                Math.min(
+                    1.1,
+                    score/500
+                )
+            )+
+            Math.random()*1.4;
+    }
+
+
+    /* -----------------------------------------------------
+       MOEDAS
+    ----------------------------------------------------- */
 
     coinTimer-=dt;
 
-    if(coinTimer<=0){
+
+    if(
+        coinTimer<=0
+    ){
 
         spawnCoin();
-
-        /*
-           intervalo pequeno para
-           criar fluxo constante.
-        */
 
         coinTimer=
             .55+
@@ -1042,9 +1374,9 @@ function update(dt){
     }
 
 
-    /*
-       MOVIMENTO DOS OBSTÁCULOS
-    */
+    /* -----------------------------------------------------
+       MOVIMENTO
+    ----------------------------------------------------- */
 
     for(
         const o of obstacles
@@ -1054,12 +1386,11 @@ function update(dt){
             speed*
             60*
             dt;
+
+        o.flame+=
+            dt*8;
     }
 
-
-    /*
-       MOVIMENTO DAS MOEDAS
-    */
 
     for(
         const c of coins
@@ -1077,7 +1408,7 @@ function update(dt){
 
     obstacles=
         obstacles.filter(
-            o=>o.x>-120
+            o=>o.x>-180
         );
 
 
@@ -1090,9 +1421,9 @@ function update(dt){
     checkCollisions();
 
 
-    /*
+    /* -----------------------------------------------------
        PARTÍCULAS
-    */
+    ----------------------------------------------------- */
 
     for(
         const p of particles
@@ -1127,38 +1458,18 @@ function update(dt){
 
 function checkCollisions(){
 
-    const ducked=
-        lion.duck;
-
-
-    /*
-       Caixa de colisão ajustada
-       ao novo personagem.
-    */
-
     const lx=
         lion.x+20;
 
     const ly=
-        lion.y+
-        (
-            ducked
-            ? 35
-            : 12
-        );
+        lion.y+12;
 
     const lw=
         lion.width-35;
 
     const lh=
-        ducked
-        ? lion.height-40
-        : lion.height-15;
+        lion.height-15;
 
-
-    /*
-       OBSTÁCULOS
-    */
 
     for(
         const o of obstacles
@@ -1169,14 +1480,14 @@ function checkCollisions(){
             lx<
             o.x+
             o.width-
-            6
+            8
 
             &&
 
             lx+
             lw>
             o.x+
-            6
+            8
 
             &&
 
@@ -1189,7 +1500,7 @@ function checkCollisions(){
             ly+
             lh>
             o.y+
-            5;
+            10;
 
 
         if(hit){
@@ -1202,11 +1513,12 @@ function checkCollisions(){
 
 
     /*
-       MOEDAS
+       COLETA DE MOEDAS
     */
 
     for(
-        let i=coins.length-1;
+        let i=
+            coins.length-1;
         i>=0;
         i--
     ){
@@ -1238,18 +1550,10 @@ function checkCollisions(){
             )<65
         ){
 
-            /*
-               BÔNUS DE MOEDA
-            */
-
             score+=25;
 
             distance+=250;
 
-
-            /*
-               explosão dourada
-            */
 
             for(
                 let j=0;
@@ -1294,7 +1598,7 @@ function checkCollisions(){
 
 
 /* =========================================================
-   CÉU
+   CÉU BABILÔNICO
 ========================================================= */
 
 function drawSky(){
@@ -1307,20 +1611,22 @@ function drawSky(){
             H
         );
 
+
     g.addColorStop(
         0,
-        "#0d2240"
+        "#101d35"
     );
 
     g.addColorStop(
         .45,
-        "#123e75"
+        "#274b72"
     );
 
     g.addColorStop(
         1,
-        "#1a549c"
+        "#7893a8"
     );
+
 
     ctx.fillStyle=g;
 
@@ -1332,13 +1638,18 @@ function drawSky(){
     );
 
 
+    /*
+       Tijolos distantes
+    */
+
     ctx.strokeStyle=
-        "rgba(10,25,50,.6)";
+        "rgba(30,45,65,.45)";
 
     ctx.lineWidth=2;
 
 
     const brickH=18;
+
     const brickW=45;
 
 
@@ -1399,7 +1710,7 @@ function drawSky(){
 
 
 /* =========================================================
-   CIDADE
+   CIDADE BABILÔNICA
 ========================================================= */
 
 function drawDistantCity(){
@@ -1408,7 +1719,8 @@ function drawDistantCity(){
         groundY();
 
 
-    ctx.fillStyle="#3d2115";
+    ctx.fillStyle=
+        "#806d5c";
 
 
     for(
@@ -1419,7 +1731,7 @@ function drawDistantCity(){
 
         const h=
             70+
-            (
+            Math.abs(
                 x*13%100
             );
 
@@ -1469,7 +1781,9 @@ function drawDistantCity(){
         W*.55;
 
 
-    ctx.fillStyle="#542b18";
+    ctx.fillStyle=
+        "#a08b73";
+
 
     ctx.beginPath();
 
@@ -1496,7 +1810,8 @@ function drawDistantCity(){
     ctx.fill();
 
 
-    ctx.fillStyle="#6d381d";
+    ctx.fillStyle=
+        "#b49d7c";
 
 
     ctx.fillRect(
@@ -1537,14 +1852,19 @@ function drawDistantCity(){
 
 
 /* =========================================================
-   CHÃO
+   PISO DE MÁRMORE BRANCO
 ========================================================= */
 
 function drawGround(){
 
-    const y=groundY();
+    const y=
+        groundY();
 
-    /* base de mármore */
+
+    /*
+       Mármore base
+    */
+
     const marble=
         ctx.createLinearGradient(
             0,
@@ -1553,11 +1873,31 @@ function drawGround(){
             H
         );
 
-    marble.addColorStop(0,"#ffffff");
-    marble.addColorStop(.35,"#eeeeee");
-    marble.addColorStop(1,"#c9c9c9");
 
-    ctx.fillStyle=marble;
+    marble.addColorStop(
+        0,
+        "#ffffff"
+    );
+
+    marble.addColorStop(
+        .28,
+        "#f7f7f7"
+    );
+
+    marble.addColorStop(
+        .65,
+        "#e5e7e9"
+    );
+
+    marble.addColorStop(
+        1,
+        "#bfc3c7"
+    );
+
+
+    ctx.fillStyle=
+        marble;
+
 
     ctx.fillRect(
         0,
@@ -1566,17 +1906,26 @@ function drawGround(){
         groundHeight
     );
 
-    /* placas de mármore */
+
+    /*
+       Grandes placas
+    */
+
     const tileW=150;
+
     const tileH=58;
 
+
     const offset=
-        -(distance*2)%tileW;
+        -(distance*2)%
+        tileW;
+
 
     ctx.strokeStyle=
-        "rgba(120,120,130,.45)";
+        "rgba(105,110,118,.42)";
 
-    ctx.lineWidth=3;
+    ctx.lineWidth=2;
+
 
     for(
         let x=offset;
@@ -1585,10 +1934,20 @@ function drawGround(){
     ){
 
         ctx.beginPath();
-        ctx.moveTo(x,y);
-        ctx.lineTo(x,H);
+
+        ctx.moveTo(
+            x,
+            y
+        );
+
+        ctx.lineTo(
+            x,
+            H
+        );
+
         ctx.stroke();
     }
+
 
     for(
         let yy=y+tileH;
@@ -1597,39 +1956,103 @@ function drawGround(){
     ){
 
         ctx.beginPath();
-        ctx.moveTo(0,yy);
-        ctx.lineTo(W,yy);
+
+        ctx.moveTo(
+            0,
+            yy
+        );
+
+        ctx.lineTo(
+            W,
+            yy
+        );
+
         ctx.stroke();
     }
 
-    /* brilho do mármore */
+
+    /*
+       Veios do mármore
+    */
+
+    ctx.strokeStyle=
+        "rgba(120,125,132,.18)";
+
+    ctx.lineWidth=3;
+
+
+    for(
+        let i=0;
+        i<7;
+        i++
+    ){
+
+        const sx=
+            (
+                i*230-
+                distance*.8
+            )%
+            (W+300)-
+            150;
+
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            sx,
+            y
+        );
+
+        ctx.bezierCurveTo(
+            sx+60,
+            y+30,
+            sx-40,
+            y+65,
+            sx+100,
+            H
+        );
+
+        ctx.stroke();
+    }
+
+
+    /*
+       Faixa de brilho
+    */
+
     const shine=
         ctx.createLinearGradient(
             0,
             y,
             0,
-            y+25
+            y+35
         );
+
 
     shine.addColorStop(
         0,
-        "rgba(255,255,255,.95)"
+        "rgba(255,255,255,.98)"
     );
+
 
     shine.addColorStop(
         1,
         "rgba(255,255,255,0)"
     );
 
-    ctx.fillStyle=shine;
+
+    ctx.fillStyle=
+        shine;
+
 
     ctx.fillRect(
         0,
         y,
         W,
-        28
+        35
     );
 }
+
 
 /* =========================================================
    FRAMES DO LEÃO
@@ -1757,11 +2180,6 @@ function processLionImage(
             const b=data[i+2];
 
 
-            /*
-               Transparência para
-               áreas muito claras.
-            */
-
             const brightness=
                 (
                     r+
@@ -1769,6 +2187,10 @@ function processLionImage(
                     b
                 )/3;
 
+
+            /*
+               Fundo branco transparente
+            */
 
             if(
                 (
@@ -1787,8 +2209,7 @@ function processLionImage(
 
 
             /*
-               Transformação para
-               tonalidade dourada.
+               Ouro
             */
 
             const luminance=
@@ -1800,12 +2221,16 @@ function processLionImage(
 
 
             const darkR=72;
+
             const darkG=35;
+
             const darkB=10;
 
 
             const goldR=242;
+
             const goldG=180;
+
             const goldB=58;
 
 
@@ -1857,13 +2282,8 @@ function processLionImage(
     }
     catch(error){
 
-        /*
-           Se o navegador bloquear
-           processamento externo,
-           usamos a imagem original.
-        */
-
-        processedFrames[index]=img;
+        processedFrames[index]=
+            img;
 
         console.log(
             "Processamento do frame falhou:",
@@ -1875,7 +2295,7 @@ function processLionImage(
 
 
 /* =========================================================
-   CARREGAMENTO DOS FRAMES
+   CARREGAR LEÃO
 ========================================================= */
 
 frameURLs.forEach(
@@ -1883,7 +2303,6 @@ frameURLs.forEach(
 
         const img=
             new Image();
-
 
         img.crossOrigin=
             "Anonymous";
@@ -1917,7 +2336,7 @@ frameURLs.forEach(
 
 
 /* =========================================================
-   DESENHO DO LEÃO
+   DESENHAR LEÃO
 ========================================================= */
 
 function drawLion(){
@@ -1931,19 +2350,13 @@ function drawLion(){
     const drawHeight=246;
 
 
-    /*
-       Centralização horizontal
-       em relação ao ponto lógico.
-    */
-
     let x=
         lion.x-
         150;
 
 
     /*
-       Pé do leão alinhado
-       com o chão.
+       Posição base no mármore
     */
 
     let y=
@@ -1953,11 +2366,8 @@ function drawLion(){
 
 
     /*
-       O salto move o personagem
-       inteiro verticalmente.
-
-       Isso é importante agora que
-       o leão ficou muito maior.
+       Movimento vertical real
+       durante o salto
     */
 
     y+=
@@ -1971,7 +2381,7 @@ function drawLion(){
 
 
     /*
-       Pequeno balanço ao correr.
+       Pequeno balanço
     */
 
     const bob=
@@ -1989,16 +2399,16 @@ function drawLion(){
 
 
     /*
-       Sombra
+       Sombra do leão
     */
 
     ctx.beginPath();
 
     ctx.ellipse(
         lion.x+75,
-        groundY()+4,
-        85,
-        11,
+        groundY()+5,
+        88,
+        12,
         0,
         0,
         Math.PI*2
@@ -2006,14 +2416,10 @@ function drawLion(){
 
 
     ctx.fillStyle=
-        "rgba(0,0,0,.35)";
+        "rgba(0,0,0,.28)";
 
     ctx.fill();
 
-
-    /*
-       Frame atual
-    */
 
     const currentFrameIndex=
         Math.floor(
@@ -2055,137 +2461,305 @@ function drawLion(){
 
 
 /* =========================================================
-   OBSTÁCULO
+   ALTAR COM TOCHA
 ========================================================= */
 
 function drawObstacle(o){
 
-    if(
-        o.type==="column"
+    const x=o.x;
+
+    const y=o.y;
+
+    const w=o.width;
+
+    const h=o.height;
+
+
+    /*
+       Base de sombra
+    */
+
+    ctx.fillStyle=
+        "rgba(0,0,0,.18)";
+
+    ctx.fillRect(
+        x-8,
+        groundY()-3,
+        w+16,
+        7
+    );
+
+
+    /*
+       Degrau inferior
+    */
+
+    ctx.fillStyle=
+        "#8b8177";
+
+    ctx.fillRect(
+        x-10,
+        y+h-15,
+        w+20,
+        15
+    );
+
+
+    /*
+       Degrau dourado
+    */
+
+    ctx.fillStyle=
+        "#b79b5b";
+
+    ctx.fillRect(
+        x-14,
+        y+h-20,
+        w+28,
+        7
+    );
+
+
+    /*
+       Corpo do altar
+    */
+
+    const stone=
+        ctx.createLinearGradient(
+            x,
+            y,
+            x+w,
+            y
+        );
+
+
+    stone.addColorStop(
+        0,
+        "#716963"
+    );
+
+    stone.addColorStop(
+        .5,
+        "#c5beb5"
+    );
+
+    stone.addColorStop(
+        1,
+        "#68615c"
+    );
+
+
+    ctx.fillStyle=stone;
+
+
+    ctx.fillRect(
+        x,
+        y+25,
+        w,
+        h-35
+    );
+
+
+    /*
+       topo
+    */
+
+    ctx.fillStyle=
+        "#b8aea4";
+
+
+    ctx.fillRect(
+        x-8,
+        y+17,
+        w+16,
+        13
+    );
+
+
+    /*
+       detalhes babilônicos
+    */
+
+    ctx.strokeStyle=
+        "#d2b66c";
+
+    ctx.lineWidth=3;
+
+
+    for(
+        let xx=x+15;
+        xx<x+w-5;
+        xx+=22
     ){
 
-        ctx.fillStyle=
-            "#6b3920";
+        ctx.beginPath();
 
-        ctx.fillRect(
-            o.x,
-            o.y,
-            o.width,
-            o.height
+        ctx.moveTo(
+            xx,
+            y+42
         );
 
-
-        ctx.fillStyle=
-            "#9a5a2b";
-
-        ctx.fillRect(
-            o.x-7,
-            o.y-8,
-            o.width+14,
-            12
+        ctx.lineTo(
+            xx+8,
+            y+55
         );
 
-
-        ctx.fillRect(
-            o.x-7,
-            o.y+
-            o.height-
-            5,
-            o.width+14,
-            10
+        ctx.lineTo(
+            xx,
+            y+68
         );
 
-
-        ctx.fillStyle=
-            "#d08b3d";
-
-
-        for(
-            let y=o.y+15;
-            y<
-            o.y+
-            o.height-
-            10;
-            y+=18
-        ){
-
-            ctx.fillRect(
-                o.x+18,
-                y,
-                7,
-                7
-            );
-        }
-
+        ctx.stroke();
     }
-    else{
 
-        ctx.fillStyle=
-            "#713718";
 
-        ctx.fillRect(
-            o.x,
-            o.y,
-            o.width,
-            o.height
+    /*
+       TOCHA
+    */
+
+    const torchX=
+        x+w/2;
+
+    const torchY=
+        y+8;
+
+
+    /*
+       haste
+    */
+
+    ctx.fillStyle=
+        "#593719";
+
+
+    ctx.fillRect(
+        torchX-4,
+        torchY,
+        8,
+        27
+    );
+
+
+    /*
+       chama externa
+    */
+
+    const flicker=
+        Math.sin(
+            o.flame
+        )*
+        4;
+
+
+    ctx.save();
+
+
+    ctx.translate(
+        torchX,
+        torchY-7
+    );
+
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        0,
+        -30-flicker
+    );
+
+    ctx.bezierCurveTo(
+        -18,
+        -13,
+        -14,
+        2,
+        0,
+        8
+    );
+
+    ctx.bezierCurveTo(
+        14,
+        2,
+        18,
+        -13,
+        0,
+        -30-flicker
+    );
+
+
+    const fire=
+        ctx.createRadialGradient(
+            0,
+            -10,
+            2,
+            0,
+            -10,
+            28
         );
 
 
-        ctx.strokeStyle=
-            "#a96128";
+    fire.addColorStop(
+        0,
+        "#fff7a0"
+    );
 
-        ctx.lineWidth=3;
+    fire.addColorStop(
+        .3,
+        "#ffd33d"
+    );
 
+    fire.addColorStop(
+        .7,
+        "#ff8a18"
+    );
 
-        for(
-            let y=o.y+15;
-            y<
-            o.y+
-            o.height;
-            y+=15
-        ){
-
-            ctx.beginPath();
-
-            ctx.moveTo(
-                o.x,
-                y
-            );
-
-            ctx.lineTo(
-                o.x+
-                o.width,
-                y
-            );
-
-            ctx.stroke();
-        }
+    fire.addColorStop(
+        1,
+        "rgba(255,65,0,0)"
+    );
 
 
-        for(
-            let x=o.x+15;
-            x<
-            o.x+
-            o.width;
-            x+=25
-        ){
+    ctx.fillStyle=fire;
 
-            ctx.beginPath();
+    ctx.fill();
 
-            ctx.moveTo(
-                x,
-                o.y
-            );
 
-            ctx.lineTo(
-                x,
-                o.y+
-                o.height
-            );
+    /*
+       núcleo da chama
+    */
 
-            ctx.stroke();
-        }
-    }
+    ctx.beginPath();
+
+    ctx.moveTo(
+        0,
+        -23-flicker
+    );
+
+    ctx.bezierCurveTo(
+        -7,
+        -10,
+        -6,
+        -1,
+        0,
+        4
+    );
+
+    ctx.bezierCurveTo(
+        7,
+        -1,
+        7,
+        -10,
+        0,
+        -23-flicker
+    );
+
+
+    ctx.fillStyle=
+        "#fff4a0";
+
+    ctx.fill();
+
+
+    ctx.restore();
 }
 
 
@@ -2220,7 +2794,7 @@ function drawCoin(c){
 
 
     /*
-       brilho externo
+       Aura
     */
 
     ctx.beginPath();
@@ -2228,14 +2802,14 @@ function drawCoin(c){
     ctx.arc(
         0,
         0,
-        c.r+4,
+        c.r+7,
         0,
         Math.PI*2
     );
 
 
     ctx.fillStyle=
-        "rgba(255,205,70,.18)";
+        "rgba(255,205,70,.16)";
 
     ctx.fill();
 
@@ -2270,7 +2844,7 @@ function drawCoin(c){
 
 
     /*
-       símbolo babilônico
+       símbolo
     */
 
     ctx.fillStyle=
@@ -2336,7 +2910,7 @@ function drawParticles(){
 
 
 /* =========================================================
-   DESENHO PRINCIPAL
+   DESENHO
 ========================================================= */
 
 function draw(){
@@ -2357,7 +2931,7 @@ function draw(){
 
 
     /*
-       Moedas primeiro
+       Moedas
     */
 
     for(
@@ -2369,7 +2943,7 @@ function draw(){
 
 
     /*
-       Obstáculos
+       Altares
     */
 
     for(
@@ -2381,7 +2955,7 @@ function draw(){
 
 
     /*
-       LEÃO GIGANTE
+       LEÃO
     */
 
     drawLion();
@@ -2391,7 +2965,7 @@ function draw(){
 
 
     /*
-       Vinheta cinematográfica
+       Vinheta
     */
 
     const v=
@@ -2413,7 +2987,7 @@ function draw(){
 
     v.addColorStop(
         1,
-        "rgba(0,0,0,.42)"
+        "rgba(0,0,0,.30)"
     );
 
 
@@ -2435,7 +3009,11 @@ function draw(){
 
 function loop(time){
 
-    if(!running){
+    if(
+        !running ||
+        paused
+    ){
+
         return;
     }
 
