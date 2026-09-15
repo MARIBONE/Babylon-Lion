@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -665,40 +665,32 @@ frameURLs.forEach((url, index) => {
     lionFrames[index] = img;
 });
 
-// Canvas invisível criado apenas uma vez fora da função
-const tintCanvas = document.createElement('canvas');
-const tintCtx = tintCanvas.getContext('2d');
-
-// Canvas temporário em memória para processar a transparência perfeita
-const tintCanvas = document.createElement('canvas');
-const tintCtx = tintCanvas.getContext('2d');
-
-function drawLion() {
+function drawLion(){
     let x = lion.x;
-    let y = lion.y - 130;
+    let y = lion.y - 130; // Subtrai o valor para subir o leão
 
     const bob = lion.grounded ? Math.sin(lion.frame * 0.2) * 2 : 0;
     y += bob;
 
     ctx.save();
 
-    // 1. Sombra no chão
+    // Sombra no chão
     ctx.beginPath();
-    ctx.ellipse(x + 180, groundY() + 4, 160, 15, 0, 0, Math.PI * 2);
+    ctx.ellipse(x + 60, groundY() + 4, 55, 8, 0, 0, Math.PI * 2);
     ctx.fillStyle = "rgba(0,0,0,.35)";
     ctx.fill();
 
-    // 2. Desenho do leão sem fundo branco
+    // Seleciona o frame correto do ciclo
     const currentFrameIndex = Math.floor(lion.frame / 2) % frameURLs.length;
     const currentImg = lionFrames[currentFrameIndex];
 
     if (currentImg && currentImg.complete) {
-        // Apaga o fundo branco puro instantaneamente no Canvas
+        // Aplica o filtro que oculta a cor branca mantendo o leão visível
         ctx.globalCompositeOperation = "multiply";
         ctx.drawImage(currentImg, x, y, 360, 195);
     }
 
-    ctx.restore(); // Limpa as configurações para o resto do jogo continuar normal
+    ctx.restore();
 }
 
     
@@ -844,3 +836,5 @@ draw();
 
 </body>
 </html>
+
+
