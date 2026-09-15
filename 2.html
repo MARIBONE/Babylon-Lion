@@ -6,15 +6,13 @@
 <title>Babylon Lion</title>
 
 <style>
-
 *{
     box-sizing:border-box;
     margin:0;
     padding:0;
 }
 
-html,
-body{
+html,body{
     width:100%;
     height:100%;
     overflow:hidden;
@@ -79,6 +77,38 @@ canvas{
     margin-top:2px;
 }
 
+.lifePanel{
+    min-width:150px;
+}
+
+.lifeBar{
+    width:120px;
+    height:10px;
+    margin-top:6px;
+    overflow:hidden;
+    border-radius:10px;
+    background:rgba(0,0,0,.55);
+    border:1px solid rgba(255,255,255,.25);
+}
+
+#lifeFill{
+    width:100%;
+    height:100%;
+    background:linear-gradient(
+        90deg,
+        #36d66b,
+        #b8e84c
+    );
+    transition:width:.2s;
+}
+
+.lifeValue{
+    margin-top:4px;
+    color:#fff;
+    font-size:12px;
+    font-weight:bold;
+}
+
 #pauseBtn{
     position:absolute;
     top:22px;
@@ -103,8 +133,7 @@ canvas{
 
     cursor:pointer;
 
-    box-shadow:
-        0 5px 18px rgba(0,0,0,.35);
+    box-shadow:0 5px 18px rgba(0,0,0,.35);
 
     backdrop-filter:blur(5px);
 }
@@ -116,21 +145,13 @@ canvas{
 #menu,
 #gameover,
 #pauseScreen{
-
     position:absolute;
-
     inset:0;
-
     display:flex;
-
     flex-direction:column;
-
     align-items:center;
-
     justify-content:center;
-
     text-align:center;
-
     z-index:10;
 
     background:
@@ -148,11 +169,8 @@ canvas{
 
 .logo{
     font-size:clamp(48px,9vw,105px);
-
     font-weight:900;
-
     letter-spacing:-5px;
-
     color:#f0bd4e;
 
     text-shadow:
@@ -162,28 +180,17 @@ canvas{
 
 .subtitle{
     margin-top:-5px;
-
     color:#fff1c8;
-
-    font-size:
-        clamp(
-            13px,
-            2vw,
-            20px
-        );
-
+    font-size:clamp(13px,2vw,20px);
     letter-spacing:6px;
-
     text-transform:uppercase;
 }
 
 button{
     margin-top:35px;
-
     padding:16px 42px;
 
     border:2px solid #f3ca67;
-
     border-radius:999px;
 
     background:
@@ -195,9 +202,7 @@ button{
     color:white;
 
     font-size:18px;
-
     font-weight:bold;
-
     letter-spacing:2px;
 
     cursor:pointer;
@@ -222,43 +227,26 @@ button:active{
 
 .instructions{
     margin-top:18px;
-
     color:#d7c39a;
-
     font-size:13px;
 }
 
 #finalScore{
-
     font-size:58px;
-
     color:#f0bd4e;
-
     font-weight:900;
-
     margin-top:8px;
 }
 
 #bestScore{
-
     color:#ddd;
-
     margin-top:4px;
 }
 
 #pauseTitle{
-
     color:#f0bd4e;
-
-    font-size:
-        clamp(
-            42px,
-            8vw,
-            90px
-        );
-
+    font-size:clamp(42px,8vw,90px);
     font-weight:900;
-
     letter-spacing:-3px;
 
     text-shadow:
@@ -266,56 +254,46 @@ button:active{
 }
 
 #pauseHint{
-
     margin-top:12px;
-
     color:#fff1c8;
-
     letter-spacing:3px;
-
     font-size:13px;
 }
 
 @media(max-width:700px){
 
     #hud{
-
         top:10px;
-
         left:10px;
-
         right:10px;
     }
 
     .panel{
-
-        padding:
-            7px
-            11px;
+        padding:7px 11px;
     }
 
     .value{
-
         font-size:19px;
     }
 
+    .lifePanel{
+        min-width:125px;
+    }
+
+    .lifeBar{
+        width:100px;
+    }
+
     #pauseBtn{
-
         top:10px;
-
-        padding:
-            8px
-            14px;
-
+        padding:8px 14px;
         font-size:11px;
     }
 
     .logo{
-
         letter-spacing:-3px;
     }
 }
-
 </style>
 </head>
 
@@ -326,9 +304,7 @@ button:active{
 <canvas id="canvas"></canvas>
 
 
-<!-- =====================================================
-     HUD
-===================================================== -->
+<!-- HUD -->
 
 <div id="hud">
 
@@ -343,6 +319,28 @@ button:active{
             id="score"
         >
             0
+        </div>
+
+    </div>
+
+
+    <div class="panel lifePanel">
+
+        <div class="label">
+            LIFE
+        </div>
+
+        <div class="lifeBar">
+
+            <div id="lifeFill"></div>
+
+        </div>
+
+        <div
+            class="lifeValue"
+            id="lifeValue"
+        >
+            100
         </div>
 
     </div>
@@ -366,18 +364,14 @@ button:active{
 </div>
 
 
-<!-- =====================================================
-     PAUSE
-===================================================== -->
+<!-- PAUSE -->
 
 <button id="pauseBtn">
     PAUSE
 </button>
 
 
-<!-- =====================================================
-     MENU
-===================================================== -->
+<!-- MENU -->
 
 <div id="menu">
 
@@ -400,9 +394,7 @@ button:active{
 </div>
 
 
-<!-- =====================================================
-     GAME OVER
-===================================================== -->
+<!-- GAME OVER -->
 
 <div id="gameover">
 
@@ -429,9 +421,7 @@ button:active{
 </div>
 
 
-<!-- =====================================================
-     PAUSE SCREEN
-===================================================== -->
+<!-- PAUSE -->
 
 <div id="pauseScreen">
 
@@ -453,7 +443,7 @@ button:active{
 <script>
 
 /* =========================================================
-   TELA CHEIA
+   FULLSCREEN
 ========================================================= */
 
 function enterFullscreenAndLock(){
@@ -467,9 +457,8 @@ function enterFullscreenAndLock(){
 
         elem.requestFullscreen()
         .catch(()=>{});
-    }
 
-    else if(
+    }else if(
         elem.webkitRequestFullscreen
     ){
 
@@ -493,9 +482,7 @@ function enterFullscreenAndLock(){
 ========================================================= */
 
 const canvas=
-    document.getElementById(
-        "canvas"
-    );
+    document.getElementById("canvas");
 
 const ctx=
     canvas.getContext("2d");
@@ -505,7 +492,7 @@ let H;
 
 
 /* =========================================================
-   ESTADO
+   ESTADO DO JOGO
 ========================================================= */
 
 let running=false;
@@ -523,6 +510,11 @@ let best=
         ) || 0
     );
 
+
+/*
+   VELOCIDADE 2X
+*/
+
 let speed=14;
 
 let distance=0;
@@ -533,11 +525,30 @@ let coins=[];
 
 let particles=[];
 
-let spawnTimer=2.8;
+let spawnTimer=4.0;
 
-let coinTimer=.35;
+let coinTimer=.25;
 
-const groundHeight=115;
+
+/*
+   CHÃO REDUZIDO PELA METADE
+*/
+
+const groundHeight=58;
+
+
+/*
+   VIDA
+*/
+
+let life=100;
+
+
+/*
+   TEMPO DE INVULNERABILIDADE
+*/
+
+let hitCooldown=0;
 
 
 /* =========================================================
@@ -565,7 +576,6 @@ const lion={
     duck:false,
 
     frame:0
-
 };
 
 
@@ -603,6 +613,7 @@ function resize(){
 
     H=canvas.clientHeight;
 
+
     lion.y=
         H-
         groundHeight-
@@ -625,7 +636,62 @@ function groundY(){
 
 
 /* =========================================================
-   INICIAR JOGO
+   ATUALIZA HUD LIFE
+========================================================= */
+
+function updateLifeUI(){
+
+    const fill=
+        document.getElementById(
+            "lifeFill"
+        );
+
+    const value=
+        document.getElementById(
+            "lifeValue"
+        );
+
+
+    fill.style.width=
+        Math.max(
+            0,
+            life
+        )+
+        "%";
+
+
+    value.textContent=
+        Math.max(
+            0,
+            life
+        );
+
+
+    /*
+       Mudança visual conforme
+       a vida diminui.
+    */
+
+    if(life<=25){
+
+        fill.style.background=
+            "linear-gradient(90deg,#e52b2b,#ff7b3d)";
+
+    }else if(life<=50){
+
+        fill.style.background=
+            "linear-gradient(90deg,#f0a52b,#ffe34c)";
+
+    }else{
+
+        fill.style.background=
+            "linear-gradient(90deg,#36d66b,#b8e84c)";
+    }
+}
+
+
+/* =========================================================
+   INICIAR
 ========================================================= */
 
 function startGame(){
@@ -638,10 +704,6 @@ function startGame(){
 
     distance=0;
 
-    /*
-       VELOCIDADE 2X
-    */
-
     speed=14;
 
     obstacles=[];
@@ -650,18 +712,31 @@ function startGame(){
 
     particles=[];
 
+
     /*
-       PRIMEIRO OBSTÁCULO
-       BEM DISTANTE
+       PRIMEIRO FOGO BEM DISTANTE
     */
 
     spawnTimer=4.0;
 
+
     /*
-       MOEDAS COMEÇAM CEDO
+       MUITAS MOEDAS
     */
 
     coinTimer=.25;
+
+
+    /*
+       VIDA COMPLETA
+    */
+
+    life=100;
+
+    hitCooldown=0;
+
+    updateLifeUI();
+
 
     lion.y=
         groundY()-
@@ -673,24 +748,30 @@ function startGame(){
 
     lion.duck=false;
 
+
     document.getElementById(
         "menu"
     ).style.display="none";
+
 
     document.getElementById(
         "gameover"
     ).style.display="none";
 
+
     document.getElementById(
         "pauseScreen"
     ).style.display="none";
+
 
     document.getElementById(
         "pauseBtn"
     ).style.display="block";
 
+
     lastTime=
         performance.now();
+
 
     requestAnimationFrame(loop);
 }
@@ -706,9 +787,8 @@ function gameOver(){
 
     paused=false;
 
-    if(
-        score>best
-    ){
+
+    if(score>best){
 
         best=score;
 
@@ -718,22 +798,27 @@ function gameOver(){
         );
     }
 
+
     document.getElementById(
         "finalScore"
     ).textContent=score;
+
 
     document.getElementById(
         "bestScore"
     ).textContent=
         "Recorde: "+best;
 
+
     document.getElementById(
         "best"
     ).textContent=best;
 
+
     document.getElementById(
         "gameover"
     ).style.display="flex";
+
 
     document.getElementById(
         "pauseBtn"
@@ -753,6 +838,7 @@ function pauseGame(){
 
     paused=true;
 
+
     document.getElementById(
         "pauseScreen"
     ).style.display="flex";
@@ -765,14 +851,18 @@ function resumeGame(){
         return;
     }
 
+
     paused=false;
+
 
     document.getElementById(
         "pauseScreen"
     ).style.display="none";
 
+
     lastTime=
         performance.now();
+
 
     requestAnimationFrame(loop);
 }
@@ -817,6 +907,7 @@ function jump(){
         return;
     }
 
+
     if(
         lion.grounded
     ){
@@ -826,6 +917,10 @@ function jump(){
 
         lion.grounded=false;
 
+
+        /*
+           Poeira
+        */
 
         for(
             let i=0;
@@ -860,26 +955,21 @@ function jump(){
 
 
 /* =========================================================
-   TOQUE NA TELA = PULO
+   TOQUE = SALTO
 ========================================================= */
 
 document.addEventListener(
     "touchstart",
     function(e){
 
-        /*
-           Não interfere nos menus
-           nem no botão de pause.
-        */
-
         if(
             e.target.closest(
                 "button"
             )
         ){
-
             return;
         }
+
 
         if(
             running &&
@@ -899,8 +989,7 @@ document.addEventListener(
 
 
 /*
-   Também permite clique no desktop
-   durante a partida.
+   Clique no canvas
 */
 
 canvas.addEventListener(
@@ -957,9 +1046,8 @@ window.addEventListener(
             ){
 
                 pauseGame();
-            }
 
-            else if(
+            }else if(
                 running &&
                 paused
             ){
@@ -970,6 +1058,10 @@ window.addEventListener(
     }
 );
 
+
+/* =========================================================
+   BOTÕES
+========================================================= */
 
 document.getElementById(
     "startBtn"
@@ -996,46 +1088,29 @@ document.getElementById(
 
 
 /* =========================================================
-   ALTARES BABILÔNICOS
+   FOGO
 ========================================================= */
 
 function spawnObstacle(){
 
-    const tall=
-        Math.random()<.6;
-
-
     obstacles.push({
 
         /*
-           ALTAR COMEÇA LONGE
+           Primeiro fogo começa
+           longe da tela.
         */
 
         x:
             W+260,
 
         y:
-            groundY()-
-            (
-                tall
-                ? 105
-                : 85
-            ),
+            groundY()-70,
 
-        width:
-            tall
-            ? 82
-            : 100,
+        width:65,
 
-        height:
-            tall
-            ? 105
-            : 85,
+        height:70,
 
-        type:
-            tall
-            ? "altar"
-            : "altarLow",
+        type:"fire",
 
         flame:
             Math.random()*
@@ -1086,14 +1161,13 @@ function spawnCoin(){
        LINHA
     */
 
-    if(
-        pattern===0
-    ){
+    if(pattern===0){
 
         const y=
             groundY()-
             105-
             Math.random()*70;
+
 
         for(
             let i=0;
@@ -1113,12 +1187,11 @@ function spawnCoin(){
        ESCADA SUBINDO
     */
 
-    else if(
-        pattern===1
-    ){
+    else if(pattern===1){
 
         const base=
             groundY()-75;
+
 
         for(
             let i=0;
@@ -1138,12 +1211,11 @@ function spawnCoin(){
        ESCADA DESCENDO
     */
 
-    else if(
-        pattern===2
-    ){
+    else if(pattern===2){
 
         const base=
             groundY()-205;
+
 
         for(
             let i=0;
@@ -1163,15 +1235,14 @@ function spawnCoin(){
        ARCO
     */
 
-    else if(
-        pattern===3
-    ){
+    else if(pattern===3){
 
         const centerX=
             W+180;
 
         const centerY=
             groundY()-125;
+
 
         for(
             let i=0;
@@ -1186,6 +1257,7 @@ function spawnCoin(){
                 );
 
             const radius=120;
+
 
             createCoin(
 
@@ -1205,9 +1277,7 @@ function spawnCoin(){
        ONDA
     */
 
-    else if(
-        pattern===4
-    ){
+    else if(pattern===4){
 
         for(
             let i=0;
@@ -1229,7 +1299,7 @@ function spawnCoin(){
 
 
     /*
-       LONGA SEQUÊNCIA
+       GRANDE SEQUÊNCIA
     */
 
     else{
@@ -1272,8 +1342,8 @@ function update(dt){
 
 
     /*
-       VELOCIDADE MANTÉM O DOBRO
-       E AUMENTA GRADUALMENTE.
+       Velocidade começa em 14
+       e aumenta gradualmente.
     */
 
     speed=
@@ -1289,16 +1359,32 @@ function update(dt){
     ).textContent=score;
 
 
-    /* -----------------------------------------------------
+    /*
+       INVULNERABILIDADE
+    */
+
+    if(hitCooldown>0){
+
+        hitCooldown-=dt;
+
+        if(hitCooldown<0){
+            hitCooldown=0;
+        }
+    }
+
+
+    /*
        FÍSICA
-    ----------------------------------------------------- */
+    */
 
     lion.frame+=
         dt*12;
 
+
     lion.vy+=
         lion.gravity*
         dt;
+
 
     lion.y+=
         lion.vy*
@@ -1323,9 +1409,9 @@ function update(dt){
     }
 
 
-    /* -----------------------------------------------------
-       OBSTÁCULOS
-    ----------------------------------------------------- */
+    /*
+       FOGO
+    */
 
     spawnTimer-=dt;
 
@@ -1338,8 +1424,7 @@ function update(dt){
 
 
         /*
-           ESPAÇAMENTO GRANDE
-           PARA COMPENSAR 2X DE VELOCIDADE
+           Grande espaçamento
         */
 
         spawnTimer=
@@ -1355,9 +1440,9 @@ function update(dt){
     }
 
 
-    /* -----------------------------------------------------
+    /*
        MOEDAS
-    ----------------------------------------------------- */
+    */
 
     coinTimer-=dt;
 
@@ -1374,9 +1459,9 @@ function update(dt){
     }
 
 
-    /* -----------------------------------------------------
+    /*
        MOVIMENTO
-    ----------------------------------------------------- */
+    */
 
     for(
         const o of obstacles
@@ -1421,9 +1506,9 @@ function update(dt){
     checkCollisions();
 
 
-    /* -----------------------------------------------------
+    /*
        PARTÍCULAS
-    ----------------------------------------------------- */
+    */
 
     for(
         const p of particles
@@ -1453,73 +1538,166 @@ function update(dt){
 
 
 /* =========================================================
-   COLISÕES
+   COLISÕES + LIFE
 ========================================================= */
 
 function checkCollisions(){
 
     const lx=
-        lion.x+20;
+        lion.x+25;
 
     const ly=
-        lion.y+12;
+        lion.y+15;
 
     const lw=
-        lion.width-35;
+        lion.width-45;
 
     const lh=
-        lion.height-15;
+        lion.height-20;
 
 
-    for(
-        const o of obstacles
+    /*
+       COLISÃO COM FOGO
+    */
+
+    if(
+        hitCooldown<=0
     ){
 
-        const hit=
+        for(
+            const o of obstacles
+        ){
 
-            lx<
-            o.x+
-            o.width-
-            8
+            const hit=
 
-            &&
+                lx<
+                o.x+
+                o.width-
+                5
 
-            lx+
-            lw>
-            o.x+
-            8
+                &&
 
-            &&
+                lx+
+                lw>
+                o.x+
+                5
 
-            ly<
-            o.y+
-            o.height
+                &&
 
-            &&
+                ly<
+                o.y+
+                o.height
 
-            ly+
-            lh>
-            o.y+
-            10;
+                &&
+
+                ly+
+                lh>
+                o.y+20;
 
 
-        if(hit){
+            if(hit){
 
-            gameOver();
+                /*
+                   PERDE 25 LIFE
+                */
 
-            return;
+                life-=25;
+
+
+                if(life<0){
+                    life=0;
+                }
+
+
+                updateLifeUI();
+
+
+                /*
+                   1,2 segundos sem
+                   poder sofrer novo dano
+                */
+
+                hitCooldown=1.2;
+
+
+                /*
+                   Efeito de impacto
+                */
+
+                for(
+                    let i=0;
+                    i<20;
+                    i++
+                ){
+
+                    particles.push({
+
+                        x:
+                            lion.x+
+                            lion.width/2,
+
+                        y:
+                            lion.y+
+                            lion.height/2,
+
+                        vx:
+                            (
+                                Math.random()-
+                                .5
+                            )*
+                            280,
+
+                        vy:
+                            (
+                                Math.random()-
+                                .5
+                            )*
+                            280,
+
+                        life:.7
+                    });
+                }
+
+
+                /*
+                   Remove o fogo
+                   da zona de colisão
+                */
+
+                o.x-=100;
+
+
+                /*
+                   Só morre quando LIFE
+                   chega a zero.
+                */
+
+                if(
+                    life<=0
+                ){
+
+                    gameOver();
+
+                    return;
+                }
+
+
+                break;
+            }
         }
     }
 
 
     /*
-       COLETA DE MOEDAS
+       MOEDAS
     */
 
     for(
         let i=
             coins.length-1;
+
         i>=0;
+
         i--
     ){
 
@@ -1598,7 +1776,7 @@ function checkCollisions(){
 
 
 /* =========================================================
-   CÉU BABILÔNICO
+   CÉU
 ========================================================= */
 
 function drawSky(){
@@ -1630,6 +1808,7 @@ function drawSky(){
 
     ctx.fillStyle=g;
 
+
     ctx.fillRect(
         0,
         0,
@@ -1639,7 +1818,7 @@ function drawSky(){
 
 
     /*
-       Tijolos distantes
+       Tijolos
     */
 
     ctx.strokeStyle=
@@ -1710,7 +1889,7 @@ function drawSky(){
 
 
 /* =========================================================
-   CIDADE BABILÔNICA
+   CIDADE
 ========================================================= */
 
 function drawDistantCity(){
@@ -1852,7 +2031,7 @@ function drawDistantCity(){
 
 
 /* =========================================================
-   PISO DE MÁRMORE BRANCO
+   MÁRMORE
 ========================================================= */
 
 function drawGround(){
@@ -1860,10 +2039,6 @@ function drawGround(){
     const y=
         groundY();
 
-
-    /*
-       Mármore base
-    */
 
     const marble=
         ctx.createLinearGradient(
@@ -1908,12 +2083,12 @@ function drawGround(){
 
 
     /*
-       Grandes placas
+       Placas
     */
 
     const tileW=150;
 
-    const tileH=58;
+    const tileH=29;
 
 
     const offset=
@@ -1972,18 +2147,18 @@ function drawGround(){
 
 
     /*
-       Veios do mármore
+       Veios
     */
 
     ctx.strokeStyle=
         "rgba(120,125,132,.18)";
 
-    ctx.lineWidth=3;
+    ctx.lineWidth=2;
 
 
     for(
         let i=0;
-        i<7;
+        i<5;
         i++
     ){
 
@@ -2005,9 +2180,9 @@ function drawGround(){
 
         ctx.bezierCurveTo(
             sx+60,
-            y+30,
+            y+15,
             sx-40,
-            y+65,
+            y+35,
             sx+100,
             H
         );
@@ -2017,7 +2192,7 @@ function drawGround(){
 
 
     /*
-       Faixa de brilho
+       Brilho
     */
 
     const shine=
@@ -2025,7 +2200,7 @@ function drawGround(){
             0,
             y,
             0,
-            y+35
+            y+22
         );
 
 
@@ -2041,15 +2216,14 @@ function drawGround(){
     );
 
 
-    ctx.fillStyle=
-        shine;
+    ctx.fillStyle=shine;
 
 
     ctx.fillRect(
         0,
         y,
         W,
-        35
+        22
     );
 }
 
@@ -2119,7 +2293,7 @@ const frameURLs=[
 
 
 /* =========================================================
-   PROCESSAMENTO DOURADO
+   PROCESSAMENTO DO LEÃO
 ========================================================= */
 
 function processLionImage(
@@ -2135,9 +2309,7 @@ function processLionImage(
             );
 
         const octx=
-            off.getContext(
-                "2d"
-            );
+            off.getContext("2d");
 
 
         off.width=
@@ -2209,7 +2381,7 @@ function processLionImage(
 
 
             /*
-               Ouro
+               Dourado
             */
 
             const luminance=
@@ -2282,8 +2454,7 @@ function processLionImage(
     }
     catch(error){
 
-        processedFrames[index]=
-            img;
+        processedFrames[index]=img;
 
         console.log(
             "Processamento do frame falhou:",
@@ -2295,7 +2466,7 @@ function processLionImage(
 
 
 /* =========================================================
-   CARREGAR LEÃO
+   CARREGAR FRAMES
 ========================================================= */
 
 frameURLs.forEach(
@@ -2303,6 +2474,7 @@ frameURLs.forEach(
 
         const img=
             new Image();
+
 
         img.crossOrigin=
             "Anonymous";
@@ -2342,7 +2514,7 @@ frameURLs.forEach(
 function drawLion(){
 
     /*
-       LEÃO 3X MAIOR
+       LEÃO GIGANTE
     */
 
     const drawWidth=450;
@@ -2355,10 +2527,6 @@ function drawLion(){
         150;
 
 
-    /*
-       Posição base no mármore
-    */
-
     let y=
         groundY()-
         drawHeight+
@@ -2366,7 +2534,7 @@ function drawLion(){
 
 
     /*
-       Movimento vertical real
+       Movimento vertical
        durante o salto
     */
 
@@ -2379,10 +2547,6 @@ function drawLion(){
             )
         );
 
-
-    /*
-       Pequeno balanço
-    */
 
     const bob=
         lion.grounded
@@ -2399,7 +2563,22 @@ function drawLion(){
 
 
     /*
-       Sombra do leão
+       Pisca quando sofre dano
+    */
+
+    if(
+        hitCooldown>0 &&
+        Math.floor(
+            hitCooldown*12
+        )%2===0
+    ){
+
+        ctx.globalAlpha=.35;
+    }
+
+
+    /*
+       Sombra
     */
 
     ctx.beginPath();
@@ -2456,12 +2635,14 @@ function drawLion(){
     }
 
 
+    ctx.globalAlpha=1;
+
     ctx.restore();
 }
 
 
 /* =========================================================
-   ALTAR COM TOCHA
+   FOGO
 ========================================================= */
 
 function drawObstacle(o){
@@ -2476,224 +2657,101 @@ function drawObstacle(o){
 
 
     /*
-       Base de sombra
+       Brilho
     */
 
-    ctx.fillStyle=
-        "rgba(0,0,0,.18)";
-
-    ctx.fillRect(
-        x-8,
-        groundY()-3,
-        w+16,
-        7
-    );
-
-
-    /*
-       Degrau inferior
-    */
-
-    ctx.fillStyle=
-        "#8b8177";
-
-    ctx.fillRect(
-        x-10,
-        y+h-15,
-        w+20,
-        15
-    );
-
-
-    /*
-       Degrau dourado
-    */
-
-    ctx.fillStyle=
-        "#b79b5b";
-
-    ctx.fillRect(
-        x-14,
-        y+h-20,
-        w+28,
-        7
-    );
-
-
-    /*
-       Corpo do altar
-    */
-
-    const stone=
-        ctx.createLinearGradient(
-            x,
-            y,
-            x+w,
-            y
+    const glow=
+        ctx.createRadialGradient(
+            x+w/2,
+            y+h/2,
+            3,
+            x+w/2,
+            y+h/2,
+            65
         );
 
 
-    stone.addColorStop(
+    glow.addColorStop(
         0,
-        "#716963"
+        "rgba(255,230,80,.55)"
     );
 
-    stone.addColorStop(
-        .5,
-        "#c5beb5"
+    glow.addColorStop(
+        .35,
+        "rgba(255,100,15,.30)"
     );
 
-    stone.addColorStop(
+    glow.addColorStop(
         1,
-        "#68615c"
+        "rgba(255,40,0,0)"
     );
 
 
-    ctx.fillStyle=stone;
+    ctx.fillStyle=glow;
 
 
     ctx.fillRect(
-        x,
-        y+25,
-        w,
-        h-35
+        x-35,
+        y-30,
+        w+70,
+        h+50
     );
 
 
     /*
-       topo
-    */
-
-    ctx.fillStyle=
-        "#b8aea4";
-
-
-    ctx.fillRect(
-        x-8,
-        y+17,
-        w+16,
-        13
-    );
-
-
-    /*
-       detalhes babilônicos
-    */
-
-    ctx.strokeStyle=
-        "#d2b66c";
-
-    ctx.lineWidth=3;
-
-
-    for(
-        let xx=x+15;
-        xx<x+w-5;
-        xx+=22
-    ){
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            xx,
-            y+42
-        );
-
-        ctx.lineTo(
-            xx+8,
-            y+55
-        );
-
-        ctx.lineTo(
-            xx,
-            y+68
-        );
-
-        ctx.stroke();
-    }
-
-
-    /*
-       TOCHA
-    */
-
-    const torchX=
-        x+w/2;
-
-    const torchY=
-        y+8;
-
-
-    /*
-       haste
-    */
-
-    ctx.fillStyle=
-        "#593719";
-
-
-    ctx.fillRect(
-        torchX-4,
-        torchY,
-        8,
-        27
-    );
-
-
-    /*
-       chama externa
+       Chama
     */
 
     const flicker=
         Math.sin(
             o.flame
-        )*
-        4;
+        )*5;
 
 
     ctx.save();
 
 
     ctx.translate(
-        torchX,
-        torchY-7
+        x+w/2,
+        y+h
     );
 
 
     ctx.beginPath();
 
+
     ctx.moveTo(
         0,
-        -30-flicker
+        -h-flicker
     );
 
+
     ctx.bezierCurveTo(
+        -28,
+        -h*.55,
+        -24,
         -18,
-        -13,
-        -14,
-        2,
         0,
-        8
+        0
     );
 
+
     ctx.bezierCurveTo(
-        14,
-        2,
-        18,
-        -13,
+        24,
+        -18,
+        28,
+        -h*.55,
         0,
-        -30-flicker
+        -h-flicker
     );
 
 
     const fire=
-        ctx.createRadialGradient(
+        ctx.createLinearGradient(
             0,
-            -10,
-            2,
+            -h,
             0,
-            -10,
-            28
+            0
         );
 
 
@@ -2703,18 +2761,18 @@ function drawObstacle(o){
     );
 
     fire.addColorStop(
-        .3,
-        "#ffd33d"
+        .25,
+        "#ffd32e"
     );
 
     fire.addColorStop(
-        .7,
-        "#ff8a18"
+        .6,
+        "#ff7918"
     );
 
     fire.addColorStop(
         1,
-        "rgba(255,65,0,0)"
+        "#d92d08"
     );
 
 
@@ -2724,37 +2782,41 @@ function drawObstacle(o){
 
 
     /*
-       núcleo da chama
+       Núcleo
     */
 
     ctx.beginPath();
 
+
     ctx.moveTo(
         0,
-        -23-flicker
+        -h+15-flicker
     );
 
-    ctx.bezierCurveTo(
-        -7,
-        -10,
-        -6,
-        -1,
-        0,
-        4
-    );
 
     ctx.bezierCurveTo(
-        7,
-        -1,
-        7,
+        -12,
+        -35,
+        -9,
         -10,
         0,
-        -23-flicker
+        -2
+    );
+
+
+    ctx.bezierCurveTo(
+        9,
+        -10,
+        12,
+        -35,
+        0,
+        -h+15-flicker
     );
 
 
     ctx.fillStyle=
-        "#fff4a0";
+        "#fff3a0";
+
 
     ctx.fill();
 
@@ -2799,6 +2861,7 @@ function drawCoin(c){
 
     ctx.beginPath();
 
+
     ctx.arc(
         0,
         0,
@@ -2811,14 +2874,16 @@ function drawCoin(c){
     ctx.fillStyle=
         "rgba(255,205,70,.16)";
 
+
     ctx.fill();
 
 
     /*
-       moeda
+       Moeda
     */
 
     ctx.beginPath();
+
 
     ctx.arc(
         0,
@@ -2832,32 +2897,35 @@ function drawCoin(c){
     ctx.fillStyle=
         "#f2c34e";
 
+
     ctx.fill();
 
 
     ctx.strokeStyle=
         "#fff0a2";
 
+
     ctx.lineWidth=2;
+
 
     ctx.stroke();
 
 
-    /*
-       símbolo
-    */
-
     ctx.fillStyle=
         "#875015";
+
 
     ctx.font=
         "bold 13px Arial";
 
+
     ctx.textAlign=
         "center";
 
+
     ctx.textBaseline=
         "middle";
+
 
     ctx.fillText(
         "𒀭",
@@ -2893,6 +2961,7 @@ function drawParticles(){
 
         ctx.beginPath();
 
+
         ctx.arc(
             p.x,
             p.y,
@@ -2900,6 +2969,7 @@ function drawParticles(){
             0,
             Math.PI*2
         );
+
 
         ctx.fill();
     }
@@ -2910,7 +2980,7 @@ function drawParticles(){
 
 
 /* =========================================================
-   DESENHO
+   DRAW
 ========================================================= */
 
 function draw(){
@@ -2943,7 +3013,7 @@ function draw(){
 
 
     /*
-       Altares
+       Fogo
     */
 
     for(
@@ -2955,7 +3025,7 @@ function draw(){
 
 
     /*
-       LEÃO
+       Leão
     */
 
     drawLion();
@@ -3040,9 +3110,7 @@ function loop(time){
     draw();
 
 
-    requestAnimationFrame(
-        loop
-    );
+    requestAnimationFrame(loop);
 }
 
 
