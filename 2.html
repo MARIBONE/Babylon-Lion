@@ -1542,11 +1542,22 @@ function drawDistantCity(){
 
 function drawGround(){
 
-    const y=
-        groundY();
+    const y=groundY();
 
+    /* base de mármore */
+    const marble=
+        ctx.createLinearGradient(
+            0,
+            y,
+            0,
+            H
+        );
 
-    ctx.fillStyle="#9a5420";
+    marble.addColorStop(0,"#ffffff");
+    marble.addColorStop(.35,"#eeeeee");
+    marble.addColorStop(1,"#c9c9c9");
+
+    ctx.fillStyle=marble;
 
     ctx.fillRect(
         0,
@@ -1555,63 +1566,70 @@ function drawGround(){
         groundHeight
     );
 
-
-    ctx.fillStyle="#743b1b";
-
+    /* placas de mármore */
+    const tileW=150;
+    const tileH=58;
 
     const offset=
-        -(distance*1.8)%80;
+        -(distance*2)%tileW;
 
+    ctx.strokeStyle=
+        "rgba(120,120,130,.45)";
+
+    ctx.lineWidth=3;
 
     for(
         let x=offset;
-        x<W;
-        x+=80
+        x<W+tileW;
+        x+=tileW
     ){
 
-        ctx.fillRect(
-            x,
-            y+20,
-            45,
-            7
-        );
-
-        ctx.fillRect(
-            x+25,
-            y+65,
-            35,
-            7
-        );
+        ctx.beginPath();
+        ctx.moveTo(x,y);
+        ctx.lineTo(x,H);
+        ctx.stroke();
     }
 
+    for(
+        let yy=y+tileH;
+        yy<H;
+        yy+=tileH
+    ){
 
-    ctx.fillStyle="#e0a13e";
+        ctx.beginPath();
+        ctx.moveTo(0,yy);
+        ctx.lineTo(W,yy);
+        ctx.stroke();
+    }
+
+    /* brilho do mármore */
+    const shine=
+        ctx.createLinearGradient(
+            0,
+            y,
+            0,
+            y+25
+        );
+
+    shine.addColorStop(
+        0,
+        "rgba(255,255,255,.95)"
+    );
+
+    shine.addColorStop(
+        1,
+        "rgba(255,255,255,0)"
+    );
+
+    ctx.fillStyle=shine;
 
     ctx.fillRect(
         0,
         y,
         W,
-        5
+        28
     );
-
-
-    for(
-        let x=-(distance*2)%120;
-        x<W;
-        x+=120
-    ){
-
-        ctx.fillStyle="#673516";
-
-        ctx.fillRect(
-            x,
-            y+95,
-            20,
-            5
-        );
-    }
 }
-
 
 /* =========================================================
    FRAMES DO LEÃO
