@@ -86,7 +86,11 @@ canvas{
     text-align:center;
     z-index:10;
     background:
-        radial-gradient(circle at center,rgba(117,69,24,.25),rgba(10,5,3,.9));
+        radial-gradient(
+            circle at center,
+            rgba(117,69,24,.25),
+            rgba(10,5,3,.9)
+        );
 }
 
 #gameover{
@@ -275,7 +279,7 @@ button:active{
 <script>
 
 /* =========================================================
-   TELA CHEIA + LANDSCAPE
+   TELA CHEIA + ORIENTAÇÃO
 ========================================================= */
 
 function enterFullscreenAndLock(){
@@ -283,24 +287,21 @@ function enterFullscreenAndLock(){
     const elem=document.documentElement;
 
     if(elem.requestFullscreen){
-
-        elem.requestFullscreen().catch(()=>{});
-
-    }else if(elem.webkitRequestFullscreen){
-
+        elem.requestFullscreen();
+    }
+    else if(elem.webkitRequestFullscreen){
         elem.webkitRequestFullscreen();
-
     }
 
     if(
         screen.orientation &&
         screen.orientation.lock
     ){
-
-        screen.orientation
-            .lock("landscape")
-            .catch(()=>{});
-
+        screen.orientation.lock("landscape").catch(()=>{
+            console.log(
+                "Bloqueio de orientação não suportado."
+            );
+        });
     }
 }
 
@@ -326,14 +327,20 @@ const ctx=canvas.getContext("2d");
 
 let W,H;
 
+
+/* =========================================================
+   ESTADO DO JOGO
+========================================================= */
+
 let running=false;
 let lastTime=0;
 
 let score=0;
 
-let best=Number(
-    localStorage.getItem("babylonLionBest")||0
-);
+let best=
+    Number(
+        localStorage.getItem("babylonLionBest") || 0
+    );
 
 let speed=7;
 let distance=0;
@@ -349,7 +356,7 @@ const groundHeight=115;
 
 
 /* =========================================================
-   LEÃO
+   LEÃO — AGORA GRANDE
 ========================================================= */
 
 const lion={
@@ -360,18 +367,22 @@ const lion={
 
     /*
        Área lógica do personagem.
-       Agora está mais próxima do tamanho
-       visual efetivo do leão.
+       O desenho é muito maior,
+       mas mantemos uma caixa de colisão
+       proporcional e confortável.
     */
-
-    width:90,
-    height:70,
+    width:115,
+    height:95,
 
     vy:0,
 
-    gravity:1900,
+    /*
+       GRAVIDADE REDUZIDA + SALTO MAIS FORTE
+       para acompanhar o leão gigante.
+    */
+    gravity:1650,
 
-    jumpPower:-720,
+    jumpPower:-900,
 
     grounded:true,
 
@@ -382,26 +393,30 @@ const lion={
 };
 
 
+document.getElementById("best").textContent=best;
+
+
 /* =========================================================
    RESIZE
 ========================================================= */
 
 function resize(){
 
-    const dpr=
-        window.devicePixelRatio||1;
+    W=
+        canvas.width=
+        canvas.clientWidth*
+        devicePixelRatio;
 
-    canvas.width=
-        canvas.clientWidth*dpr;
-
-    canvas.height=
-        canvas.clientHeight*dpr;
+    H=
+        canvas.height=
+        canvas.clientHeight*
+        devicePixelRatio;
 
     ctx.setTransform(
-        dpr,
+        devicePixelRatio,
         0,
         0,
-        dpr,
+        devicePixelRatio,
         0,
         0
     );
@@ -426,12 +441,11 @@ resize();
 function groundY(){
 
     return H-groundHeight;
-
 }
 
 
 /* =========================================================
-   JOGO
+   INICIAR
 ========================================================= */
 
 function startGame(){
@@ -449,6 +463,15 @@ function startGame(){
     coins=[];
 
     particles=[];
+
+    spawnTimer=.8;
+
+    /*
+       Começamos imediatamente
+       com moedas espalhadas.
+    */
+
+    coinTimer=.25;
 
     lion.y=
         groundY()-
@@ -475,6 +498,10 @@ function startGame(){
 }
 
 
+/* =========================================================
+   GAME OVER
+========================================================= */
+
 function gameOver(){
 
     running=false;
@@ -487,7 +514,6 @@ function gameOver(){
             "babylonLionBest",
             best
         );
-
     }
 
     document.getElementById(
@@ -510,47 +536,76 @@ function gameOver(){
 
 
 /* =========================================================
-   CONTROLES
+   SALTO
 ========================================================= */
 
 function jump(){
 
-    if(!running)return;
+    if(!running){
+        return;
+    }
 
     if(lion.grounded){
+
+        /*
+           SALTO MAIS ALTO PARA O NOVO
+           TAMANHO DO LEÃO.
+        */
 
         lion.vy=
             lion.jumpPower;
 
         lion.grounded=false;
 
-        for(let i=0;i<7;i++){
+        /*
+           Poeira do salto
+        */
+
+        for(
+            let i=0;
+            i<12;
+            i++
+        ){
 
             particles.push({
 
-                x:lion.x+30,
+                x:
+                    lion.x+
+                    50+
+                    Math.random()*50,
 
-                y:groundY(),
+                y:
+                    groundY()-5,
 
-                vx:-Math.random()*100,
+                vx:
+                    -Math.random()*180,
 
-                vy:-Math.random()*100,
+                vy:
+                    -50-
+                    Math.random()*180,
 
-                life:.5
-
+                life:
+                    .55+
+                    Math.random()*.25
             });
-
         }
     }
 }
 
 
+/* =========================================================
+   ABAIXAR
+========================================================= */
+
 function duck(state){
 
     lion.duck=state;
-
 }
 
+
+/* =========================================================
+   CONTROLES
+========================================================= */
 
 window.addEventListener(
     "keydown",
@@ -564,15 +619,15 @@ window.addEventListener(
             e.preventDefault();
 
             jump();
-
         }
 
-        if(e.code==="ArrowDown"){
+        if(
+            e.code==="ArrowDown"
+        ){
 
             e.preventDefault();
 
             duck(true);
-
         }
 
         if(
@@ -581,7 +636,6 @@ window.addEventListener(
         ){
 
             startGame();
-
         }
 
     }
@@ -592,10 +646,11 @@ window.addEventListener(
     "keyup",
     e=>{
 
-        if(e.code==="ArrowDown"){
+        if(
+            e.code==="ArrowDown"
+        ){
 
             duck(false);
-
         }
 
     }
@@ -619,7 +674,6 @@ document.getElementById(
     e.preventDefault();
 
     jump();
-
 };
 
 
@@ -630,7 +684,6 @@ document.getElementById(
     e.preventDefault();
 
     duck(true);
-
 };
 
 
@@ -641,7 +694,6 @@ document.getElementById(
     e.preventDefault();
 
     duck(false);
-
 };
 
 
@@ -660,32 +712,39 @@ function spawnObstacle(){
 
         y:
             groundY()-
-            (tall?65:45),
+            (
+                tall
+                ? 65
+                : 45
+            ),
 
         width:
-            tall?42:65,
+            tall
+            ? 42
+            : 65,
 
         height:
-            tall?65:45,
+            tall
+            ? 65
+            : 45,
 
         type:
-            tall?"column":"brick"
-
+            tall
+            ? "column"
+            : "brick"
     });
-
 }
 
 
-function spawnCoin(){
+/* =========================================================
+   MOEDA INDIVIDUAL
+========================================================= */
 
-    const y=
-        groundY()-
-        100-
-        Math.random()*130;
+function createCoin(x,y){
 
     coins.push({
 
-        x:W+50,
+        x:x,
 
         y:y,
 
@@ -693,10 +752,188 @@ function spawnCoin(){
 
         spin:
             Math.random()*
-            Math.PI*2
-
+            Math.PI*
+            2
     });
+}
 
+
+/* =========================================================
+   MUITAS MOEDAS
+========================================================= */
+
+function spawnCoin(){
+
+    /*
+       Agora existem vários formatos
+       de grupos de moedas.
+
+       Isso deixa o percurso muito mais
+       interessante para o jogador.
+    */
+
+    const pattern=
+        Math.floor(
+            Math.random()*6
+        );
+
+
+    /*
+       1 — linha horizontal
+    */
+
+    if(pattern===0){
+
+        const y=
+            groundY()-
+            105-
+            Math.random()*70;
+
+        for(
+            let i=0;
+            i<6;
+            i++
+        ){
+
+            createCoin(
+                W+50+i*42,
+                y
+            );
+        }
+    }
+
+
+    /*
+       2 — escadinha subindo
+    */
+
+    else if(pattern===1){
+
+        const base=
+            groundY()-75;
+
+        for(
+            let i=0;
+            i<7;
+            i++
+        ){
+
+            createCoin(
+                W+50+i*42,
+                base-i*24
+            );
+        }
+    }
+
+
+    /*
+       3 — escadinha descendo
+    */
+
+    else if(pattern===2){
+
+        const base=
+            groundY()-205;
+
+        for(
+            let i=0;
+            i<7;
+            i++
+        ){
+
+            createCoin(
+                W+50+i*42,
+                base+i*24
+            );
+        }
+    }
+
+
+    /*
+       4 — arco de moedas
+    */
+
+    else if(pattern===3){
+
+        const centerX=W+180;
+
+        const centerY=
+            groundY()-125;
+
+        for(
+            let i=0;
+            i<9;
+            i++
+        ){
+
+            const angle=
+                Math.PI-
+                (Math.PI*i/8);
+
+            const radius=115;
+
+            createCoin(
+
+                centerX+
+                Math.cos(angle)*
+                radius,
+
+                centerY-
+                Math.sin(angle)*
+                radius
+            );
+        }
+    }
+
+
+    /*
+       5 — corredor de moedas
+    */
+
+    else if(pattern===4){
+
+        for(
+            let i=0;
+            i<10;
+            i++
+        ){
+
+            createCoin(
+
+                W+50+i*38,
+
+                groundY()-
+                115-
+                Math.sin(i*.75)*
+                45
+            );
+        }
+    }
+
+
+    /*
+       6 — grande sequência
+    */
+
+    else{
+
+        for(
+            let i=0;
+            i<12;
+            i++
+        ){
+
+            createCoin(
+
+                W+40+i*38,
+
+                groundY()-
+                95-
+                Math.sin(i*.55)*
+                70
+            );
+        }
+    }
 }
 
 
@@ -706,10 +943,14 @@ function spawnCoin(){
 
 function update(dt){
 
-    distance+=speed*dt;
+    distance+=
+        speed*
+        dt;
 
     score=
-        Math.floor(distance/10);
+        Math.floor(
+            distance/10
+        );
 
     speed=
         7+
@@ -723,13 +964,20 @@ function update(dt){
     ).textContent=score;
 
 
-    lion.frame+=dt*12;
+    /*
+       FÍSICA DO LEÃO
+    */
+
+    lion.frame+=
+        dt*12;
 
     lion.vy+=
-        lion.gravity*dt;
+        lion.gravity*
+        dt;
 
     lion.y+=
-        lion.vy*dt;
+        lion.vy*
+        dt;
 
 
     const targetGround=
@@ -737,21 +985,24 @@ function update(dt){
         lion.height;
 
 
-    if(lion.y>=targetGround){
+    if(
+        lion.y>=targetGround
+    ){
 
-        lion.y=targetGround;
+        lion.y=
+            targetGround;
 
         lion.vy=0;
 
         lion.grounded=true;
-
     }
 
 
+    /*
+       OBSTÁCULOS
+    */
+
     spawnTimer-=dt;
-
-    coinTimer-=dt;
-
 
     if(spawnTimer<=0){
 
@@ -767,40 +1018,60 @@ function update(dt){
                 )
             )+
             Math.random()*.65;
-
     }
 
+
+    /*
+       MOEDAS — MUITO MAIS FREQUENTES
+    */
+
+    coinTimer-=dt;
 
     if(coinTimer<=0){
 
         spawnCoin();
 
-        coinTimer=
-            .8+
-            Math.random()*1.2;
+        /*
+           intervalo pequeno para
+           criar fluxo constante.
+        */
 
+        coinTimer=
+            .55+
+            Math.random()*.65;
     }
 
 
-    for(const o of obstacles){
+    /*
+       MOVIMENTO DOS OBSTÁCULOS
+    */
+
+    for(
+        const o of obstacles
+    ){
 
         o.x-=
             speed*
             60*
             dt;
-
     }
 
 
-    for(const c of coins){
+    /*
+       MOVIMENTO DAS MOEDAS
+    */
+
+    for(
+        const c of coins
+    ){
 
         c.x-=
             speed*
             60*
             dt;
 
-        c.spin+=dt*7;
-
+        c.spin+=
+            dt*7;
     }
 
 
@@ -812,23 +1083,34 @@ function update(dt){
 
     coins=
         coins.filter(
-            c=>c.x>-50
+            c=>c.x>-70
         );
 
 
     checkCollisions();
 
 
-    for(const p of particles){
+    /*
+       PARTÍCULAS
+    */
 
-        p.x+=p.vx*dt;
+    for(
+        const p of particles
+    ){
 
-        p.y+=p.vy*dt;
+        p.x+=
+            p.vx*
+            dt;
 
-        p.vy+=400*dt;
+        p.y+=
+            p.vy*
+            dt;
+
+        p.vy+=
+            400*
+            dt;
 
         p.life-=dt;
-
     }
 
 
@@ -836,7 +1118,6 @@ function update(dt){
         particles.filter(
             p=>p.life>0
         );
-
 }
 
 
@@ -850,50 +1131,65 @@ function checkCollisions(){
         lion.duck;
 
 
+    /*
+       Caixa de colisão ajustada
+       ao novo personagem.
+    */
+
     const lx=
-        lion.x+15;
+        lion.x+20;
 
     const ly=
         lion.y+
-        (ducked?25:5);
+        (
+            ducked
+            ? 35
+            : 12
+        );
 
     const lw=
-        lion.width-25;
+        lion.width-35;
 
     const lh=
-        ducked?
-        lion.height-25:
-        lion.height-8;
+        ducked
+        ? lion.height-40
+        : lion.height-15;
 
 
-    for(const o of obstacles){
+    /*
+       OBSTÁCULOS
+    */
+
+    for(
+        const o of obstacles
+    ){
 
         const hit=
 
             lx<
-                o.x+
-                o.width-
-                6
+            o.x+
+            o.width-
+            6
 
             &&
 
             lx+
             lw>
-                o.x+
-                6
+            o.x+
+            6
 
             &&
 
             ly<
-                o.y+
-                o.height
+            o.y+
+            o.height
 
             &&
 
             ly+
             lh>
-                o.y+
-                5;
+            o.y+
+            5;
 
 
         if(hit){
@@ -901,11 +1197,13 @@ function checkCollisions(){
             gameOver();
 
             return;
-
         }
-
     }
 
+
+    /*
+       MOEDAS
+    */
 
     for(
         let i=coins.length-1;
@@ -913,16 +1211,23 @@ function checkCollisions(){
         i--
     ){
 
-        const c=coins[i];
+        const c=
+            coins[i];
+
 
         const dx=
-            (lion.x+
-            lion.width/2)-
+            (
+                lion.x+
+                lion.width/2
+            )-
             c.x;
 
+
         const dy=
-            (lion.y+
-            lion.height/2)-
+            (
+                lion.y+
+                lion.height/2
+            )-
             c.y;
 
 
@@ -930,15 +1235,27 @@ function checkCollisions(){
             Math.sqrt(
                 dx*dx+
                 dy*dy
-            )<42
+            )<65
         ){
+
+            /*
+               BÔNUS DE MOEDA
+            */
 
             score+=25;
 
             distance+=250;
 
 
-            for(let j=0;j<12;j++){
+            /*
+               explosão dourada
+            */
+
+            for(
+                let j=0;
+                j<16;
+                j++
+            ){
 
                 particles.push({
 
@@ -947,31 +1264,37 @@ function checkCollisions(){
                     y:c.y,
 
                     vx:
-                        (Math.random()-.5)*
-                        180,
+                        (
+                            Math.random()-
+                            .5
+                        )*
+                        220,
 
                     vy:
-                        (Math.random()-.5)*
-                        180,
+                        (
+                            Math.random()-
+                            .5
+                        )*
+                        220,
 
-                    life:.6
-
+                    life:
+                        .6+
+                        Math.random()*.3
                 });
-
             }
 
 
-            coins.splice(i,1);
-
+            coins.splice(
+                i,
+                1
+            );
         }
-
     }
-
 }
 
 
 /* =========================================================
-   CENÁRIO
+   CÉU
 ========================================================= */
 
 function drawSky(){
@@ -999,7 +1322,6 @@ function drawSky(){
         "#1a549c"
     );
 
-
     ctx.fillStyle=g;
 
     ctx.fillRect(
@@ -1017,7 +1339,6 @@ function drawSky(){
 
 
     const brickH=18;
-
     const brickW=45;
 
 
@@ -1029,18 +1350,28 @@ function drawSky(){
 
         ctx.beginPath();
 
-        ctx.moveTo(0,y);
+        ctx.moveTo(
+            0,
+            y
+        );
 
-        ctx.lineTo(W,y);
+        ctx.lineTo(
+            W,
+            y
+        );
 
         ctx.stroke();
 
 
         const offsetX=
-            (Math.floor(
-                y/brickH
-            )%2)*
-            (brickW/2);
+            (
+                Math.floor(
+                    y/brickH
+                )%2
+            )*
+            (
+                brickW/2
+            );
 
 
         for(
@@ -1051,7 +1382,10 @@ function drawSky(){
 
             ctx.beginPath();
 
-            ctx.moveTo(x,y);
+            ctx.moveTo(
+                x,
+                y
+            );
 
             ctx.lineTo(
                 x,
@@ -1059,17 +1393,20 @@ function drawSky(){
             );
 
             ctx.stroke();
-
         }
-
     }
-
 }
 
 
+/* =========================================================
+   CIDADE
+========================================================= */
+
 function drawDistantCity(){
 
-    const y=groundY();
+    const y=
+        groundY();
+
 
     ctx.fillStyle="#3d2115";
 
@@ -1082,7 +1419,10 @@ function drawDistantCity(){
 
         const h=
             70+
-            ((x*13)%100);
+            (
+                x*13%100
+            );
+
 
         ctx.fillRect(
             x,
@@ -1118,15 +1458,18 @@ function drawDistantCity(){
         );
 
         ctx.fill();
-
     }
 
 
-    const zx=W*.55;
+    /*
+       Zigurate
+    */
+
+    const zx=
+        W*.55;
 
 
     ctx.fillStyle="#542b18";
-
 
     ctx.beginPath();
 
@@ -1190,13 +1533,17 @@ function drawDistantCity(){
     );
 
     ctx.fill();
-
 }
 
 
+/* =========================================================
+   CHÃO
+========================================================= */
+
 function drawGround(){
 
-    const y=groundY();
+    const y=
+        groundY();
 
 
     ctx.fillStyle="#9a5420";
@@ -1235,7 +1582,6 @@ function drawGround(){
             35,
             7
         );
-
     }
 
 
@@ -1263,9 +1609,7 @@ function drawGround(){
             20,
             5
         );
-
     }
-
 }
 
 
@@ -1281,33 +1625,53 @@ const processedFrames=[];
 const frameURLs=[
 
 "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-001.png",
+
 "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-002.png",
+
 "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-003.png",
+
 "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-004.png",
+
 "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-005.png",
 
 "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-006.png",
+
 "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-007.png",
+
 "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-008.png",
+
 "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-009.png",
+
 "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-010.png",
 
 "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-011.png",
+
 "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-012.png",
+
 "https://archive.org/download/ezgif-frame-013/ezgif-frame-013.png",
+
 "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-014.png",
+
 "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-015.png",
 
 "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-016.png",
+
 "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-017.png",
+
 "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-018.png",
+
 "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-019.png",
+
 "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-020.png",
 
 "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-021.png",
+
 "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-022.png",
+
 "https://ia803104.us.archive.org/10/items/ezgif-frame-013/ezgif-frame-023.png",
+
 "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-024.png",
+
 "https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-025.png"
 
 ];
@@ -1317,33 +1681,29 @@ const frameURLs=[
    PROCESSAMENTO DOURADO
 ========================================================= */
 
-function processLionImage(img,index){
+function processLionImage(
+    img,
+    index
+){
 
     try{
 
-        const w=img.naturalWidth;
-        const h=img.naturalHeight;
-
-        if(!w || !h)return;
-
-
-        const off=document.createElement(
-            "canvas"
-        );
-
-        off.width=w;
-        off.height=h;
-
+        const off=
+            document.createElement(
+                "canvas"
+            );
 
         const octx=
-            off.getContext("2d");
+            off.getContext(
+                "2d"
+            );
 
-        octx.clearRect(
-            0,
-            0,
-            w,
-            h
-        );
+
+        off.width=
+            img.naturalWidth;
+
+        off.height=
+            img.naturalHeight;
 
 
         octx.drawImage(
@@ -1353,145 +1713,111 @@ function processLionImage(img,index){
         );
 
 
-        let data;
+        const imageData=
+            octx.getImageData(
+                0,
+                0,
+                off.width,
+                off.height
+            );
 
 
-        try{
-
-            data=
-                octx.getImageData(
-                    0,
-                    0,
-                    w,
-                    h
-                );
-
-        }catch(error){
-
-            /*
-              Se o servidor não permitir
-              leitura dos pixels, usamos
-              o frame original.
-            */
-
-            processedFrames[index]=img;
-
-            return;
-
-        }
-
-
-        const pixels=data.data;
+        const data=
+            imageData.data;
 
 
         for(
             let i=0;
-            i<pixels.length;
+            i<data.length;
             i+=4
         ){
 
-            const r=pixels[i];
-            const g=pixels[i+1];
-            const b=pixels[i+2];
+            const r=data[i];
+
+            const g=data[i+1];
+
+            const b=data[i+2];
 
 
             /*
-              Detecta fundos muito claros.
-
-              Esses pixels ficam transparentes.
+               Transparência para
+               áreas muito claras.
             */
 
-            const bright=
-                (r+g+b)/3;
-
-            const nearWhite=
-                r>225 &&
-                g>225 &&
-                b>225;
+            const brightness=
+                (
+                    r+
+                    g+
+                    b
+                )/3;
 
 
             if(
-                nearWhite ||
-                bright>242
+                (
+                    r>225 &&
+                    g>225 &&
+                    b>225
+                )
+                ||
+                brightness>242
             ){
 
-                pixels[i+3]=0;
+                data[i+3]=0;
 
                 continue;
-
             }
 
 
             /*
-              Luminância original.
+               Transformação para
+               tonalidade dourada.
             */
 
-            const lum=
-                0.299*r+
-                0.587*g+
-                0.114*b;
+            const luminance=
+                (
+                    .299*r+
+                    .587*g+
+                    .114*b
+                )/255;
 
 
-            /*
-              Mapeamento dourado.
-
-              Sombras:
-              marrom escuro
-
-              Meios tons:
-              ouro
-
-              Luz:
-              dourado claro
-            */
-
-            let nr;
-            let ng;
-            let nb;
+            const darkR=72;
+            const darkG=35;
+            const darkB=10;
 
 
-            if(lum<45){
-
-                nr=75;
-                ng=42;
-                nb=12;
-
-            }else if(lum<100){
-
-                nr=125;
-                ng=72;
-                nb=18;
-
-            }else if(lum<160){
-
-                nr=184;
-                ng=119;
-                nb=29;
-
-            }else if(lum<210){
-
-                nr=218;
-                ng=157;
-                nb=55;
-
-            }else{
-
-                nr=247;
-                ng=202;
-                nb=91;
-
-            }
+            const goldR=242;
+            const goldG=180;
+            const goldB=58;
 
 
-            pixels[i]=nr;
-            pixels[i+1]=ng;
-            pixels[i+2]=nb;
+            data[i]=
+                darkR+
+                (
+                    goldR-darkR
+                )*
+                luminance;
 
+
+            data[i+1]=
+                darkG+
+                (
+                    goldG-darkG
+                )*
+                luminance;
+
+
+            data[i+2]=
+                darkB+
+                (
+                    goldB-darkB
+                )*
+                luminance;
         }
 
 
         octx.putImageData(
-            data,
+            imageData,
             0,
             0
         );
@@ -1500,61 +1826,74 @@ function processLionImage(img,index){
         const processed=
             new Image();
 
+
         processed.src=
             off.toDataURL(
                 "image/png"
             );
 
+
         processedFrames[index]=
             processed;
 
+    }
+    catch(error){
 
-    }catch(error){
+        /*
+           Se o navegador bloquear
+           processamento externo,
+           usamos a imagem original.
+        */
 
         processedFrames[index]=img;
 
+        console.log(
+            "Processamento do frame falhou:",
+            index,
+            error
+        );
     }
-
 }
 
 
 /* =========================================================
-   CARREGAMENTO
+   CARREGAMENTO DOS FRAMES
 ========================================================= */
 
 frameURLs.forEach(
     (url,index)=>{
 
-        const img=new Image();
+        const img=
+            new Image();
+
 
         img.crossOrigin=
-            "anonymous";
+            "Anonymous";
 
 
         img.onload=()=>{
-
-            lionFrames[index]=img;
 
             processLionImage(
                 img,
                 index
             );
-
         };
 
 
         img.onerror=()=>{
 
             console.log(
-                "Falha ao carregar frame:",
-                index+1
+                "Erro ao carregar frame:",
+                index
             );
-
         };
 
 
         img.src=url;
 
+
+        lionFrames[index]=
+            img;
     }
 );
 
@@ -1566,29 +1905,64 @@ frameURLs.forEach(
 function drawLion(){
 
     /*
-       Tamanho visual.
-       Mantém proporção aproximada
-       do leão original.
+       LEÃO 3X MAIOR
     */
 
-const drawWidth=450;
-const drawHeight=246;
+    const drawWidth=450;
 
-let x=lion.x-150;
-let y=groundY()-drawHeight+8;
+    const drawHeight=246;
+
 
     /*
-       Pequeno movimento natural.
+       Centralização horizontal
+       em relação ao ponto lógico.
+    */
+
+    let x=
+        lion.x-
+        150;
+
+
+    /*
+       Pé do leão alinhado
+       com o chão.
+    */
+
+    let y=
+        groundY()-
+        drawHeight+
+        8;
+
+
+    /*
+       O salto move o personagem
+       inteiro verticalmente.
+
+       Isso é importante agora que
+       o leão ficou muito maior.
+    */
+
+    y+=
+        (
+            lion.y-
+            (
+                groundY()-
+                lion.height
+            )
+        );
+
+
+    /*
+       Pequeno balanço ao correr.
     */
 
     const bob=
         lion.grounded
-        ?
-        Math.sin(
+        ? Math.sin(
             lion.frame*.2
         )*2
-        :
-        0;
+        : 0;
+
 
     y+=bob;
 
@@ -1597,20 +1971,21 @@ let y=groundY()-drawHeight+8;
 
 
     /*
-       Sombra.
+       Sombra
     */
 
     ctx.beginPath();
 
     ctx.ellipse(
-        lion.x+45,
+        lion.x+75,
         groundY()+4,
-        48,
-        7,
+        85,
+        11,
         0,
         0,
         Math.PI*2
     );
+
 
     ctx.fillStyle=
         "rgba(0,0,0,.35)";
@@ -1619,7 +1994,7 @@ let y=groundY()-drawHeight+8;
 
 
     /*
-       Seleciona frame.
+       Frame atual
     */
 
     const currentFrameIndex=
@@ -1632,7 +2007,7 @@ let y=groundY()-drawHeight+8;
     const currentImg=
         processedFrames[
             currentFrameIndex
-        ]||
+        ] ||
         lionFrames[
             currentFrameIndex
         ];
@@ -1643,13 +2018,9 @@ let y=groundY()-drawHeight+8;
         currentImg.complete
     ){
 
-        /*
-           O frame já foi convertido
-           para dourado no carregamento.
-        */
-
         ctx.globalCompositeOperation=
             "source-over";
+
 
         ctx.drawImage(
             currentImg,
@@ -1658,24 +2029,25 @@ let y=groundY()-drawHeight+8;
             drawWidth,
             drawHeight
         );
-
     }
 
 
     ctx.restore();
-
 }
 
 
 /* =========================================================
-   OBSTÁCULOS
+   OBSTÁCULO
 ========================================================= */
 
 function drawObstacle(o){
 
-    if(o.type==="column"){
+    if(
+        o.type==="column"
+    ){
 
-        ctx.fillStyle="#6b3920";
+        ctx.fillStyle=
+            "#6b3920";
 
         ctx.fillRect(
             o.x,
@@ -1685,7 +2057,8 @@ function drawObstacle(o){
         );
 
 
-        ctx.fillStyle="#9a5a2b";
+        ctx.fillStyle=
+            "#9a5a2b";
 
         ctx.fillRect(
             o.x-7,
@@ -1697,18 +2070,24 @@ function drawObstacle(o){
 
         ctx.fillRect(
             o.x-7,
-            o.y+o.height-5,
+            o.y+
+            o.height-
+            5,
             o.width+14,
             10
         );
 
 
-        ctx.fillStyle="#d08b3d";
+        ctx.fillStyle=
+            "#d08b3d";
 
 
         for(
             let y=o.y+15;
-            y<o.y+o.height-10;
+            y<
+            o.y+
+            o.height-
+            10;
             y+=18
         ){
 
@@ -1718,13 +2097,13 @@ function drawObstacle(o){
                 7,
                 7
             );
-
         }
 
+    }
+    else{
 
-    }else{
-
-        ctx.fillStyle="#713718";
+        ctx.fillStyle=
+            "#713718";
 
         ctx.fillRect(
             o.x,
@@ -1734,14 +2113,17 @@ function drawObstacle(o){
         );
 
 
-        ctx.strokeStyle="#a96128";
+        ctx.strokeStyle=
+            "#a96128";
 
         ctx.lineWidth=3;
 
 
         for(
             let y=o.y+15;
-            y<o.y+o.height;
+            y<
+            o.y+
+            o.height;
             y+=15
         ){
 
@@ -1753,18 +2135,20 @@ function drawObstacle(o){
             );
 
             ctx.lineTo(
-                o.x+o.width,
+                o.x+
+                o.width,
                 y
             );
 
             ctx.stroke();
-
         }
 
 
         for(
             let x=o.x+15;
-            x<o.x+o.width;
+            x<
+            o.x+
+            o.width;
             x+=25
         ){
 
@@ -1777,15 +2161,13 @@ function drawObstacle(o){
 
             ctx.lineTo(
                 x,
-                o.y+o.height
+                o.y+
+                o.height
             );
 
             ctx.stroke();
-
         }
-
     }
-
 }
 
 
@@ -1797,7 +2179,9 @@ function drawCoin(c){
 
     const squash=
         Math.abs(
-            Math.cos(c.spin)
+            Math.cos(
+                c.spin
+            )
         );
 
 
@@ -1817,6 +2201,31 @@ function drawCoin(c){
     );
 
 
+    /*
+       brilho externo
+    */
+
+    ctx.beginPath();
+
+    ctx.arc(
+        0,
+        0,
+        c.r+4,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.fillStyle=
+        "rgba(255,205,70,.18)";
+
+    ctx.fill();
+
+
+    /*
+       moeda
+    */
+
     ctx.beginPath();
 
     ctx.arc(
@@ -1828,26 +2237,35 @@ function drawCoin(c){
     );
 
 
-    ctx.fillStyle="#f2c34e";
+    ctx.fillStyle=
+        "#f2c34e";
 
     ctx.fill();
 
 
-    ctx.strokeStyle="#fff0a2";
+    ctx.strokeStyle=
+        "#fff0a2";
 
     ctx.lineWidth=2;
 
     ctx.stroke();
 
 
-    ctx.fillStyle="#875015";
+    /*
+       símbolo babilônico
+    */
+
+    ctx.fillStyle=
+        "#875015";
 
     ctx.font=
         "bold 13px Arial";
 
-    ctx.textAlign="center";
+    ctx.textAlign=
+        "center";
 
-    ctx.textBaseline="middle";
+    ctx.textBaseline=
+        "middle";
 
     ctx.fillText(
         "𒀭",
@@ -1857,7 +2275,6 @@ function drawCoin(c){
 
 
     ctx.restore();
-
 }
 
 
@@ -1867,7 +2284,9 @@ function drawCoin(c){
 
 function drawParticles(){
 
-    for(const p of particles){
+    for(
+        const p of particles
+    ){
 
         ctx.globalAlpha=
             Math.max(
@@ -1876,7 +2295,8 @@ function drawParticles(){
             );
 
 
-        ctx.fillStyle="#f4c45c";
+        ctx.fillStyle=
+            "#f4c45c";
 
 
         ctx.beginPath();
@@ -1890,17 +2310,15 @@ function drawParticles(){
         );
 
         ctx.fill();
-
     }
 
 
     ctx.globalAlpha=1;
-
 }
 
 
 /* =========================================================
-   DRAW
+   DESENHO PRINCIPAL
 ========================================================= */
 
 function draw(){
@@ -1920,27 +2338,42 @@ function draw(){
     drawGround();
 
 
-    for(const c of coins){
+    /*
+       Moedas primeiro
+    */
+
+    for(
+        const c of coins
+    ){
 
         drawCoin(c);
-
     }
 
 
-    for(const o of obstacles){
+    /*
+       Obstáculos
+    */
+
+    for(
+        const o of obstacles
+    ){
 
         drawObstacle(o);
-
     }
 
 
+    /*
+       LEÃO GIGANTE
+    */
+
     drawLion();
+
 
     drawParticles();
 
 
     /*
-       Vinheta.
+       Vinheta cinematográfica
     */
 
     const v=
@@ -1968,13 +2401,13 @@ function draw(){
 
     ctx.fillStyle=v;
 
+
     ctx.fillRect(
         0,
         0,
         W,
         H
     );
-
 }
 
 
@@ -1984,12 +2417,16 @@ function draw(){
 
 function loop(time){
 
-    if(!running)return;
+    if(!running){
+        return;
+    }
 
 
     let dt=
-        (time-lastTime)/
-        1000;
+        (
+            time-
+            lastTime
+        )/1000;
 
 
     lastTime=time;
@@ -2010,18 +2447,12 @@ function loop(time){
     requestAnimationFrame(
         loop
     );
-
 }
 
 
 /* =========================================================
-   DESENHO INICIAL
+   PRIMEIRO DESENHO
 ========================================================= */
-
-document.getElementById(
-    "best"
-).textContent=best;
-
 
 draw();
 
