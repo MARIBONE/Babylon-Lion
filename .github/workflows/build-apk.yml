@@ -1,0 +1,191 @@
+name: Build Babylon Lion APK
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Configurar Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Instalar SDK Android
+        run: |
+          sdkmanager "platforms;android-35" "build-tools;35.0.0"
+
+      - name: Criar projeto Android
+        run: |
+          mkdir -p app/src/main/java/com/maribone/babylonlion
+          mkdir -p app/src/main/res/values
+
+          cat > settings.gradle <<'EOF'
+          pluginManagement {
+              repositories {
+                  google()
+                  mavenCentral()
+                  gradlePluginPortal()
+              }
+          }
+
+          dependencyResolutionManagement {
+              repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+          }
+
+          rootProject.name = "BabylonLion"
+          include(":app")
+          EOF
+
+          cat > build.gradle <<'EOF'
+          plugins {
+              id 'com.android.application' version '8.7.3' apply false
+          }
+          EOF
+
+          cat > gradle.properties <<'EOF'
+          org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
+          android.useAndroidX=true
+          EOF
+
+          cat > app/build.gradle <<'EOF'
+          plugins {
+              id 'com.android.application'
+          }
+
+          android {
+              namespace 'com.maribone.babylonlion'
+              compileSdk 35
+
+              defaultConfig {
+                  applicationId 'com.maribone.babylonlion'
+                  minSdk 23
+                  targetSdk 35
+                  versionCode 1
+                  versionName '1.0'
+              }
+          }
+          EOF
+
+          cat > app/src/main/AndroidManifest.xml <<'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+              <uses-permission android:name="android.permission.INTERNET"/>
+
+              <application
+                  android:theme="@style/AppTheme"
+                  android:label="Babylon Lion"
+                  android:usesCleartextTraffic="true"
+                  android:hardwareAccelerated="true">
+
+                  <activity
+                      android:name=".MainActivity"
+                      android:screenOrientation="landscape"
+                      android:exported="true">
+
+                      <intent-filter>
+                          <action android:name="android.intent.action.MAIN"/>
+                          <category android:name="android.intent.category.LAUNCHER"/>
+                      </intent-filter>
+
+                  </activity>
+
+              </application>
+
+          </manifest>
+          EOF
+
+          cat > app/src/main/res/values/styles.xml <<'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <resources>
+              <style name="AppTheme" parent="android:style/Theme.Material.Light.NoActionBar">
+                  <item name="android:windowFullscreen">true</item>
+                  <item name="android:windowActionModeOverlay">true</item>
+                  <item name="android:fontFamily">sans</item>
+              </style>
+          </resources>
+          EOF
+
+          cat > app/src/main/java/com/maribone/babylonlion/MainActivity.java <<'EOF'
+          package com.maribone.babylonlion;
+
+          import android.app.Activity;
+          import android.os.Bundle;
+          import android.view.View;
+          import android.webkit.WebSettings;
+          import android.webkit.WebView;
+          import android.webkit.WebViewClient;
+
+          public class MainActivity extends Activity {
+
+              private WebView webView;
+
+              @Override
+              protected void onCreate(Bundle savedInstanceState) {
+                  super.onCreate(savedInstanceState);
+
+                  getWindow().setFlags(
+                      android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                      android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN
+                  );
+
+                  webView = new WebView(this);
+
+                  WebSettings settings = webView.getSettings();
+                  settings.setJavaScriptEnabled(true);
+                  settings.setDomStorageEnabled(true);
+                  settings.setDatabaseEnabled(true);
+                  settings.setAllowFileAccess(true);
+                  settings.setAllowContentAccess(true);
+                  settings.setMediaPlaybackRequiresUserGesture(false);
+
+                  webView.setWebViewClient(new WebViewClient());
+
+                  webView.setSystemUiVisibility(
+                      View.SYSTEM_UI_FLAG_FULLSCREEN |
+                      View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
+                      View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY |
+                      View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
+                      View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
+                      View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                  );
+
+                  setContentView(webView);
+
+                  webView.loadUrl(
+                      "https://maribone.github.io/Babylon-Lion/2"
+                  );
+              }
+
+              @Override
+              public void onBackPressed() {
+                  // Impede sair do jogo pelo botão voltar.
+              }
+          }
+          EOF
+
+      - name: Instalar Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Compilar APK
+        run: gradle assembleDebug --no-daemon
+
+      - name: Publicar APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Babylon-Lion-APK
+          path: app/build/outputs/apk/debug/app-debug.apk
