@@ -687,7 +687,9 @@ function drawLion(){
     if (currentImg && currentImg.complete) {
         // Aplica o filtro que oculta a cor branca mantendo o leão visível
         ctx.globalCompositeOperation = "multiply";
+        ctx.filter = "sepia(1) saturate(6) hue-rotate(10deg) brightness(1.1)";
         ctx.drawImage(currentImg, x, y, 360, 195);
+        ctx.filter = "none";
     }
 
     ctx.restore();
