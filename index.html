@@ -1,19 +1,24 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
 <title>Babylon Lion</title>
 
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
 
 html,body{
     width:100%;
     height:100%;
     overflow:hidden;
-    background:#120b08;
+    background:#08090d;
     font-family:Arial,Helvetica,sans-serif;
+    touch-action:none;
 }
 
 body{
@@ -28,7 +33,7 @@ body{
     height:100vh;
     max-width:1400px;
     overflow:hidden;
-    background:#24130c;
+    background:#dfe2e6;
 }
 
 canvas{
@@ -37,31 +42,53 @@ canvas{
     height:100%;
 }
 
+/* =========================================================
+   HUD
+========================================================= */
+
 #hud{
     position:absolute;
     top:22px;
     left:22px;
     right:22px;
+
     display:flex;
     justify-content:space-between;
+    align-items:flex-start;
+
     pointer-events:none;
     color:white;
     z-index:5;
 }
 
+/*
+   LEFT SIDE:
+   SCORE + LIFE
+*/
+
+#leftHud{
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+}
+
+/* =========================================================
+   PANELS
+========================================================= */
+
 .panel{
-    background:rgba(25,12,6,.72);
-    border:2px solid rgba(241,190,75,.55);
+    background:rgba(20,18,17,.72);
+    border:2px solid rgba(241,190,75,.65);
     border-radius:12px;
     padding:10px 16px;
     box-shadow:0 5px 20px rgba(0,0,0,.3);
-    backdrop-filter:blur(4px);
+    backdrop-filter:blur(5px);
 }
 
 .label{
     font-size:11px;
     letter-spacing:2px;
-    color:#e7bb54;
+    color:#f1c35a;
     text-transform:uppercase;
 }
 
@@ -71,27 +98,141 @@ canvas{
     margin-top:2px;
 }
 
-#menu,
-#gameover{
-    position:absolute;
-    inset:0;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
+/* =========================================================
+   LIFE
+========================================================= */
+
+.lifePanel{
+    min-width:150px;
     text-align:center;
-    z-index:10;
-    background:
-        radial-gradient(circle at center,rgba(117,69,24,.25),rgba(10,5,3,.9));
 }
 
-#gameover{display:none}
+.lifeBar{
+    width:120px;
+    height:10px;
+
+    margin:6px auto 0;
+
+    overflow:hidden;
+    border-radius:10px;
+
+    background:rgba(0,0,0,.55);
+
+    border:1px solid rgba(255,255,255,.25);
+}
+
+#lifeFill{
+    width:100%;
+    height:100%;
+
+    background:
+        linear-gradient(
+            90deg,
+            #36d66b,
+            #b8e84c
+        );
+
+    transition:width:.2s;
+}
+
+.lifeValue{
+    margin-top:4px;
+
+    color:#fff;
+
+    font-size:12px;
+    font-weight:bold;
+}
+
+/* =========================================================
+   PAUSE
+========================================================= */
+
+#pauseBtn{
+    position:absolute;
+
+    top:22px;
+    left:50%;
+
+    transform:translateX(-50%);
+
+    z-index:8;
+
+    margin:0;
+
+    padding:10px 22px;
+
+    border:2px solid #f3ca67;
+
+    border-radius:999px;
+
+    background:rgba(40,28,18,.82);
+
+    color:#fff3c8;
+
+    font-size:13px;
+    font-weight:bold;
+
+    letter-spacing:2px;
+
+    cursor:pointer;
+
+    box-shadow:
+        0 5px 18px rgba(0,0,0,.35);
+
+    backdrop-filter:blur(5px);
+}
+
+#pauseBtn:hover{
+    filter:brightness(1.15);
+}
+
+/* =========================================================
+   SCREENS
+========================================================= */
+
+#menu,
+#gameover,
+#pauseScreen{
+    position:absolute;
+    inset:0;
+
+    display:flex;
+    flex-direction:column;
+
+    align-items:center;
+    justify-content:center;
+
+    text-align:center;
+
+    z-index:10;
+
+    background:
+        radial-gradient(
+            circle at center,
+            rgba(120,90,35,.25),
+            rgba(10,8,6,.9)
+        );
+}
+
+#gameover,
+#pauseScreen{
+    display:none;
+}
+
+/* =========================================================
+   LOGO
+========================================================= */
 
 .logo{
     font-size:clamp(48px,9vw,105px);
+
     font-weight:900;
+
     letter-spacing:-5px;
+
     color:#f0bd4e;
+
     text-shadow:
         0 4px 0 #7b4515,
         0 8px 25px rgba(0,0,0,.8);
@@ -99,29 +240,60 @@ canvas{
 
 .subtitle{
     margin-top:-5px;
+
     color:#fff1c8;
-    font-size:clamp(13px,2vw,20px);
+
+    font-size:
+        clamp(
+            13px,
+            2vw,
+            20px
+        );
+
     letter-spacing:6px;
+
     text-transform:uppercase;
 }
 
+/* =========================================================
+   BUTTONS
+========================================================= */
+
 button{
     margin-top:35px;
+
     padding:16px 42px;
+
     border:2px solid #f3ca67;
+
     border-radius:999px;
-    background:linear-gradient(#d99a30,#9b5c16);
+
+    background:
+        linear-gradient(
+            #d99a30,
+            #9b5c16
+        );
+
     color:white;
+
     font-size:18px;
     font-weight:bold;
+
     letter-spacing:2px;
+
     cursor:pointer;
-    box-shadow:0 7px 20px rgba(0,0,0,.4);
+
+    box-shadow:
+        0 7px 20px rgba(0,0,0,.4);
+
     transition:.15s;
 }
 
 button:hover{
-    transform:translateY(-2px) scale(1.03);
+    transform:
+        translateY(-2px)
+        scale(1.03);
+
     filter:brightness(1.12);
 }
 
@@ -131,14 +303,19 @@ button:active{
 
 .instructions{
     margin-top:18px;
+
     color:#d7c39a;
+
     font-size:13px;
 }
 
 #finalScore{
     font-size:58px;
+
     color:#f0bd4e;
+
     font-weight:900;
+
     margin-top:8px;
 }
 
@@ -147,33 +324,77 @@ button:active{
     margin-top:4px;
 }
 
-#mobileControls{
-    position:absolute;
-    bottom:25px;
-    left:0;
-    right:0;
-    display:none;
-    justify-content:center;
-    z-index:6;
-    pointer-events:none;
+#pauseTitle{
+    color:#f0bd4e;
+
+    font-size:
+        clamp(
+            42px,
+            8vw,
+            90px
+        );
+
+    font-weight:900;
+
+    letter-spacing:-3px;
+
+    text-shadow:
+        0 4px 0 #704015;
 }
 
-.mobileBtn{
-    pointer-events:auto;
-    width:72px;
-    height:72px;
-    border-radius:50%;
-    padding:0;
-    margin:0 8px;
-    font-size:28px;
-    opacity:.75;
+#pauseHint{
+    margin-top:12px;
+
+    color:#fff1c8;
+
+    letter-spacing:3px;
+
+    font-size:13px;
 }
+
+/* =========================================================
+   MOBILE
+========================================================= */
 
 @media(max-width:700px){
-    #mobileControls{display:flex}
-    #hud{top:10px;left:10px;right:10px}
-    .panel{padding:7px 11px}
-    .value{font-size:19px}
+
+    #hud{
+        top:10px;
+        left:10px;
+        right:10px;
+    }
+
+    #leftHud{
+        gap:7px;
+    }
+
+    .panel{
+        padding:7px 11px;
+    }
+
+    .value{
+        font-size:19px;
+    }
+
+    .lifePanel{
+        min-width:125px;
+    }
+
+    .lifeBar{
+        width:100px;
+    }
+
+    #pauseBtn{
+        top:10px;
+
+        padding:8px 14px;
+
+        font-size:11px;
+    }
+
+    .logo{
+        letter-spacing:-3px;
+    }
 }
 </style>
 </head>
@@ -184,703 +405,2614 @@ button:active{
 
 <canvas id="canvas"></canvas>
 
+
+<!-- =====================================================
+     HUD
+===================================================== -->
+
 <div id="hud">
-    <div class="panel">
-        <div class="label">Pontuação</div>
-        <div class="value" id="score">0</div>
+
+    <!-- LEFT SIDE -->
+
+    <div id="leftHud">
+
+        <!-- SCORE -->
+
+        <div class="panel">
+
+            <div class="label">
+                Score
+            </div>
+
+            <div
+                class="value"
+                id="score"
+            >
+                0
+            </div>
+
+        </div>
+
+
+        <!-- LIFE -->
+
+        <div class="panel lifePanel">
+
+            <div class="label">
+                Life
+            </div>
+
+            <div class="lifeBar">
+
+                <div id="lifeFill"></div>
+
+            </div>
+
+            <div
+                class="lifeValue"
+                id="lifeValue"
+            >
+                100
+            </div>
+
+        </div>
+
     </div>
 
+
+    <!-- BEST -->
+
     <div class="panel">
-        <div class="label">Recorde</div>
-        <div class="value" id="best">0</div>
+
+        <div class="label">
+            Best
+        </div>
+
+        <div
+            class="value"
+            id="best"
+        >
+            0
+        </div>
+
     </div>
+
 </div>
+
+
+<!-- =====================================================
+     PAUSE
+===================================================== -->
+
+<button id="pauseBtn">
+    PAUSE
+</button>
+
+
+<!-- =====================================================
+     MENU
+===================================================== -->
 
 <div id="menu">
-    <div class="logo">BABYLON</div>
-    <div class="subtitle">LION</div>
-    <button id="startBtn">ENTRAR NA ARENA</button>
-    <div class="instructions">
-        Espaço / ↑ para saltar • ↓ para abaixar
+
+    <div class="logo">
+        BABYLON
     </div>
+
+    <div class="subtitle">
+        LION
+    </div>
+
+    <button id="startBtn">
+        ENTER THE ARENA
+    </button>
+
+    <div class="instructions">
+        TAP TO JUMP
+    </div>
+
 </div>
+
+
+<!-- =====================================================
+     GAME OVER
+===================================================== -->
 
 <div id="gameover">
-    <div class="subtitle">O LEÃO CAIU</div>
-    <div id="finalScore">0</div>
-    <div class="instructions">PONTOS</div>
-    <div id="bestScore">Recorde: 0</div>
-    <button id="restartBtn">CORRER NOVAMENTE</button>
+
+    <div class="subtitle">
+        THE LION FELL
+    </div>
+
+    <div id="finalScore">
+        0
+    </div>
+
+    <div class="instructions">
+        POINTS
+    </div>
+
+    <div id="bestScore">
+        Best: 0
+    </div>
+
+    <button id="restartBtn">
+        RUN AGAIN
+    </button>
+
 </div>
 
-<div id="mobileControls">
-    <button class="mobileBtn" id="jumpBtn">↑</button>
-    <button class="mobileBtn" id="duckBtn">↓</button>
-</div>
+
+<!-- =====================================================
+     PAUSE SCREEN
+===================================================== -->
+
+<div id="pauseScreen">
+
+    <div id="pauseTitle">
+        PAUSED
+    </div>
+
+    <div id="pauseHint">
+        TAP RESUME TO RETURN TO THE ARENA
+    </div>
+
+    <button id="resumeBtn">
+        RESUME
+    </button>
 
 </div>
+
 
 <script>
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
 
-let W,H;
+/* =========================================================
+   FULLSCREEN
+========================================================= */
+
+function enterFullscreenAndLock(){
+
+    const elem=
+        document.documentElement;
+
+    if(
+        elem.requestFullscreen
+    ){
+
+        elem.requestFullscreen()
+        .catch(()=>{});
+
+    }else if(
+        elem.webkitRequestFullscreen
+    ){
+
+        elem.webkitRequestFullscreen();
+    }
+
+    if(
+        screen.orientation &&
+        screen.orientation.lock
+    ){
+
+        screen.orientation
+            .lock("landscape")
+            .catch(()=>{});
+    }
+}
+
+
+/* =========================================================
+   CANVAS
+========================================================= */
+
+const canvas=
+    document.getElementById("canvas");
+
+const ctx=
+    canvas.getContext("2d");
+
+let W;
+let H;
+
+
+/* =========================================================
+   GAME STATE
+========================================================= */
+
 let running=false;
+
+let paused=false;
+
 let lastTime=0;
 
 let score=0;
-let best=Number(localStorage.getItem("babylonLionBest")||0);
 
-let speed=7;
+let best=
+    Number(
+        localStorage.getItem(
+            "babylonLionBest"
+        ) || 0
+    );
+
+let speed=14;
+
 let distance=0;
 
 let obstacles=[];
+
 let coins=[];
+
 let particles=[];
 
-let spawnTimer=0;
-let coinTimer=0;
+let spawnTimer=4.0;
 
-const groundHeight=115;
+let coinTimer=.25;
+
+
+/* =========================================================
+   GROUND
+========================================================= */
+
+const groundHeight=58;
+
+
+/* =========================================================
+   LIFE
+========================================================= */
+
+let life=100;
+
+let hitCooldown=0;
+
+
+/* =========================================================
+   LION
+========================================================= */
 
 const lion={
+
     x:160,
+
     y:0,
-    width:78,
-    height:68,
+
+    width:115,
+
+    height:95,
+
     vy:0,
-    gravity:1900,
-    jumpPower:-720,
+
+    gravity:1650,
+
+    jumpPower:-900,
+
     grounded:true,
+
     duck:false,
+
     frame:0
 };
 
-document.getElementById("best").textContent=best;
+
+document.getElementById(
+    "best"
+).textContent=best;
+
+
+/* =========================================================
+   RESIZE
+========================================================= */
 
 function resize(){
-    W=canvas.width=canvas.clientWidth*devicePixelRatio;
-    H=canvas.height=canvas.clientHeight*devicePixelRatio;
 
-    ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+    W=
+        canvas.width=
+        canvas.clientWidth*
+        devicePixelRatio;
+
+    H=
+        canvas.height=
+        canvas.clientHeight*
+        devicePixelRatio;
+
+    ctx.setTransform(
+        devicePixelRatio,
+        0,
+        0,
+        devicePixelRatio,
+        0,
+        0
+    );
 
     W=canvas.clientWidth;
+
     H=canvas.clientHeight;
 
-    lion.y=H-groundHeight-lion.height;
+
+    lion.y=
+        H-
+        groundHeight-
+        lion.height;
 }
 
-window.addEventListener("resize",resize);
+window.addEventListener(
+    "resize",
+    resize
+);
+
 resize();
 
+
 function groundY(){
-    return H-groundHeight;
+
+    return H-
+        groundHeight;
 }
+
+
+/* =========================================================
+   LIFE UI
+========================================================= */
+
+function updateLifeUI(){
+
+    const fill=
+        document.getElementById(
+            "lifeFill"
+        );
+
+    const value=
+        document.getElementById(
+            "lifeValue"
+        );
+
+
+    fill.style.width=
+        Math.max(
+            0,
+            life
+        )+
+        "%";
+
+
+    value.textContent=
+        Math.max(
+            0,
+            life
+        );
+
+
+    if(life<=25){
+
+        fill.style.background=
+            "linear-gradient(90deg,#e52b2b,#ff7b3d)";
+
+    }else if(life<=50){
+
+        fill.style.background=
+            "linear-gradient(90deg,#f0a52b,#ffe34c)";
+
+    }else{
+
+        fill.style.background=
+            "linear-gradient(90deg,#36d66b,#b8e84c)";
+    }
+}
+
+
+/* =========================================================
+   START GAME
+========================================================= */
 
 function startGame(){
 
     running=true;
+
+    paused=false;
+
     score=0;
+
     distance=0;
-    speed=7;
+
+    speed=14;
+
     obstacles=[];
+
     coins=[];
+
     particles=[];
 
-    lion.y=groundY()-lion.height;
+    spawnTimer=4.0;
+
+    coinTimer=.25;
+
+    life=100;
+
+    hitCooldown=0;
+
+    updateLifeUI();
+
+    lion.y=
+        groundY()-
+        lion.height;
+
     lion.vy=0;
+
     lion.grounded=true;
+
     lion.duck=false;
 
-    document.getElementById("menu").style.display="none";
-    document.getElementById("gameover").style.display="none";
 
-    lastTime=performance.now();
+    document.getElementById(
+        "menu"
+    ).style.display="none";
+
+
+    document.getElementById(
+        "gameover"
+    ).style.display="none";
+
+
+    document.getElementById(
+        "pauseScreen"
+    ).style.display="none";
+
+
+    document.getElementById(
+        "pauseBtn"
+    ).style.display="block";
+
+
+    lastTime=
+        performance.now();
+
+
     requestAnimationFrame(loop);
 }
+
+
+/* =========================================================
+   GAME OVER
+========================================================= */
 
 function gameOver(){
 
     running=false;
 
+    paused=false;
+
+
     if(score>best){
+
         best=score;
-        localStorage.setItem("babylonLionBest",best);
+
+        localStorage.setItem(
+            "babylonLionBest",
+            best
+        );
     }
 
-    document.getElementById("finalScore").textContent=score;
-    document.getElementById("bestScore").textContent="Recorde: "+best;
-    document.getElementById("best").textContent=best;
 
-    document.getElementById("gameover").style.display="flex";
+    document.getElementById(
+        "finalScore"
+    ).textContent=score;
+
+
+    document.getElementById(
+        "bestScore"
+    ).textContent=
+        "Best: "+best;
+
+
+    document.getElementById(
+        "best"
+    ).textContent=best;
+
+
+    document.getElementById(
+        "gameover"
+    ).style.display="flex";
+
+
+    document.getElementById(
+        "pauseBtn"
+    ).style.display="none";
 }
+
+
+/* =========================================================
+   PAUSE
+========================================================= */
+
+function pauseGame(){
+
+    if(!running){
+        return;
+    }
+
+    paused=true;
+
+
+    document.getElementById(
+        "pauseScreen"
+    ).style.display="flex";
+}
+
+
+function resumeGame(){
+
+    if(!running){
+        return;
+    }
+
+
+    paused=false;
+
+
+    document.getElementById(
+        "pauseScreen"
+    ).style.display="none";
+
+
+    lastTime=
+        performance.now();
+
+
+    requestAnimationFrame(loop);
+}
+
+
+document.getElementById(
+    "pauseBtn"
+).addEventListener(
+    "click",
+    e=>{
+
+        e.stopPropagation();
+
+        pauseGame();
+    }
+);
+
+
+document.getElementById(
+    "resumeBtn"
+).addEventListener(
+    "click",
+    e=>{
+
+        e.stopPropagation();
+
+        resumeGame();
+    }
+);
+
+
+/* =========================================================
+   JUMP
+========================================================= */
 
 function jump(){
 
-    if(!running)return;
+    if(
+        !running ||
+        paused
+    ){
+        return;
+    }
 
-    if(lion.grounded){
-        lion.vy=lion.jumpPower;
+
+    if(
+        lion.grounded
+    ){
+
+        lion.vy=
+            lion.jumpPower;
+
         lion.grounded=false;
 
-        for(let i=0;i<7;i++){
+
+        for(
+            let i=0;
+            i<12;
+            i++
+        ){
+
             particles.push({
-                x:lion.x+25,
-                y:groundY(),
-                vx:-Math.random()*100,
-                vy:-Math.random()*100,
-                life:.5
+
+                x:
+                    lion.x+
+                    50+
+                    Math.random()*50,
+
+                y:
+                    groundY()-5,
+
+                vx:
+                    -Math.random()*180,
+
+                vy:
+                    -50-
+                    Math.random()*180,
+
+                life:
+                    .55+
+                    Math.random()*.25
             });
         }
     }
 }
 
-function duck(state){
-    lion.duck=state;
-}
 
-window.addEventListener("keydown",e=>{
+/* =========================================================
+   TOUCH = JUMP
+========================================================= */
 
-    if(e.code==="Space" || e.code==="ArrowUp"){
-        e.preventDefault();
-        jump();
+document.addEventListener(
+    "touchstart",
+    function(e){
+
+        if(
+            e.target.closest(
+                "button"
+            )
+        ){
+            return;
+        }
+
+
+        if(
+            running &&
+            !paused
+        ){
+
+            e.preventDefault();
+
+            jump();
+        }
+
+    },
+    {
+        passive:false
     }
+);
 
-    if(e.code==="ArrowDown"){
-        e.preventDefault();
-        duck(true);
+
+/* =========================================================
+   MOUSE
+========================================================= */
+
+canvas.addEventListener(
+    "mousedown",
+    function(){
+
+        if(
+            running &&
+            !paused
+        ){
+
+            jump();
+        }
     }
+);
 
-    if(e.code==="Enter" && !running){
-        startGame();
+
+/* =========================================================
+   KEYBOARD
+========================================================= */
+
+window.addEventListener(
+    "keydown",
+    e=>{
+
+        if(
+            e.code==="Space" ||
+            e.code==="ArrowUp"
+        ){
+
+            e.preventDefault();
+
+            jump();
+        }
+
+
+        if(
+            e.code==="Enter" &&
+            !running
+        ){
+
+            startGame();
+        }
+
+
+        if(
+            e.code==="KeyP" ||
+            e.code==="Escape"
+        ){
+
+            if(
+                running &&
+                !paused
+            ){
+
+                pauseGame();
+
+            }else if(
+                running &&
+                paused
+            ){
+
+                resumeGame();
+            }
+        }
     }
-});
+);
 
-window.addEventListener("keyup",e=>{
-    if(e.code==="ArrowDown")duck(false);
-});
 
-document.getElementById("startBtn").onclick=startGame;
-document.getElementById("restartBtn").onclick=startGame;
+/* =========================================================
+   BUTTONS
+========================================================= */
 
-document.getElementById("jumpBtn").ontouchstart=e=>{
-    e.preventDefault();
-    jump();
+document.getElementById(
+    "startBtn"
+).onclick=e=>{
+
+    e.stopPropagation();
+
+    enterFullscreenAndLock();
+
+    startGame();
 };
 
-document.getElementById("duckBtn").ontouchstart=e=>{
-    e.preventDefault();
-    duck(true);
+
+document.getElementById(
+    "restartBtn"
+).onclick=e=>{
+
+    e.stopPropagation();
+
+    enterFullscreenAndLock();
+
+    startGame();
 };
 
-document.getElementById("duckBtn").ontouchend=e=>{
-    e.preventDefault();
-    duck(false);
-};
+
+/* =========================================================
+   FIRE
+========================================================= */
 
 function spawnObstacle(){
 
-    const tall=Math.random()<.6;
-
     obstacles.push({
-        x:W+80,
-        y:groundY()-(tall?65:45),
-        width:tall?42:65,
-        height:tall?65:45,
-        type:tall?"column":"brick"
+
+        x:
+            W+260,
+
+        y:
+            groundY()-70,
+
+        width:65,
+
+        height:70,
+
+        type:"fire",
+
+        flame:
+            Math.random()*
+            Math.PI*
+            2
     });
 }
+
+
+/* =========================================================
+   COINS
+========================================================= */
+
+function createCoin(
+    x,
+    y
+){
+
+    coins.push({
+
+        x:x,
+
+        y:y,
+
+        r:12,
+
+        spin:
+            Math.random()*
+            Math.PI*
+            2
+    });
+}
+
+
+/* =========================================================
+   COIN PATTERNS
+========================================================= */
 
 function spawnCoin(){
 
-    const y=groundY()-100-Math.random()*130;
+    const pattern=
+        Math.floor(
+            Math.random()*6
+        );
 
-    coins.push({
-        x:W+50,
-        y,
-        r:12,
-        spin:Math.random()*Math.PI*2
-    });
+
+    if(pattern===0){
+
+        const y=
+            groundY()-
+            105-
+            Math.random()*70;
+
+
+        for(
+            let i=0;
+            i<7;
+            i++
+        ){
+
+            createCoin(
+                W+50+i*42,
+                y
+            );
+        }
+    }
+
+
+    else if(pattern===1){
+
+        const base=
+            groundY()-75;
+
+
+        for(
+            let i=0;
+            i<8;
+            i++
+        ){
+
+            createCoin(
+                W+50+i*42,
+                base-i*24
+            );
+        }
+    }
+
+
+    else if(pattern===2){
+
+        const base=
+            groundY()-205;
+
+
+        for(
+            let i=0;
+            i<8;
+            i++
+        ){
+
+            createCoin(
+                W+50+i*42,
+                base+i*24
+            );
+        }
+    }
+
+
+    else if(pattern===3){
+
+        const centerX=
+            W+180;
+
+        const centerY=
+            groundY()-125;
+
+
+        for(
+            let i=0;
+            i<10;
+            i++
+        ){
+
+            const angle=
+                Math.PI-
+                (
+                    Math.PI*i/9
+                );
+
+            const radius=120;
+
+
+            createCoin(
+
+                centerX+
+                Math.cos(angle)*
+                radius,
+
+                centerY-
+                Math.sin(angle)*
+                radius
+            );
+        }
+    }
+
+
+    else if(pattern===4){
+
+        for(
+            let i=0;
+            i<11;
+            i++
+        ){
+
+            createCoin(
+
+                W+50+i*38,
+
+                groundY()-
+                115-
+                Math.sin(i*.75)*
+                45
+            );
+        }
+    }
+
+
+    else{
+
+        for(
+            let i=0;
+            i<13;
+            i++
+        ){
+
+            createCoin(
+
+                W+40+i*38,
+
+                groundY()-
+                95-
+                Math.sin(i*.55)*
+                70
+            );
+        }
+    }
 }
+
+
+/* =========================================================
+   UPDATE
+========================================================= */
 
 function update(dt){
 
-    distance+=speed*dt;
+    distance+=
+        speed*
+        dt;
 
-    score=Math.floor(distance/10);
 
-    speed=7+Math.min(10,score/250);
+    score=
+        Math.floor(
+            distance/10
+        );
 
-    document.getElementById("score").textContent=score;
 
-    lion.frame+=dt*12;
+    speed=
+        14+
+        Math.min(
+            12,
+            score/180
+        );
 
-    lion.vy+=lion.gravity*dt;
-    lion.y+=lion.vy*dt;
 
-    const targetGround=groundY()-lion.height;
+    document.getElementById(
+        "score"
+    ).textContent=score;
 
-    if(lion.y>=targetGround){
-        lion.y=targetGround;
+
+    if(hitCooldown>0){
+
+        hitCooldown-=dt;
+
+        if(hitCooldown<0){
+            hitCooldown=0;
+        }
+    }
+
+
+    lion.frame+=
+        dt*12;
+
+
+    lion.vy+=
+        lion.gravity*
+        dt;
+
+
+    lion.y+=
+        lion.vy*
+        dt;
+
+
+    const targetGround=
+        groundY()-
+        lion.height;
+
+
+    if(
+        lion.y>=targetGround
+    ){
+
+        lion.y=
+            targetGround;
+
         lion.vy=0;
+
         lion.grounded=true;
     }
 
-    spawnTimer-=dt;
-    coinTimer-=dt;
 
-    if(spawnTimer<=0){
+    spawnTimer-=dt;
+
+
+    if(
+        spawnTimer<=0
+    ){
+
         spawnObstacle();
 
+
         spawnTimer=
-            Math.max(.65,1.35-Math.min(.55,score/600))
-            +Math.random()*.65;
+            Math.max(
+                1.7,
+                3.3-
+                Math.min(
+                    1.1,
+                    score/500
+                )
+            )+
+            Math.random()*1.4;
     }
 
-    if(coinTimer<=0){
+
+    coinTimer-=dt;
+
+
+    if(
+        coinTimer<=0
+    ){
+
         spawnCoin();
-        coinTimer=.8+Math.random()*1.2;
+
+        coinTimer=
+            .55+
+            Math.random()*.65;
     }
 
-    for(const o of obstacles){
-        o.x-=speed*60*dt;
+
+    for(
+        const o of obstacles
+    ){
+
+        o.x-=
+            speed*
+            60*
+            dt;
+
+        o.flame+=
+            dt*8;
     }
 
-    for(const c of coins){
-        c.x-=speed*60*dt;
-        c.spin+=dt*7;
+
+    for(
+        const c of coins
+    ){
+
+        c.x-=
+            speed*
+            60*
+            dt;
+
+        c.spin+=
+            dt*7;
     }
 
-    obstacles=obstacles.filter(o=>o.x>-120);
-    coins=coins.filter(c=>c.x>-50);
+
+    obstacles=
+        obstacles.filter(
+            o=>o.x>-180
+        );
+
+
+    coins=
+        coins.filter(
+            c=>c.x>-70
+        );
+
 
     checkCollisions();
 
-    for(const p of particles){
-        p.x+=p.vx*dt;
-        p.y+=p.vy*dt;
-        p.vy+=400*dt;
+
+    for(
+        const p of particles
+    ){
+
+        p.x+=
+            p.vx*
+            dt;
+
+        p.y+=
+            p.vy*
+            dt;
+
+        p.vy+=
+            400*
+            dt;
+
         p.life-=dt;
     }
 
-    particles=particles.filter(p=>p.life>0);
+
+    particles=
+        particles.filter(
+            p=>p.life>0
+        );
 }
+
+
+/* =========================================================
+   COLLISIONS + LIFE
+========================================================= */
 
 function checkCollisions(){
 
-    const ducked=lion.duck;
+    const lx=
+        lion.x+25;
 
-    const lx=lion.x+15;
-    const ly=lion.y+(ducked?25:5);
-    const lw=lion.width-25;
-    const lh=ducked?lion.height-25:lion.height-8;
+    const ly=
+        lion.y+15;
 
-    for(const o of obstacles){
+    const lw=
+        lion.width-45;
 
-        const hit=
-            lx<o.x+o.width-6 &&
-            lx+lw>o.x+6 &&
-            ly<o.y+o.height &&
-            ly+lh>o.y+5;
+    const lh=
+        lion.height-20;
 
-        if(hit){
-            gameOver();
-            return;
+
+    if(
+        hitCooldown<=0
+    ){
+
+        for(
+            const o of obstacles
+        ){
+
+            const hit=
+
+                lx<
+                o.x+
+                o.width-
+                5
+
+                &&
+
+                lx+
+                lw>
+                o.x+
+                5
+
+                &&
+
+                ly<
+                o.y+
+                o.height
+
+                &&
+
+                ly+
+                lh>
+                o.y+20;
+
+
+            if(hit){
+
+                life-=25;
+
+
+                if(life<0){
+                    life=0;
+                }
+
+
+                updateLifeUI();
+
+
+                hitCooldown=1.2;
+
+
+                for(
+                    let i=0;
+                    i<20;
+                    i++
+                ){
+
+                    particles.push({
+
+                        x:
+                            lion.x+
+                            lion.width/2,
+
+                        y:
+                            lion.y+
+                            lion.height/2,
+
+                        vx:
+                            (
+                                Math.random()-
+                                .5
+                            )*
+                            280,
+
+                        vy:
+                            (
+                                Math.random()-
+                                .5
+                            )*
+                            280,
+
+                        life:.7
+                    });
+                }
+
+
+                o.x-=100;
+
+
+                if(
+                    life<=0
+                ){
+
+                    gameOver();
+
+                    return;
+                }
+
+
+                break;
+            }
         }
     }
 
-    for(let i=coins.length-1;i>=0;i--){
 
-        const c=coins[i];
+    for(
+        let i=
+            coins.length-1;
 
-        const dx=(lion.x+lion.width/2)-c.x;
-        const dy=(lion.y+lion.height/2)-c.y;
+        i>=0;
 
-        if(Math.sqrt(dx*dx+dy*dy)<42){
+        i--
+    ){
+
+        const c=
+            coins[i];
+
+
+        const dx=
+            (
+                lion.x+
+                lion.width/2
+            )-
+            c.x;
+
+
+        const dy=
+            (
+                lion.y+
+                lion.height/2
+            )-
+            c.y;
+
+
+        if(
+            Math.sqrt(
+                dx*dx+
+                dy*dy
+            )<65
+        ){
 
             score+=25;
+
             distance+=250;
 
-            for(let j=0;j<12;j++){
+
+            for(
+                let j=0;
+                j<16;
+                j++
+            ){
+
                 particles.push({
+
                     x:c.x,
+
                     y:c.y,
-                    vx:(Math.random()-.5)*180,
-                    vy:(Math.random()-.5)*180,
-                    life:.6
+
+                    vx:
+                        (
+                            Math.random()-
+                            .5
+                        )*
+                        220,
+
+                    vy:
+                        (
+                            Math.random()-
+                            .5
+                        )*
+                        220,
+
+                    life:
+                        .6+
+                        Math.random()*.3
                 });
             }
 
-            coins.splice(i,1);
+
+            coins.splice(
+                i,
+                1
+            );
         }
     }
 }
 
+
+/* =========================================================
+   SKY
+========================================================= */
+
 function drawSky(){
 
-    const g=ctx.createLinearGradient(0,0,0,H);
-    g.addColorStop(0,"#20110c");
-    g.addColorStop(.45,"#75421d");
-    g.addColorStop(1,"#c0782b");
+    const g=
+        ctx.createLinearGradient(
+            0,
+            0,
+            0,
+            H
+        );
+
+
+    g.addColorStop(
+        0,
+        "#101d35"
+    );
+
+    g.addColorStop(
+        .45,
+        "#274b72"
+    );
+
+    g.addColorStop(
+        1,
+        "#7893a8"
+    );
+
 
     ctx.fillStyle=g;
-    ctx.fillRect(0,0,W,H);
 
-    // Lua / sol
-    ctx.beginPath();
-    ctx.arc(W-150,130,52,0,Math.PI*2);
-    ctx.fillStyle="rgba(246,205,108,.9)";
-    ctx.fill();
 
-    // estrelas
-    for(let i=0;i<35;i++){
+    ctx.fillRect(
+        0,
+        0,
+        W,
+        H
+    );
 
-        const x=(i*173)%W;
-        const y=30+(i*71)%(H*.45);
 
-        ctx.fillStyle="rgba(255,235,170,.55)";
-        ctx.fillRect(x,y,2,2);
+    ctx.strokeStyle=
+        "rgba(30,45,65,.45)";
+
+    ctx.lineWidth=2;
+
+
+    const brickH=18;
+
+    const brickW=45;
+
+
+    for(
+        let y=0;
+        y<H;
+        y+=brickH
+    ){
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            0,
+            y
+        );
+
+        ctx.lineTo(
+            W,
+            y
+        );
+
+        ctx.stroke();
+
+
+        const offsetX=
+            (
+                Math.floor(
+                    y/brickH
+                )%2
+            )*
+            (
+                brickW/2
+            );
+
+
+        for(
+            let x=offsetX;
+            x<W;
+            x+=brickW
+        ){
+
+            ctx.beginPath();
+
+            ctx.moveTo(
+                x,
+                y
+            );
+
+            ctx.lineTo(
+                x,
+                y+brickH
+            );
+
+            ctx.stroke();
+        }
     }
 }
+
+
+/* =========================================================
+   DISTANT CITY
+========================================================= */
 
 function drawDistantCity(){
 
-    const y=groundY();
+    const y=
+        groundY();
 
-    ctx.fillStyle="#3d2115";
 
-    for(let x=-50;x<W+100;x+=90){
+    ctx.fillStyle=
+        "#806d5c";
 
-        const h=70+(x*13%100);
 
-        ctx.fillRect(x,y-h,55,h);
+    for(
+        let x=-50;
+        x<W+100;
+        x+=90
+    ){
 
-        // torre
-        ctx.fillRect(x+15,y-h-35,25,35);
+        const h=
+            70+
+            Math.abs(
+                x*13%100
+            );
+
+
+        ctx.fillRect(
+            x,
+            y-h,
+            55,
+            h
+        );
+
+
+        ctx.fillRect(
+            x+15,
+            y-h-35,
+            25,
+            35
+        );
+
 
         ctx.beginPath();
-        ctx.moveTo(x+10,y-h-35);
-        ctx.lineTo(x+27,y-h-60);
-        ctx.lineTo(x+44,y-h-35);
+
+        ctx.moveTo(
+            x+10,
+            y-h-35
+        );
+
+        ctx.lineTo(
+            x+27,
+            y-h-60
+        );
+
+        ctx.lineTo(
+            x+44,
+            y-h-35
+        );
+
         ctx.fill();
     }
 
-    // Zigurate
-    const zx=W*.55;
 
-    ctx.fillStyle="#542b18";
+    const zx=
+        W*.55;
+
+
+    ctx.fillStyle=
+        "#a08b73";
+
 
     ctx.beginPath();
-    ctx.moveTo(zx-180,y);
-    ctx.lineTo(zx-120,y-95);
-    ctx.lineTo(zx+120,y-95);
-    ctx.lineTo(zx+180,y);
+
+    ctx.moveTo(
+        zx-180,
+        y
+    );
+
+    ctx.lineTo(
+        zx-120,
+        y-95
+    );
+
+    ctx.lineTo(
+        zx+120,
+        y-95
+    );
+
+    ctx.lineTo(
+        zx+180,
+        y
+    );
+
     ctx.fill();
 
-    ctx.fillStyle="#6d381d";
 
-    ctx.fillRect(zx-85,y-150,170,55);
+    ctx.fillStyle=
+        "#b49d7c";
 
-    ctx.fillRect(zx-48,y-195,96,45);
+
+    ctx.fillRect(
+        zx-85,
+        y-150,
+        170,
+        55
+    );
+
+
+    ctx.fillRect(
+        zx-48,
+        y-195,
+        96,
+        45
+    );
+
 
     ctx.beginPath();
-    ctx.moveTo(zx-55,y-195);
-    ctx.lineTo(zx,y-240);
-    ctx.lineTo(zx+55,y-195);
+
+    ctx.moveTo(
+        zx-55,
+        y-195
+    );
+
+    ctx.lineTo(
+        zx,
+        y-240
+    );
+
+    ctx.lineTo(
+        zx+55,
+        y-195
+    );
+
     ctx.fill();
 }
+
+
+/* =========================================================
+   MARBLE GROUND
+========================================================= */
 
 function drawGround(){
 
-    const y=groundY();
+    const y=
+        groundY();
 
-    ctx.fillStyle="#9a5420";
-    ctx.fillRect(0,y,W,groundHeight);
 
-    // faixas
-    ctx.fillStyle="#743b1b";
+    const marble=
+        ctx.createLinearGradient(
+            0,
+            y,
+            0,
+            H
+        );
 
-    const offset=-(distance*1.8)%80;
 
-    for(let x=offset;x<W;x+=80){
-        ctx.fillRect(x,y+20,45,7);
-        ctx.fillRect(x+25,y+65,35,7);
+    marble.addColorStop(
+        0,
+        "#ffffff"
+    );
+
+    marble.addColorStop(
+        .28,
+        "#f7f7f7"
+    );
+
+    marble.addColorStop(
+        .65,
+        "#e5e7e9"
+    );
+
+    marble.addColorStop(
+        1,
+        "#bfc3c7"
+    );
+
+
+    ctx.fillStyle=
+        marble;
+
+
+    ctx.fillRect(
+        0,
+        y,
+        W,
+        groundHeight
+    );
+
+
+    const tileW=150;
+
+    const tileH=29;
+
+
+    const offset=
+        -(distance*2)%
+        tileW;
+
+
+    ctx.strokeStyle=
+        "rgba(105,110,118,.42)";
+
+    ctx.lineWidth=2;
+
+
+    for(
+        let x=offset;
+        x<W+tileW;
+        x+=tileW
+    ){
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            x,
+            y
+        );
+
+        ctx.lineTo(
+            x,
+            H
+        );
+
+        ctx.stroke();
     }
 
-    // linha superior
-    ctx.fillStyle="#e0a13e";
-    ctx.fillRect(0,y,W,5);
 
-    // pequenas pedras
-    for(let x=-(distance*2)%120;x<W;x+=120){
-        ctx.fillStyle="#673516";
-        ctx.fillRect(x,y+95,20,5);
+    for(
+        let yy=y+tileH;
+        yy<H;
+        yy+=tileH
+    ){
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            0,
+            yy
+        );
+
+        ctx.lineTo(
+            W,
+            yy
+        );
+
+        ctx.stroke();
+    }
+
+
+    ctx.strokeStyle=
+        "rgba(120,125,132,.18)";
+
+    ctx.lineWidth=2;
+
+
+    for(
+        let i=0;
+        i<5;
+        i++
+    ){
+
+        const sx=
+            (
+                i*230-
+                distance*.8
+            )%
+            (W+300)-
+            150;
+
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            sx,
+            y
+        );
+
+        ctx.bezierCurveTo(
+            sx+60,
+            y+15,
+            sx-40,
+            y+35,
+            sx+100,
+            H
+        );
+
+        ctx.stroke();
+    }
+
+
+    const shine=
+        ctx.createLinearGradient(
+            0,
+            y,
+            0,
+            y+22
+        );
+
+
+    shine.addColorStop(
+        0,
+        "rgba(255,255,255,.98)"
+    );
+
+
+    shine.addColorStop(
+        1,
+        "rgba(255,255,255,0)"
+    );
+
+
+    ctx.fillStyle=shine;
+
+
+    ctx.fillRect(
+        0,
+        y,
+        W,
+        22
+    );
+}
+
+
+/* =========================================================
+   LION FRAMES
+========================================================= */
+
+const lionFrames=[];
+
+const processedFrames=[];
+
+
+const frameURLs=[
+
+"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-001.png",
+"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-002.png",
+"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-003.png",
+"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-004.png",
+"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-005.png",
+"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-006.png",
+"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-007.png",
+"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-008.png",
+"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-009.png",
+"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-010.png",
+"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-011.png",
+"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-012.png",
+"https://archive.org/download/ezgif-frame-013/ezgif-frame-013.png",
+"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-014.png",
+"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-015.png",
+"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-016.png",
+"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-017.png",
+"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-018.png",
+"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-019.png",
+"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-020.png",
+"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-021.png",
+"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-022.png",
+"https://ia803104.us.archive.org/10/items/ezgif-frame-013/ezgif-frame-023.png",
+"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-024.png",
+"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-025.png"
+
+];
+
+
+/* =========================================================
+   PROCESS LION IMAGE
+========================================================= */
+
+function processLionImage(
+    img,
+    index
+){
+
+    try{
+
+        const off=
+            document.createElement(
+                "canvas"
+            );
+
+        const octx=
+            off.getContext("2d");
+
+
+        off.width=
+            img.naturalWidth;
+
+        off.height=
+            img.naturalHeight;
+
+
+        octx.drawImage(
+            img,
+            0,
+            0
+        );
+
+
+        const imageData=
+            octx.getImageData(
+                0,
+                0,
+                off.width,
+                off.height
+            );
+
+
+        const data=
+            imageData.data;
+
+
+        for(
+            let i=0;
+            i<data.length;
+            i+=4
+        ){
+
+            const r=data[i];
+
+            const g=data[i+1];
+
+            const b=data[i+2];
+
+
+            const brightness=
+                (
+                    r+
+                    g+
+                    b
+                )/3;
+
+
+            if(
+                (
+                    r>225 &&
+                    g>225 &&
+                    b>225
+                )
+                ||
+                brightness>242
+            ){
+
+                data[i+3]=0;
+
+                continue;
+            }
+
+
+            const luminance=
+                (
+                    .299*r+
+                    .587*g+
+                    .114*b
+                )/255;
+
+
+            const darkR=72;
+            const darkG=35;
+            const darkB=10;
+
+
+            const goldR=242;
+            const goldG=180;
+            const goldB=58;
+
+
+            data[i]=
+                darkR+
+                (
+                    goldR-darkR
+                )*
+                luminance;
+
+
+            data[i+1]=
+                darkG+
+                (
+                    goldG-darkG
+                )*
+                luminance;
+
+
+            data[i+2]=
+                darkB+
+                (
+                    goldB-darkB
+                )*
+                luminance;
+        }
+
+
+        octx.putImageData(
+            imageData,
+            0,
+            0
+        );
+
+
+        const processed=
+            new Image();
+
+
+        processed.src=
+            off.toDataURL(
+                "image/png"
+            );
+
+
+        processedFrames[index]=
+            processed;
+
+    }
+    catch(error){
+
+        processedFrames[index]=img;
+
+        console.log(
+            "Lion frame processing failed:",
+            index,
+            error
+        );
     }
 }
 
+
+/* =========================================================
+   LOAD FRAMES
+========================================================= */
+
+frameURLs.forEach(
+    (url,index)=>{
+
+        const img=
+            new Image();
+
+
+        img.crossOrigin=
+            "Anonymous";
+
+
+        img.onload=()=>{
+
+            processLionImage(
+                img,
+                index
+            );
+        };
+
+
+        img.onerror=()=>{
+
+            console.log(
+                "Error loading lion frame:",
+                index
+            );
+        };
+
+
+        img.src=url;
+
+
+        lionFrames[index]=
+            img;
+    }
+);
+
+
+/* =========================================================
+   DRAW LION
+   25% SMALLER
+========================================================= */
+
 function drawLion(){
 
-    let x=lion.x;
-    let y=lion.y;
+    const drawWidth=337.5;
+
+    const drawHeight=184.5;
+
+
+    let x=
+        lion.x-
+        112.5;
+
+
+    let y=
+        groundY()-
+        drawHeight+
+        8;
+
+
+    y+=
+        (
+            lion.y-
+            (
+                groundY()-
+                lion.height
+            )
+        );
+
 
     const bob=
-        lion.grounded?
-        Math.sin(lion.frame)*2:
-        0;
+        lion.grounded
+        ? Math.sin(
+            lion.frame*.2
+        )*2
+        : 0;
+
 
     y+=bob;
 
-    const duck=lion.duck;
 
     ctx.save();
 
-    // sombra
+
+    /*
+       DAMAGE FLASH
+    */
+
+    if(
+        hitCooldown>0 &&
+        Math.floor(
+            hitCooldown*12
+        )%2===0
+    ){
+
+        ctx.globalAlpha=.35;
+    }
+
+
+    /*
+       SHADOW
+    */
+
     ctx.beginPath();
+
     ctx.ellipse(
-        x+38,
-        groundY()+4,
-        duck?42:45,
-        8,
-        0,0,Math.PI*2
-    );
-    ctx.fillStyle="rgba(0,0,0,.35)";
-    ctx.fill();
-
-    // cauda
-    ctx.strokeStyle="#6b3415";
-    ctx.lineWidth=9;
-    ctx.lineCap="round";
-
-    ctx.beginPath();
-    ctx.moveTo(x+10,y+42);
-    ctx.quadraticCurveTo(
-        x-25,y+20,
-        x-8,y-2
-    );
-    ctx.stroke();
-
-    // juba
-    ctx.beginPath();
-    ctx.arc(
-        x+38,
-        y+25,
-        32,
+        lion.x+75,
+        groundY()+5,
+        66,
+        9,
+        0,
         0,
         Math.PI*2
     );
 
-    ctx.fillStyle="#51250f";
+
+    ctx.fillStyle=
+        "rgba(0,0,0,.28)";
+
     ctx.fill();
 
-    // corpo
-    ctx.fillStyle="#b96d27";
 
-    if(duck){
-        ctx.beginPath();
-        ctx.roundRect(x+10,y+27,60,32,15);
-        ctx.fill();
-    }else{
-        ctx.beginPath();
-        ctx.roundRect(x+13,y+30,55,34,17);
-        ctx.fill();
+    const currentFrameIndex=
+        Math.floor(
+            lion.frame/2
+        )%
+        frameURLs.length;
+
+
+    const currentImg=
+        processedFrames[
+            currentFrameIndex
+        ] ||
+        lionFrames[
+            currentFrameIndex
+        ];
+
+
+    if(
+        currentImg &&
+        currentImg.complete
+    ){
+
+        ctx.globalCompositeOperation=
+            "source-over";
+
+
+        ctx.drawImage(
+            currentImg,
+            x,
+            y,
+            drawWidth,
+            drawHeight
+        );
     }
 
-    // cabeça
-    ctx.beginPath();
-    ctx.arc(x+42,y+23,24,0,Math.PI*2);
-    ctx.fillStyle="#c77a2c";
-    ctx.fill();
 
-    // focinho
-    ctx.beginPath();
-    ctx.arc(x+57,y+28,11,0,Math.PI*2);
-    ctx.fillStyle="#e2a14d";
-    ctx.fill();
-
-    // nariz
-    ctx.beginPath();
-    ctx.arc(x+63,y+26,4,0,Math.PI*2);
-    ctx.fillStyle="#28100a";
-    ctx.fill();
-
-    // olho
-    ctx.beginPath();
-    ctx.arc(x+51,y+16,3.5,0,Math.PI*2);
-    ctx.fillStyle="#160b06";
-    ctx.fill();
-
-    // brilho
-    ctx.beginPath();
-    ctx.arc(x+52,y+15,1,0,Math.PI*2);
-    ctx.fillStyle="#fff";
-    ctx.fill();
-
-    // orelha
-    ctx.beginPath();
-    ctx.moveTo(x+27,y+7);
-    ctx.lineTo(x+23,y-9);
-    ctx.lineTo(x+38,y+1);
-    ctx.fillStyle="#713516";
-    ctx.fill();
-
-    // pernas
-    if(!duck){
-
-        const step=Math.sin(lion.frame)*8;
-
-        ctx.strokeStyle="#783916";
-        ctx.lineWidth=11;
-
-        ctx.beginPath();
-        ctx.moveTo(x+27,y+55);
-        ctx.lineTo(x+25+step,y+69);
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.moveTo(x+54,y+55);
-        ctx.lineTo(x+55-step,y+69);
-        ctx.stroke();
-    }
+    ctx.globalAlpha=1;
 
     ctx.restore();
 }
+
+
+/* =========================================================
+   FIRE
+========================================================= */
 
 function drawObstacle(o){
 
-    if(o.type==="column"){
+    const x=o.x;
 
-        // coluna
-        ctx.fillStyle="#6b3920";
-        ctx.fillRect(o.x,o.y,o.width,o.height);
+    const y=o.y;
 
-        ctx.fillStyle="#9a5a2b";
-        ctx.fillRect(o.x-7,o.y-8,o.width+14,12);
+    const w=o.width;
 
-        ctx.fillRect(
-            o.x-7,
-            o.y+o.height-5,
-            o.width+14,
-            10
+    const h=o.height;
+
+
+    const glow=
+        ctx.createRadialGradient(
+            x+w/2,
+            y+h/2,
+            3,
+            x+w/2,
+            y+h/2,
+            65
         );
 
-        // hieróglifos
-        ctx.fillStyle="#d08b3d";
 
-        for(let y=o.y+15;y<o.y+o.height-10;y+=18){
-            ctx.fillRect(o.x+18,y,7,7);
-        }
+    glow.addColorStop(
+        0,
+        "rgba(255,230,80,.55)"
+    );
 
-    }else{
+    glow.addColorStop(
+        .35,
+        "rgba(255,100,15,.30)"
+    );
 
-        ctx.fillStyle="#713718";
-        ctx.fillRect(o.x,o.y,o.width,o.height);
+    glow.addColorStop(
+        1,
+        "rgba(255,40,0,0)"
+    );
 
-        ctx.strokeStyle="#a96128";
-        ctx.lineWidth=3;
 
-        for(let y=o.y+15;y<o.y+o.height;y+=15){
-            ctx.beginPath();
-            ctx.moveTo(o.x,y);
-            ctx.lineTo(o.x+o.width,y);
-            ctx.stroke();
-        }
+    ctx.fillStyle=glow;
 
-        for(let x=o.x+15;x<o.x+o.width;x+=25){
-            ctx.beginPath();
-            ctx.moveTo(x,o.y);
-            ctx.lineTo(x,o.y+o.height);
-            ctx.stroke();
-        }
-    }
-}
 
-function drawCoin(c){
+    ctx.fillRect(
+        x-35,
+        y-30,
+        w+70,
+        h+50
+    );
 
-    const squash=Math.abs(Math.cos(c.spin));
+
+    const flicker=
+        Math.sin(
+            o.flame
+        )*5;
+
 
     ctx.save();
 
-    ctx.translate(c.x,c.y);
-    ctx.scale(.35+.65*squash,1);
+
+    ctx.translate(
+        x+w/2,
+        y+h
+    );
+
 
     ctx.beginPath();
-    ctx.arc(0,0,c.r,0,Math.PI*2);
 
-    ctx.fillStyle="#f2c34e";
+
+    ctx.moveTo(
+        0,
+        -h-flicker
+    );
+
+
+    ctx.bezierCurveTo(
+        -28,
+        -h*.55,
+        -24,
+        -18,
+        0,
+        0
+    );
+
+
+    ctx.bezierCurveTo(
+        24,
+        -18,
+        28,
+        -h*.55,
+        0,
+        -h-flicker
+    );
+
+
+    const fire=
+        ctx.createLinearGradient(
+            0,
+            -h,
+            0,
+            0
+        );
+
+
+    fire.addColorStop(
+        0,
+        "#fff7a0"
+    );
+
+    fire.addColorStop(
+        .25,
+        "#ffd32e"
+    );
+
+    fire.addColorStop(
+        .6,
+        "#ff7918"
+    );
+
+    fire.addColorStop(
+        1,
+        "#d92d08"
+    );
+
+
+    ctx.fillStyle=fire;
+
     ctx.fill();
 
-    ctx.strokeStyle="#fff0a2";
-    ctx.lineWidth=2;
-    ctx.stroke();
 
-    ctx.fillStyle="#875015";
-    ctx.font="bold 13px Arial";
-    ctx.textAlign="center";
-    ctx.textBaseline="middle";
-    ctx.fillText("𒀭",0,1);
+    ctx.beginPath();
+
+
+    ctx.moveTo(
+        0,
+        -h+15-flicker
+    );
+
+
+    ctx.bezierCurveTo(
+        -12,
+        -35,
+        -9,
+        -10,
+        0,
+        -2
+    );
+
+
+    ctx.bezierCurveTo(
+        9,
+        -10,
+        12,
+        -35,
+        0,
+        -h+15-flicker
+    );
+
+
+    ctx.fillStyle=
+        "#fff3a0";
+
+
+    ctx.fill();
+
 
     ctx.restore();
 }
 
+
+/* =========================================================
+   COIN
+========================================================= */
+
+function drawCoin(c){
+
+    const squash=
+        Math.abs(
+            Math.cos(
+                c.spin
+            )
+        );
+
+
+    ctx.save();
+
+
+    ctx.translate(
+        c.x,
+        c.y
+    );
+
+
+    ctx.scale(
+        .35+
+        .65*squash,
+        1
+    );
+
+
+    ctx.beginPath();
+
+
+    ctx.arc(
+        0,
+        0,
+        c.r+7,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.fillStyle=
+        "rgba(255,205,70,.16)";
+
+
+    ctx.fill();
+
+
+    ctx.beginPath();
+
+
+    ctx.arc(
+        0,
+        0,
+        c.r,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.fillStyle=
+        "#f2c34e";
+
+
+    ctx.fill();
+
+
+    ctx.strokeStyle=
+        "#fff0a2";
+
+
+    ctx.lineWidth=2;
+
+
+    ctx.stroke();
+
+
+    ctx.fillStyle=
+        "#875015";
+
+
+    ctx.font=
+        "bold 13px Arial";
+
+
+    ctx.textAlign=
+        "center";
+
+
+    ctx.textBaseline=
+        "middle";
+
+
+    ctx.fillText(
+        "𒀭",
+        0,
+        1
+    );
+
+
+    ctx.restore();
+}
+
+
+/* =========================================================
+   PARTICLES
+========================================================= */
+
 function drawParticles(){
 
-    for(const p of particles){
+    for(
+        const p of particles
+    ){
 
-        ctx.globalAlpha=Math.max(0,p.life/.6);
+        ctx.globalAlpha=
+            Math.max(
+                0,
+                p.life/.6
+            );
 
-        ctx.fillStyle="#f4c45c";
+
+        ctx.fillStyle=
+            "#f4c45c";
+
 
         ctx.beginPath();
-        ctx.arc(p.x,p.y,3,0,Math.PI*2);
+
+
+        ctx.arc(
+            p.x,
+            p.y,
+            3,
+            0,
+            Math.PI*2
+        );
+
+
         ctx.fill();
     }
+
 
     ctx.globalAlpha=1;
 }
 
+
+/* =========================================================
+   DRAW
+========================================================= */
+
 function draw(){
 
-    ctx.clearRect(0,0,W,H);
-
-    drawSky();
-    drawDistantCity();
-    drawGround();
-
-    for(const c of coins)drawCoin(c);
-    for(const o of obstacles)drawObstacle(o);
-
-    drawLion();
-    drawParticles();
-
-    // vinheta
-    const v=ctx.createRadialGradient(
-        W/2,H/2,Math.min(W,H)*.25,
-        W/2,H/2,Math.max(W,H)*.75
+    ctx.clearRect(
+        0,
+        0,
+        W,
+        H
     );
 
-    v.addColorStop(0,"rgba(0,0,0,0)");
-    v.addColorStop(1,"rgba(0,0,0,.42)");
+
+    drawSky();
+
+    drawDistantCity();
+
+    drawGround();
+
+
+    for(
+        const c of coins
+    ){
+
+        drawCoin(c);
+    }
+
+
+    for(
+        const o of obstacles
+    ){
+
+        drawObstacle(o);
+    }
+
+
+    drawLion();
+
+    drawParticles();
+
+
+    const v=
+        ctx.createRadialGradient(
+            W/2,
+            H/2,
+            Math.min(W,H)*.25,
+            W/2,
+            H/2,
+            Math.max(W,H)*.75
+        );
+
+
+    v.addColorStop(
+        0,
+        "rgba(0,0,0,0)"
+    );
+
+
+    v.addColorStop(
+        1,
+        "rgba(0,0,0,.30)"
+    );
+
 
     ctx.fillStyle=v;
-    ctx.fillRect(0,0,W,H);
+
+
+    ctx.fillRect(
+        0,
+        0,
+        W,
+        H
+    );
 }
+
+
+/* =========================================================
+   LOOP
+========================================================= */
 
 function loop(time){
 
-    if(!running)return;
+    if(
+        !running ||
+        paused
+    ){
 
-    let dt=(time-lastTime)/1000;
+        return;
+    }
+
+
+    let dt=
+        (
+            time-
+            lastTime
+        )/1000;
+
+
     lastTime=time;
 
-    dt=Math.min(dt,.035);
+
+    dt=
+        Math.min(
+            dt,
+            .035
+        );
+
 
     update(dt);
+
     draw();
+
 
     requestAnimationFrame(loop);
 }
 
-// desenho inicial
+
+/* =========================================================
+   FIRST DRAW
+========================================================= */
+
 draw();
 
 </script>
