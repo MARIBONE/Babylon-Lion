@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -48,13 +47,19 @@ canvas{
     top:22px;
     left:22px;
     right:22px;
+
     display:flex;
     justify-content:space-between;
     align-items:flex-start;
+
     pointer-events:none;
     color:white;
     z-index:5;
 }
+
+/* =========================================================
+   PAINÉIS
+========================================================= */
 
 .panel{
     background:rgba(20,18,17,.72);
@@ -78,21 +83,23 @@ canvas{
     margin-top:2px;
 }
 
+/* =========================================================
+   LIFE
+========================================================= */
+
 .lifePanel{
-    position:absolute;
-    top:70px;
-    left:50%;
-    transform:translateX(-50%);
     min-width:150px;
-    text-align:center;
+    margin-left:12px;
 }
 
 .lifeBar{
     width:120px;
     height:10px;
-    margin:6px auto 0;
+    margin-top:6px;
+
     overflow:hidden;
     border-radius:10px;
+
     background:rgba(0,0,0,.55);
     border:1px solid rgba(255,255,255,.25);
 }
@@ -100,11 +107,14 @@ canvas{
 #lifeFill{
     width:100%;
     height:100%;
-    background:linear-gradient(
-        90deg,
-        #36d66b,
-        #b8e84c
-    );
+
+    background:
+        linear-gradient(
+            90deg,
+            #36d66b,
+            #b8e84c
+        );
+
     transition:width:.2s;
 }
 
@@ -115,11 +125,18 @@ canvas{
     font-weight:bold;
 }
 
+/* =========================================================
+   PAUSE
+========================================================= */
+
 #pauseBtn{
     position:absolute;
+
     top:22px;
     left:50%;
+
     transform:translateX(-50%);
+
     z-index:8;
 
     margin:0;
@@ -139,7 +156,8 @@ canvas{
 
     cursor:pointer;
 
-    box-shadow:0 5px 18px rgba(0,0,0,.35);
+    box-shadow:
+        0 5px 18px rgba(0,0,0,.35);
 
     backdrop-filter:blur(5px);
 }
@@ -148,16 +166,24 @@ canvas{
     filter:brightness(1.15);
 }
 
+/* =========================================================
+   TELAS
+========================================================= */
+
 #menu,
 #gameover,
 #pauseScreen{
     position:absolute;
     inset:0;
+
     display:flex;
     flex-direction:column;
+
     align-items:center;
     justify-content:center;
+
     text-align:center;
+
     z-index:10;
 
     background:
@@ -173,10 +199,17 @@ canvas{
     display:none;
 }
 
+/* =========================================================
+   LOGO
+========================================================= */
+
 .logo{
     font-size:clamp(48px,9vw,105px);
+
     font-weight:900;
+
     letter-spacing:-5px;
+
     color:#f0bd4e;
 
     text-shadow:
@@ -186,17 +219,32 @@ canvas{
 
 .subtitle{
     margin-top:-5px;
+
     color:#fff1c8;
-    font-size:clamp(13px,2vw,20px);
+
+    font-size:
+        clamp(
+            13px,
+            2vw,
+            20px
+        );
+
     letter-spacing:6px;
+
     text-transform:uppercase;
 }
 
+/* =========================================================
+   BOTÕES
+========================================================= */
+
 button{
     margin-top:35px;
+
     padding:16px 42px;
 
     border:2px solid #f3ca67;
+
     border-radius:999px;
 
     background:
@@ -209,6 +257,7 @@ button{
 
     font-size:18px;
     font-weight:bold;
+
     letter-spacing:2px;
 
     cursor:pointer;
@@ -233,14 +282,19 @@ button:active{
 
 .instructions{
     margin-top:18px;
+
     color:#d7c39a;
+
     font-size:13px;
 }
 
 #finalScore{
     font-size:58px;
+
     color:#f0bd4e;
+
     font-weight:900;
+
     margin-top:8px;
 }
 
@@ -251,8 +305,16 @@ button:active{
 
 #pauseTitle{
     color:#f0bd4e;
-    font-size:clamp(42px,8vw,90px);
+
+    font-size:
+        clamp(
+            42px,
+            8vw,
+            90px
+        );
+
     font-weight:900;
+
     letter-spacing:-3px;
 
     text-shadow:
@@ -261,10 +323,17 @@ button:active{
 
 #pauseHint{
     margin-top:12px;
+
     color:#fff1c8;
+
     letter-spacing:3px;
+
     font-size:13px;
 }
+
+/* =========================================================
+   MOBILE
+========================================================= */
 
 @media(max-width:700px){
 
@@ -283,8 +352,8 @@ button:active{
     }
 
     .lifePanel{
-        top:58px;
         min-width:125px;
+        margin-left:8px;
     }
 
     .lifeBar{
@@ -293,7 +362,9 @@ button:active{
 
     #pauseBtn{
         top:10px;
+
         padding:8px 14px;
+
         font-size:11px;
     }
 
@@ -310,7 +381,13 @@ button:active{
 
 <canvas id="canvas"></canvas>
 
+<!-- =====================================================
+     HUD
+===================================================== -->
+
 <div id="hud">
+
+    <!-- PONTUAÇÃO -->
 
     <div class="panel">
 
@@ -326,6 +403,9 @@ button:active{
         </div>
 
     </div>
+
+
+    <!-- LIFE AO LADO DA PONTUAÇÃO -->
 
     <div class="panel lifePanel">
 
@@ -348,6 +428,9 @@ button:active{
 
     </div>
 
+
+    <!-- RECORDE -->
+
     <div class="panel">
 
         <div class="label">
@@ -365,9 +448,17 @@ button:active{
 
 </div>
 
+
+<!-- PAUSE -->
+
 <button id="pauseBtn">
     PAUSE
 </button>
+
+
+<!-- =====================================================
+     MENU
+===================================================== -->
 
 <div id="menu">
 
@@ -388,6 +479,11 @@ button:active{
     </div>
 
 </div>
+
+
+<!-- =====================================================
+     GAME OVER
+===================================================== -->
 
 <div id="gameover">
 
@@ -413,6 +509,11 @@ button:active{
 
 </div>
 
+
+<!-- =====================================================
+     PAUSE SCREEN
+===================================================== -->
+
 <div id="pauseScreen">
 
     <div id="pauseTitle">
@@ -429,19 +530,28 @@ button:active{
 
 </div>
 
+
 <script>
+
+/* =========================================================
+   FULLSCREEN
+========================================================= */
 
 function enterFullscreenAndLock(){
 
     const elem=
         document.documentElement;
 
-    if(elem.requestFullscreen){
+    if(
+        elem.requestFullscreen
+    ){
 
         elem.requestFullscreen()
         .catch(()=>{});
 
-    }else if(elem.webkitRequestFullscreen){
+    }else if(
+        elem.webkitRequestFullscreen
+    ){
 
         elem.webkitRequestFullscreen();
     }
@@ -457,6 +567,11 @@ function enterFullscreenAndLock(){
     }
 }
 
+
+/* =========================================================
+   CANVAS
+========================================================= */
+
 const canvas=
     document.getElementById("canvas");
 
@@ -466,9 +581,17 @@ const ctx=
 let W;
 let H;
 
+
+/* =========================================================
+   ESTADO
+========================================================= */
+
 let running=false;
+
 let paused=false;
+
 let lastTime=0;
+
 let score=0;
 
 let best=
@@ -479,19 +602,39 @@ let best=
     );
 
 let speed=14;
+
 let distance=0;
 
 let obstacles=[];
+
 let coins=[];
+
 let particles=[];
 
 let spawnTimer=4.0;
+
 let coinTimer=.25;
+
+
+/* =========================================================
+   CHÃO
+========================================================= */
 
 const groundHeight=58;
 
+
+/* =========================================================
+   VIDA
+========================================================= */
+
 let life=100;
+
 let hitCooldown=0;
+
+
+/* =========================================================
+   LEÃO
+========================================================= */
 
 const lion={
 
@@ -516,9 +659,15 @@ const lion={
     frame:0
 };
 
+
 document.getElementById(
     "best"
 ).textContent=best;
+
+
+/* =========================================================
+   RESIZE
+========================================================= */
 
 function resize(){
 
@@ -542,7 +691,9 @@ function resize(){
     );
 
     W=canvas.clientWidth;
+
     H=canvas.clientHeight;
+
 
     lion.y=
         H-
@@ -557,10 +708,17 @@ window.addEventListener(
 
 resize();
 
+
 function groundY(){
 
-    return H-groundHeight;
+    return H-
+        groundHeight;
 }
+
+
+/* =========================================================
+   LIFE UI
+========================================================= */
 
 function updateLifeUI(){
 
@@ -574,11 +732,21 @@ function updateLifeUI(){
             "lifeValue"
         );
 
+
     fill.style.width=
-        Math.max(0,life)+"%";
+        Math.max(
+            0,
+            life
+        )+
+        "%";
+
 
     value.textContent=
-        Math.max(0,life);
+        Math.max(
+            0,
+            life
+        );
+
 
     if(life<=25){
 
@@ -597,22 +765,35 @@ function updateLifeUI(){
     }
 }
 
+
+/* =========================================================
+   INICIAR
+========================================================= */
+
 function startGame(){
 
     running=true;
+
     paused=false;
+
     score=0;
+
     distance=0;
+
     speed=14;
 
     obstacles=[];
+
     coins=[];
+
     particles=[];
 
     spawnTimer=4.0;
+
     coinTimer=.25;
 
     life=100;
+
     hitCooldown=0;
 
     updateLifeUI();
@@ -622,35 +803,50 @@ function startGame(){
         lion.height;
 
     lion.vy=0;
+
     lion.grounded=true;
+
     lion.duck=false;
+
 
     document.getElementById(
         "menu"
     ).style.display="none";
 
+
     document.getElementById(
         "gameover"
     ).style.display="none";
+
 
     document.getElementById(
         "pauseScreen"
     ).style.display="none";
 
+
     document.getElementById(
         "pauseBtn"
     ).style.display="block";
 
+
     lastTime=
         performance.now();
+
 
     requestAnimationFrame(loop);
 }
 
+
+/* =========================================================
+   GAME OVER
+========================================================= */
+
 function gameOver(){
 
     running=false;
+
     paused=false;
+
 
     if(score>best){
 
@@ -662,27 +858,37 @@ function gameOver(){
         );
     }
 
+
     document.getElementById(
         "finalScore"
     ).textContent=score;
+
 
     document.getElementById(
         "bestScore"
     ).textContent=
         "Recorde: "+best;
 
+
     document.getElementById(
         "best"
     ).textContent=best;
+
 
     document.getElementById(
         "gameover"
     ).style.display="flex";
 
+
     document.getElementById(
         "pauseBtn"
     ).style.display="none";
 }
+
+
+/* =========================================================
+   PAUSE
+========================================================= */
 
 function pauseGame(){
 
@@ -692,10 +898,12 @@ function pauseGame(){
 
     paused=true;
 
+
     document.getElementById(
         "pauseScreen"
     ).style.display="flex";
 }
+
 
 function resumeGame(){
 
@@ -703,17 +911,22 @@ function resumeGame(){
         return;
     }
 
+
     paused=false;
+
 
     document.getElementById(
         "pauseScreen"
     ).style.display="none";
 
+
     lastTime=
         performance.now();
 
+
     requestAnimationFrame(loop);
 }
+
 
 document.getElementById(
     "pauseBtn"
@@ -722,9 +935,11 @@ document.getElementById(
     e=>{
 
         e.stopPropagation();
+
         pauseGame();
     }
 );
+
 
 document.getElementById(
     "resumeBtn"
@@ -733,20 +948,35 @@ document.getElementById(
     e=>{
 
         e.stopPropagation();
+
         resumeGame();
     }
 );
 
+
+/* =========================================================
+   SALTO
+========================================================= */
+
 function jump(){
 
-    if(!running || paused){
+    if(
+        !running ||
+        paused
+    ){
         return;
     }
 
-    if(lion.grounded){
 
-        lion.vy=lion.jumpPower;
+    if(
+        lion.grounded
+    ){
+
+        lion.vy=
+            lion.jumpPower;
+
         lion.grounded=false;
+
 
         for(
             let i=0;
@@ -779,17 +1009,31 @@ function jump(){
     }
 }
 
+
+/* =========================================================
+   TOQUE = SALTO
+========================================================= */
+
 document.addEventListener(
     "touchstart",
     function(e){
 
-        if(e.target.closest("button")){
+        if(
+            e.target.closest(
+                "button"
+            )
+        ){
             return;
         }
 
-        if(running && !paused){
+
+        if(
+            running &&
+            !paused
+        ){
 
             e.preventDefault();
+
             jump();
         }
 
@@ -799,15 +1043,29 @@ document.addEventListener(
     }
 );
 
+
+/* =========================================================
+   MOUSE
+========================================================= */
+
 canvas.addEventListener(
     "mousedown",
     function(){
 
-        if(running && !paused){
+        if(
+            running &&
+            !paused
+        ){
+
             jump();
         }
     }
 );
+
+
+/* =========================================================
+   TECLADO
+========================================================= */
 
 window.addEventListener(
     "keydown",
@@ -819,8 +1077,10 @@ window.addEventListener(
         ){
 
             e.preventDefault();
+
             jump();
         }
+
 
         if(
             e.code==="Enter" &&
@@ -830,22 +1090,34 @@ window.addEventListener(
             startGame();
         }
 
+
         if(
             e.code==="KeyP" ||
             e.code==="Escape"
         ){
 
-            if(running && !paused){
+            if(
+                running &&
+                !paused
+            ){
 
                 pauseGame();
 
-            }else if(running && paused){
+            }else if(
+                running &&
+                paused
+            ){
 
                 resumeGame();
             }
         }
     }
 );
+
+
+/* =========================================================
+   BOTÕES
+========================================================= */
 
 document.getElementById(
     "startBtn"
@@ -854,8 +1126,10 @@ document.getElementById(
     e.stopPropagation();
 
     enterFullscreenAndLock();
+
     startGame();
 };
+
 
 document.getElementById(
     "restartBtn"
@@ -864,16 +1138,24 @@ document.getElementById(
     e.stopPropagation();
 
     enterFullscreenAndLock();
+
     startGame();
 };
+
+
+/* =========================================================
+   FOGO
+========================================================= */
 
 function spawnObstacle(){
 
     obstacles.push({
 
-        x:W+260,
+        x:
+            W+260,
 
-        y:groundY()-70,
+        y:
+            groundY()-70,
 
         width:65,
 
@@ -888,19 +1170,35 @@ function spawnObstacle(){
     });
 }
 
-function createCoin(x,y){
+
+/* =========================================================
+   MOEDAS
+========================================================= */
+
+function createCoin(
+    x,
+    y
+){
 
     coins.push({
 
         x:x,
+
         y:y,
+
         r:12,
+
         spin:
             Math.random()*
             Math.PI*
             2
     });
 }
+
+
+/* =========================================================
+   PADRÕES DE MOEDAS
+========================================================= */
 
 function spawnCoin(){
 
@@ -909,12 +1207,14 @@ function spawnCoin(){
             Math.random()*6
         );
 
+
     if(pattern===0){
 
         const y=
             groundY()-
             105-
             Math.random()*70;
+
 
         for(
             let i=0;
@@ -927,11 +1227,14 @@ function spawnCoin(){
                 y
             );
         }
+    }
 
-    }else if(pattern===1){
+
+    else if(pattern===1){
 
         const base=
             groundY()-75;
+
 
         for(
             let i=0;
@@ -944,11 +1247,14 @@ function spawnCoin(){
                 base-i*24
             );
         }
+    }
 
-    }else if(pattern===2){
+
+    else if(pattern===2){
 
         const base=
             groundY()-205;
+
 
         for(
             let i=0;
@@ -961,14 +1267,17 @@ function spawnCoin(){
                 base+i*24
             );
         }
+    }
 
-    }else if(pattern===3){
+
+    else if(pattern===3){
 
         const centerX=
             W+180;
 
         const centerY=
             groundY()-125;
+
 
         for(
             let i=0;
@@ -978,19 +1287,28 @@ function spawnCoin(){
 
             const angle=
                 Math.PI-
-                (Math.PI*i/9);
+                (
+                    Math.PI*i/9
+                );
 
             const radius=120;
 
+
             createCoin(
+
                 centerX+
-                Math.cos(angle)*radius,
+                Math.cos(angle)*
+                radius,
+
                 centerY-
-                Math.sin(angle)*radius
+                Math.sin(angle)*
+                radius
             );
         }
+    }
 
-    }else if(pattern===4){
+
+    else if(pattern===4){
 
         for(
             let i=0;
@@ -999,14 +1317,19 @@ function spawnCoin(){
         ){
 
             createCoin(
+
                 W+50+i*38,
+
                 groundY()-
                 115-
-                Math.sin(i*.75)*45
+                Math.sin(i*.75)*
+                45
             );
         }
+    }
 
-    }else{
+
+    else{
 
         for(
             let i=0;
@@ -1015,21 +1338,35 @@ function spawnCoin(){
         ){
 
             createCoin(
+
                 W+40+i*38,
+
                 groundY()-
                 95-
-                Math.sin(i*.55)*70
+                Math.sin(i*.55)*
+                70
             );
         }
     }
 }
 
+
+/* =========================================================
+   UPDATE
+========================================================= */
+
 function update(dt){
 
-    distance+=speed*dt;
+    distance+=
+        speed*
+        dt;
+
 
     score=
-        Math.floor(distance/10);
+        Math.floor(
+            distance/10
+        );
+
 
     speed=
         14+
@@ -1038,9 +1375,11 @@ function update(dt){
             score/180
         );
 
+
     document.getElementById(
         "score"
     ).textContent=score;
+
 
     if(hitCooldown>0){
 
@@ -1051,27 +1390,48 @@ function update(dt){
         }
     }
 
-    lion.frame+=dt*12;
 
-    lion.vy+=lion.gravity*dt;
+    lion.frame+=
+        dt*12;
 
-    lion.y+=lion.vy*dt;
+
+    lion.vy+=
+        lion.gravity*
+        dt;
+
+
+    lion.y+=
+        lion.vy*
+        dt;
+
 
     const targetGround=
-        groundY()-lion.height;
+        groundY()-
+        lion.height;
 
-    if(lion.y>=targetGround){
 
-        lion.y=targetGround;
+    if(
+        lion.y>=targetGround
+    ){
+
+        lion.y=
+            targetGround;
+
         lion.vy=0;
+
         lion.grounded=true;
     }
 
+
     spawnTimer-=dt;
 
-    if(spawnTimer<=0){
+
+    if(
+        spawnTimer<=0
+    ){
 
         spawnObstacle();
+
 
         spawnTimer=
             Math.max(
@@ -1085,9 +1445,13 @@ function update(dt){
             Math.random()*1.4;
     }
 
+
     coinTimer-=dt;
 
-    if(coinTimer<=0){
+
+    if(
+        coinTimer<=0
+    ){
 
         spawnCoin();
 
@@ -1096,49 +1460,80 @@ function update(dt){
             Math.random()*.65;
     }
 
+
     for(
         const o of obstacles
     ){
 
-        o.x-=speed*60*dt;
-        o.flame+=dt*8;
+        o.x-=
+            speed*
+            60*
+            dt;
+
+        o.flame+=
+            dt*8;
     }
+
 
     for(
         const c of coins
     ){
 
-        c.x-=speed*60*dt;
-        c.spin+=dt*7;
+        c.x-=
+            speed*
+            60*
+            dt;
+
+        c.spin+=
+            dt*7;
     }
+
 
     obstacles=
         obstacles.filter(
             o=>o.x>-180
         );
 
+
     coins=
         coins.filter(
             c=>c.x>-70
         );
 
+
     checkCollisions();
+
 
     for(
         const p of particles
     ){
 
-        p.x+=p.vx*dt;
-        p.y+=p.vy*dt;
-        p.vy+=400*dt;
+        p.x+=
+            p.vx*
+            dt;
+
+        p.y+=
+            p.vy*
+            dt;
+
+        p.vy+=
+            400*
+            dt;
+
         p.life-=dt;
     }
+
 
     particles=
         particles.filter(
             p=>p.life>0
         );
 }
+
+
+/* =========================================================
+   COLISÕES
+========================================================= */
 
 function checkCollisions(){
 
@@ -1154,7 +1549,10 @@ function checkCollisions(){
     const lh=
         lion.height-20;
 
-    if(hitCooldown<=0){
+
+    if(
+        hitCooldown<=0
+    ){
 
         for(
             const o of obstacles
@@ -1186,17 +1584,22 @@ function checkCollisions(){
                 lh>
                 o.y+20;
 
+
             if(hit){
 
                 life-=25;
+
 
                 if(life<0){
                     life=0;
                 }
 
+
                 updateLifeUI();
 
+
                 hitCooldown=1.2;
+
 
                 for(
                     let i=0;
@@ -1216,39 +1619,54 @@ function checkCollisions(){
 
                         vx:
                             (
-                                Math.random()-.5
-                            )*280,
+                                Math.random()-
+                                .5
+                            )*
+                            280,
 
                         vy:
                             (
-                                Math.random()-.5
-                            )*280,
+                                Math.random()-
+                                .5
+                            )*
+                            280,
 
                         life:.7
                     });
                 }
 
+
                 o.x-=100;
 
-                if(life<=0){
+
+                if(
+                    life<=0
+                ){
 
                     gameOver();
 
                     return;
                 }
 
+
                 break;
             }
         }
     }
 
+
     for(
-        let i=coins.length-1;
+        let i=
+            coins.length-1;
+
         i>=0;
+
         i--
     ){
 
-        const c=coins[i];
+        const c=
+            coins[i];
+
 
         const dx=
             (
@@ -1257,6 +1675,7 @@ function checkCollisions(){
             )-
             c.x;
 
+
         const dy=
             (
                 lion.y+
@@ -1264,12 +1683,18 @@ function checkCollisions(){
             )-
             c.y;
 
+
         if(
-            Math.sqrt(dx*dx+dy*dy)<65
+            Math.sqrt(
+                dx*dx+
+                dy*dy
+            )<65
         ){
 
             score+=25;
+
             distance+=250;
+
 
             for(
                 let j=0;
@@ -1280,17 +1705,22 @@ function checkCollisions(){
                 particles.push({
 
                     x:c.x,
+
                     y:c.y,
 
                     vx:
                         (
-                            Math.random()-.5
-                        )*220,
+                            Math.random()-
+                            .5
+                        )*
+                        220,
 
                     vy:
                         (
-                            Math.random()-.5
-                        )*220,
+                            Math.random()-
+                            .5
+                        )*
+                        220,
 
                     life:
                         .6+
@@ -1298,17 +1728,30 @@ function checkCollisions(){
                 });
             }
 
-            coins.splice(i,1);
+
+            coins.splice(
+                i,
+                1
+            );
         }
     }
 }
+
+
+/* =========================================================
+   CÉU
+========================================================= */
 
 function drawSky(){
 
     const g=
         ctx.createLinearGradient(
-            0,0,0,H
+            0,
+            0,
+            0,
+            H
         );
+
 
     g.addColorStop(
         0,
@@ -1325,19 +1768,28 @@ function drawSky(){
         "#7893a8"
     );
 
+
     ctx.fillStyle=g;
 
+
     ctx.fillRect(
-        0,0,W,H
+        0,
+        0,
+        W,
+        H
     );
+
 
     ctx.strokeStyle=
         "rgba(30,45,65,.45)";
 
     ctx.lineWidth=2;
 
+
     const brickH=18;
+
     const brickW=45;
+
 
     for(
         let y=0;
@@ -1347,15 +1799,29 @@ function drawSky(){
 
         ctx.beginPath();
 
-        ctx.moveTo(0,y);
-        ctx.lineTo(W,y);
+        ctx.moveTo(
+            0,
+            y
+        );
+
+        ctx.lineTo(
+            W,
+            y
+        );
+
         ctx.stroke();
+
 
         const offsetX=
             (
-                Math.floor(y/brickH)%2
+                Math.floor(
+                    y/brickH
+                )%2
             )*
-            (brickW/2);
+            (
+                brickW/2
+            );
+
 
         for(
             let x=offsetX;
@@ -1365,18 +1831,35 @@ function drawSky(){
 
             ctx.beginPath();
 
-            ctx.moveTo(x,y);
-            ctx.lineTo(x,y+brickH);
+            ctx.moveTo(
+                x,
+                y
+            );
+
+            ctx.lineTo(
+                x,
+                y+brickH
+            );
+
             ctx.stroke();
         }
     }
 }
 
+
+/* =========================================================
+   CIDADE
+========================================================= */
+
 function drawDistantCity(){
 
-    const y=groundY();
+    const y=
+        groundY();
 
-    ctx.fillStyle="#806d5c";
+
+    ctx.fillStyle=
+        "#806d5c";
+
 
     for(
         let x=-50;
@@ -1386,7 +1869,10 @@ function drawDistantCity(){
 
         const h=
             70+
-            Math.abs(x*13%100);
+            Math.abs(
+                x*13%100
+            );
+
 
         ctx.fillRect(
             x,
@@ -1395,12 +1881,14 @@ function drawDistantCity(){
             h
         );
 
+
         ctx.fillRect(
             x+15,
             y-h-35,
             25,
             35
         );
+
 
         ctx.beginPath();
 
@@ -1422,9 +1910,14 @@ function drawDistantCity(){
         ctx.fill();
     }
 
-    const zx=W*.55;
 
-    ctx.fillStyle="#a08b73";
+    const zx=
+        W*.55;
+
+
+    ctx.fillStyle=
+        "#a08b73";
+
 
     ctx.beginPath();
 
@@ -1450,7 +1943,10 @@ function drawDistantCity(){
 
     ctx.fill();
 
-    ctx.fillStyle="#b49d7c";
+
+    ctx.fillStyle=
+        "#b49d7c";
+
 
     ctx.fillRect(
         zx-85,
@@ -1459,12 +1955,14 @@ function drawDistantCity(){
         55
     );
 
+
     ctx.fillRect(
         zx-48,
         y-195,
         96,
         45
     );
+
 
     ctx.beginPath();
 
@@ -1486,9 +1984,16 @@ function drawDistantCity(){
     ctx.fill();
 }
 
+
+/* =========================================================
+   MÁRMORE
+========================================================= */
+
 function drawGround(){
 
-    const y=groundY();
+    const y=
+        groundY();
+
 
     const marble=
         ctx.createLinearGradient(
@@ -1497,6 +2002,7 @@ function drawGround(){
             0,
             H
         );
+
 
     marble.addColorStop(
         0,
@@ -1518,7 +2024,10 @@ function drawGround(){
         "#bfc3c7"
     );
 
-    ctx.fillStyle=marble;
+
+    ctx.fillStyle=
+        marble;
+
 
     ctx.fillRect(
         0,
@@ -1527,16 +2036,22 @@ function drawGround(){
         groundHeight
     );
 
+
     const tileW=150;
+
     const tileH=29;
 
+
     const offset=
-        -(distance*2)%tileW;
+        -(distance*2)%
+        tileW;
+
 
     ctx.strokeStyle=
         "rgba(105,110,118,.42)";
 
     ctx.lineWidth=2;
+
 
     for(
         let x=offset;
@@ -1546,10 +2061,19 @@ function drawGround(){
 
         ctx.beginPath();
 
-        ctx.moveTo(x,y);
-        ctx.lineTo(x,H);
+        ctx.moveTo(
+            x,
+            y
+        );
+
+        ctx.lineTo(
+            x,
+            H
+        );
+
         ctx.stroke();
     }
+
 
     for(
         let yy=y+tileH;
@@ -1559,15 +2083,25 @@ function drawGround(){
 
         ctx.beginPath();
 
-        ctx.moveTo(0,yy);
-        ctx.lineTo(W,yy);
+        ctx.moveTo(
+            0,
+            yy
+        );
+
+        ctx.lineTo(
+            W,
+            yy
+        );
+
         ctx.stroke();
     }
+
 
     ctx.strokeStyle=
         "rgba(120,125,132,.18)";
 
     ctx.lineWidth=2;
+
 
     for(
         let i=0;
@@ -1580,11 +2114,16 @@ function drawGround(){
                 i*230-
                 distance*.8
             )%
-            (W+300)-150;
+            (W+300)-
+            150;
+
 
         ctx.beginPath();
 
-        ctx.moveTo(sx,y);
+        ctx.moveTo(
+            sx,
+            y
+        );
 
         ctx.bezierCurveTo(
             sx+60,
@@ -1598,6 +2137,7 @@ function drawGround(){
         ctx.stroke();
     }
 
+
     const shine=
         ctx.createLinearGradient(
             0,
@@ -1606,17 +2146,21 @@ function drawGround(){
             y+22
         );
 
+
     shine.addColorStop(
         0,
         "rgba(255,255,255,.98)"
     );
+
 
     shine.addColorStop(
         1,
         "rgba(255,255,255,0)"
     );
 
+
     ctx.fillStyle=shine;
+
 
     ctx.fillRect(
         0,
@@ -1626,8 +2170,15 @@ function drawGround(){
     );
 }
 
+
+/* =========================================================
+   FRAMES DO LEÃO
+========================================================= */
+
 const lionFrames=[];
+
 const processedFrames=[];
+
 
 const frameURLs=[
 
@@ -1659,24 +2210,40 @@ const frameURLs=[
 
 ];
 
-function processLionImage(img,index){
+
+/* =========================================================
+   PROCESSAMENTO DO LEÃO
+========================================================= */
+
+function processLionImage(
+    img,
+    index
+){
 
     try{
 
         const off=
-            document.createElement("canvas");
+            document.createElement(
+                "canvas"
+            );
 
         const octx=
             off.getContext("2d");
 
-        off.width=img.naturalWidth;
-        off.height=img.naturalHeight;
+
+        off.width=
+            img.naturalWidth;
+
+        off.height=
+            img.naturalHeight;
+
 
         octx.drawImage(
             img,
             0,
             0
         );
+
 
         const imageData=
             octx.getImageData(
@@ -1686,7 +2253,10 @@ function processLionImage(img,index){
                 off.height
             );
 
-        const data=imageData.data;
+
+        const data=
+            imageData.data;
+
 
         for(
             let i=0;
@@ -1695,11 +2265,19 @@ function processLionImage(img,index){
         ){
 
             const r=data[i];
+
             const g=data[i+1];
+
             const b=data[i+2];
 
+
             const brightness=
-                (r+g+b)/3;
+                (
+                    r+
+                    g+
+                    b
+                )/3;
+
 
             if(
                 (
@@ -1716,6 +2294,7 @@ function processLionImage(img,index){
                 continue;
             }
 
+
             const luminance=
                 (
                     .299*r+
@@ -1723,29 +2302,41 @@ function processLionImage(img,index){
                     .114*b
                 )/255;
 
+
             const darkR=72;
             const darkG=35;
             const darkB=10;
+
 
             const goldR=242;
             const goldG=180;
             const goldB=58;
 
+
             data[i]=
                 darkR+
-                (goldR-darkR)*
+                (
+                    goldR-darkR
+                )*
                 luminance;
+
 
             data[i+1]=
                 darkG+
-                (goldG-darkG)*
+                (
+                    goldG-darkG
+                )*
                 luminance;
+
 
             data[i+2]=
                 darkB+
-                (goldB-darkB)*
+                (
+                    goldB-darkB
+                )*
                 luminance;
         }
+
 
         octx.putImageData(
             imageData,
@@ -1753,15 +2344,22 @@ function processLionImage(img,index){
             0
         );
 
+
         const processed=
             new Image();
 
+
         processed.src=
-            off.toDataURL("image/png");
+            off.toDataURL(
+                "image/png"
+            );
 
-        processedFrames[index]=processed;
 
-    }catch(error){
+        processedFrames[index]=
+            processed;
+
+    }
+    catch(error){
 
         processedFrames[index]=img;
 
@@ -1773,13 +2371,21 @@ function processLionImage(img,index){
     }
 }
 
+
+/* =========================================================
+   CARREGAR FRAMES
+========================================================= */
+
 frameURLs.forEach(
     (url,index)=>{
 
         const img=
             new Image();
 
-        img.crossOrigin="Anonymous";
+
+        img.crossOrigin=
+            "Anonymous";
+
 
         img.onload=()=>{
 
@@ -1789,6 +2395,7 @@ frameURLs.forEach(
             );
         };
 
+
         img.onerror=()=>{
 
             console.log(
@@ -1797,34 +2404,43 @@ frameURLs.forEach(
             );
         };
 
+
         img.src=url;
 
-        lionFrames[index]=img;
+
+        lionFrames[index]=
+            img;
     }
 );
 
+
+/* =========================================================
+   DESENHAR LEÃO
+   25% MENOR
+========================================================= */
+
 function drawLion(){
 
-    /*
-       LEÃO REDUZIDO EM 25%
-    */
-
     const drawWidth=337.5;
+
     const drawHeight=184.5;
 
+
     /*
-       Mantém o leão centralizado
-       na mesma região da arena.
+       Mantém a posição visual
+       centralizada.
     */
 
     let x=
         lion.x-
         112.5;
 
+
     let y=
         groundY()-
         drawHeight+
         8;
+
 
     y+=
         (
@@ -1835,6 +2451,7 @@ function drawLion(){
             )
         );
 
+
     const bob=
         lion.grounded
         ? Math.sin(
@@ -1842,9 +2459,12 @@ function drawLion(){
         )*2
         : 0;
 
+
     y+=bob;
 
+
     ctx.save();
+
 
     if(
         hitCooldown>0 &&
@@ -1855,6 +2475,7 @@ function drawLion(){
 
         ctx.globalAlpha=.35;
     }
+
 
     ctx.beginPath();
 
@@ -1868,16 +2489,19 @@ function drawLion(){
         Math.PI*2
     );
 
+
     ctx.fillStyle=
         "rgba(0,0,0,.28)";
 
     ctx.fill();
+
 
     const currentFrameIndex=
         Math.floor(
             lion.frame/2
         )%
         frameURLs.length;
+
 
     const currentImg=
         processedFrames[
@@ -1887,6 +2511,7 @@ function drawLion(){
             currentFrameIndex
         ];
 
+
     if(
         currentImg &&
         currentImg.complete
@@ -1894,6 +2519,7 @@ function drawLion(){
 
         ctx.globalCompositeOperation=
             "source-over";
+
 
         ctx.drawImage(
             currentImg,
@@ -1904,17 +2530,27 @@ function drawLion(){
         );
     }
 
+
     ctx.globalAlpha=1;
 
     ctx.restore();
 }
 
+
+/* =========================================================
+   FOGO
+========================================================= */
+
 function drawObstacle(o){
 
     const x=o.x;
+
     const y=o.y;
+
     const w=o.width;
+
     const h=o.height;
+
 
     const glow=
         ctx.createRadialGradient(
@@ -1925,6 +2561,7 @@ function drawObstacle(o){
             y+h/2,
             65
         );
+
 
     glow.addColorStop(
         0,
@@ -1941,7 +2578,9 @@ function drawObstacle(o){
         "rgba(255,40,0,0)"
     );
 
+
     ctx.fillStyle=glow;
+
 
     ctx.fillRect(
         x-35,
@@ -1950,22 +2589,30 @@ function drawObstacle(o){
         h+50
     );
 
+
     const flicker=
-        Math.sin(o.flame)*5;
+        Math.sin(
+            o.flame
+        )*5;
+
 
     ctx.save();
+
 
     ctx.translate(
         x+w/2,
         y+h
     );
 
+
     ctx.beginPath();
+
 
     ctx.moveTo(
         0,
         -h-flicker
     );
+
 
     ctx.bezierCurveTo(
         -28,
@@ -1976,6 +2623,7 @@ function drawObstacle(o){
         0
     );
 
+
     ctx.bezierCurveTo(
         24,
         -18,
@@ -1985,6 +2633,7 @@ function drawObstacle(o){
         -h-flicker
     );
 
+
     const fire=
         ctx.createLinearGradient(
             0,
@@ -1992,6 +2641,7 @@ function drawObstacle(o){
             0,
             0
         );
+
 
     fire.addColorStop(
         0,
@@ -2013,15 +2663,20 @@ function drawObstacle(o){
         "#d92d08"
     );
 
+
     ctx.fillStyle=fire;
+
     ctx.fill();
 
+
     ctx.beginPath();
+
 
     ctx.moveTo(
         0,
         -h+15-flicker
     );
+
 
     ctx.bezierCurveTo(
         -12,
@@ -2032,6 +2687,7 @@ function drawObstacle(o){
         -2
     );
 
+
     ctx.bezierCurveTo(
         9,
         -10,
@@ -2041,25 +2697,40 @@ function drawObstacle(o){
         -h+15-flicker
     );
 
-    ctx.fillStyle="#fff3a0";
+
+    ctx.fillStyle=
+        "#fff3a0";
+
+
     ctx.fill();
+
 
     ctx.restore();
 }
+
+
+/* =========================================================
+   MOEDA
+========================================================= */
 
 function drawCoin(c){
 
     const squash=
         Math.abs(
-            Math.cos(c.spin)
+            Math.cos(
+                c.spin
+            )
         );
 
+
     ctx.save();
+
 
     ctx.translate(
         c.x,
         c.y
     );
+
 
     ctx.scale(
         .35+
@@ -2067,7 +2738,9 @@ function drawCoin(c){
         1
     );
 
+
     ctx.beginPath();
+
 
     ctx.arc(
         0,
@@ -2077,12 +2750,16 @@ function drawCoin(c){
         Math.PI*2
     );
 
+
     ctx.fillStyle=
         "rgba(255,205,70,.16)";
 
+
     ctx.fill();
 
+
     ctx.beginPath();
+
 
     ctx.arc(
         0,
@@ -2092,20 +2769,39 @@ function drawCoin(c){
         Math.PI*2
     );
 
-    ctx.fillStyle="#f2c34e";
+
+    ctx.fillStyle=
+        "#f2c34e";
+
+
     ctx.fill();
 
-    ctx.strokeStyle="#fff0a2";
+
+    ctx.strokeStyle=
+        "#fff0a2";
+
+
     ctx.lineWidth=2;
+
+
     ctx.stroke();
 
-    ctx.fillStyle="#875015";
+
+    ctx.fillStyle=
+        "#875015";
+
 
     ctx.font=
         "bold 13px Arial";
 
-    ctx.textAlign="center";
-    ctx.textBaseline="middle";
+
+    ctx.textAlign=
+        "center";
+
+
+    ctx.textBaseline=
+        "middle";
+
 
     ctx.fillText(
         "𒀭",
@@ -2113,8 +2809,14 @@ function drawCoin(c){
         1
     );
 
+
     ctx.restore();
 }
+
+
+/* =========================================================
+   PARTÍCULAS
+========================================================= */
 
 function drawParticles(){
 
@@ -2128,9 +2830,13 @@ function drawParticles(){
                 p.life/.6
             );
 
-        ctx.fillStyle="#f4c45c";
+
+        ctx.fillStyle=
+            "#f4c45c";
+
 
         ctx.beginPath();
+
 
         ctx.arc(
             p.x,
@@ -2140,11 +2846,18 @@ function drawParticles(){
             Math.PI*2
         );
 
+
         ctx.fill();
     }
 
+
     ctx.globalAlpha=1;
 }
+
+
+/* =========================================================
+   DRAW
+========================================================= */
 
 function draw(){
 
@@ -2155,24 +2868,34 @@ function draw(){
         H
     );
 
+
     drawSky();
+
     drawDistantCity();
+
     drawGround();
+
 
     for(
         const c of coins
     ){
+
         drawCoin(c);
     }
+
 
     for(
         const o of obstacles
     ){
+
         drawObstacle(o);
     }
 
+
     drawLion();
+
     drawParticles();
+
 
     const v=
         ctx.createRadialGradient(
@@ -2184,17 +2907,21 @@ function draw(){
             Math.max(W,H)*.75
         );
 
+
     v.addColorStop(
         0,
         "rgba(0,0,0,0)"
     );
+
 
     v.addColorStop(
         1,
         "rgba(0,0,0,.30)"
     );
 
+
     ctx.fillStyle=v;
+
 
     ctx.fillRect(
         0,
@@ -2204,14 +2931,21 @@ function draw(){
     );
 }
 
+
+/* =========================================================
+   LOOP
+========================================================= */
+
 function loop(time){
 
     if(
         !running ||
         paused
     ){
+
         return;
     }
+
 
     let dt=
         (
@@ -2219,7 +2953,9 @@ function loop(time){
             lastTime
         )/1000;
 
+
     lastTime=time;
+
 
     dt=
         Math.min(
@@ -2227,11 +2963,19 @@ function loop(time){
             .035
         );
 
+
     update(dt);
+
     draw();
+
 
     requestAnimationFrame(loop);
 }
+
+
+/* =========================================================
+   PRIMEIRO DESENHO
+========================================================= */
 
 draw();
 
@@ -2239,4 +2983,3 @@ draw();
 
 </body>
 </html>
-```
