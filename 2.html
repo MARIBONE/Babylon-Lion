@@ -42,6 +42,7 @@ canvas{
     height:100%;
 }
 
+
 /* =========================================================
    HUD
 ========================================================= */
@@ -57,14 +58,11 @@ canvas{
     align-items:flex-start;
 
     pointer-events:none;
+
     color:white;
+
     z-index:5;
 }
-
-/*
-   LEFT SIDE:
-   SCORE + LIFE
-*/
 
 #leftHud{
     display:flex;
@@ -72,31 +70,44 @@ canvas{
     gap:12px;
 }
 
+
 /* =========================================================
    PANELS
 ========================================================= */
 
 .panel{
     background:rgba(20,18,17,.72);
+
     border:2px solid rgba(241,190,75,.65);
+
     border-radius:12px;
+
     padding:10px 16px;
-    box-shadow:0 5px 20px rgba(0,0,0,.3);
+
+    box-shadow:
+        0 5px 20px rgba(0,0,0,.3);
+
     backdrop-filter:blur(5px);
 }
 
 .label{
     font-size:11px;
+
     letter-spacing:2px;
+
     color:#f1c35a;
+
     text-transform:uppercase;
 }
 
 .value{
     font-size:25px;
+
     font-weight:bold;
+
     margin-top:2px;
 }
+
 
 /* =========================================================
    LIFE
@@ -104,16 +115,19 @@ canvas{
 
 .lifePanel{
     min-width:150px;
+
     text-align:center;
 }
 
 .lifeBar{
     width:120px;
+
     height:10px;
 
     margin:6px auto 0;
 
     overflow:hidden;
+
     border-radius:10px;
 
     background:rgba(0,0,0,.55);
@@ -123,6 +137,7 @@ canvas{
 
 #lifeFill{
     width:100%;
+
     height:100%;
 
     background:
@@ -141,17 +156,20 @@ canvas{
     color:#fff;
 
     font-size:12px;
+
     font-weight:bold;
 }
 
+
 /* =========================================================
-   PAUSE
+   PAUSE BUTTON
 ========================================================= */
 
 #pauseBtn{
     position:absolute;
 
     top:22px;
+
     left:50%;
 
     transform:translateX(-50%);
@@ -171,6 +189,7 @@ canvas{
     color:#fff3c8;
 
     font-size:13px;
+
     font-weight:bold;
 
     letter-spacing:2px;
@@ -187,6 +206,7 @@ canvas{
     filter:brightness(1.15);
 }
 
+
 /* =========================================================
    SCREENS
 ========================================================= */
@@ -195,12 +215,15 @@ canvas{
 #gameover,
 #pauseScreen{
     position:absolute;
+
     inset:0;
 
     display:flex;
+
     flex-direction:column;
 
     align-items:center;
+
     justify-content:center;
 
     text-align:center;
@@ -220,12 +243,18 @@ canvas{
     display:none;
 }
 
+
 /* =========================================================
    LOGO
 ========================================================= */
 
 .logo{
-    font-size:clamp(48px,9vw,105px);
+    font-size:
+        clamp(
+            48px,
+            9vw,
+            105px
+        );
 
     font-weight:900;
 
@@ -255,6 +284,7 @@ canvas{
     text-transform:uppercase;
 }
 
+
 /* =========================================================
    BUTTONS
 ========================================================= */
@@ -277,6 +307,7 @@ button{
     color:white;
 
     font-size:18px;
+
     font-weight:bold;
 
     letter-spacing:2px;
@@ -321,6 +352,7 @@ button:active{
 
 #bestScore{
     color:#ddd;
+
     margin-top:4px;
 }
 
@@ -352,6 +384,7 @@ button:active{
     font-size:13px;
 }
 
+
 /* =========================================================
    MOBILE
 ========================================================= */
@@ -360,7 +393,9 @@ button:active{
 
     #hud{
         top:10px;
+
         left:10px;
+
         right:10px;
     }
 
@@ -412,11 +447,7 @@ button:active{
 
 <div id="hud">
 
-    <!-- LEFT SIDE -->
-
     <div id="leftHud">
-
-        <!-- SCORE -->
 
         <div class="panel">
 
@@ -433,8 +464,6 @@ button:active{
 
         </div>
 
-
-        <!-- LIFE -->
 
         <div class="panel lifePanel">
 
@@ -459,8 +488,6 @@ button:active{
 
     </div>
 
-
-    <!-- BEST -->
 
     <div class="panel">
 
@@ -699,6 +726,102 @@ document.getElementById(
 
 
 /* =========================================================
+   AUDIO
+========================================================= */
+
+const menuMusic=
+    new Audio(
+        "assets/music/babylon_mp3_58926.mp3"
+    );
+
+const gameMusic=
+    new Audio(
+        "assets/music/ancient_sumerian_music_ancient_kingdom_mp3_59905.mp3"
+    );
+
+
+menuMusic.loop=true;
+gameMusic.loop=true;
+
+menuMusic.preload="auto";
+gameMusic.preload="auto";
+
+menuMusic.volume=.75;
+gameMusic.volume=.65;
+
+
+/*
+   Audio is unlocked after the user's first interaction.
+*/
+
+let audioUnlocked=false;
+
+
+function unlockAudio(){
+
+    if(audioUnlocked){
+        return;
+    }
+
+    audioUnlocked=true;
+
+    menuMusic.play().catch(()=>{});
+}
+
+
+function stopMusic(audio){
+
+    audio.pause();
+
+    try{
+        audio.currentTime=0;
+    }catch(error){}
+}
+
+
+function playMenuMusic(){
+
+    stopMusic(gameMusic);
+
+    menuMusic.play().catch(()=>{});
+}
+
+
+function playGameMusic(){
+
+    stopMusic(menuMusic);
+
+    gameMusic.play().catch(()=>{});
+}
+
+
+function pauseGameMusic(){
+
+    gameMusic.pause();
+}
+
+
+function resumeGameMusic(){
+
+    gameMusic.play().catch(()=>{});
+}
+
+
+/*
+   First interaction unlocks audio.
+*/
+
+document.addEventListener(
+    "pointerdown",
+    unlockAudio,
+    {
+        once:true,
+        passive:true
+    }
+);
+
+
+/* =========================================================
    RESIZE
 ========================================================= */
 
@@ -726,7 +849,6 @@ function resize(){
     W=canvas.clientWidth;
 
     H=canvas.clientHeight;
-
 
     lion.y=
         H-
@@ -805,6 +927,8 @@ function updateLifeUI(){
 
 function startGame(){
 
+    playGameMusic();
+
     running=true;
 
     paused=false;
@@ -876,6 +1000,8 @@ function startGame(){
 
 function gameOver(){
 
+    stopMusic(gameMusic);
+
     running=false;
 
     paused=false;
@@ -931,6 +1057,8 @@ function pauseGame(){
 
     paused=true;
 
+    pauseGameMusic();
+
 
     document.getElementById(
         "pauseScreen"
@@ -944,8 +1072,9 @@ function resumeGame(){
         return;
     }
 
-
     paused=false;
+
+    resumeGameMusic();
 
 
     document.getElementById(
@@ -1044,7 +1173,7 @@ function jump(){
 
 
 /* =========================================================
-   TOUCH = JUMP
+   TOUCH
 ========================================================= */
 
 document.addEventListener(
@@ -1052,9 +1181,7 @@ document.addEventListener(
     function(e){
 
         if(
-            e.target.closest(
-                "button"
-            )
+            e.target.closest("button")
         ){
             return;
         }
@@ -1119,6 +1246,8 @@ window.addEventListener(
             e.code==="Enter" &&
             !running
         ){
+
+            enterFullscreenAndLock();
 
             startGame();
         }
@@ -2205,7 +2334,7 @@ function drawGround(){
 
 
 /* =========================================================
-   LION FRAMES
+   LOCAL LION FRAMES
 ========================================================= */
 
 const lionFrames=[];
@@ -2215,31 +2344,31 @@ const processedFrames=[];
 
 const frameURLs=[
 
-"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-001.png",
-"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-002.png",
-"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-003.png",
-"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-004.png",
-"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-005.png",
-"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-006.png",
-"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-007.png",
-"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-008.png",
-"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-009.png",
-"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-010.png",
-"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-011.png",
-"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-012.png",
-"https://archive.org/download/ezgif-frame-013/ezgif-frame-013.png",
-"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-014.png",
-"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-015.png",
-"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-016.png",
-"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-017.png",
-"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-018.png",
-"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-019.png",
-"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-020.png",
-"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-021.png",
-"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-022.png",
-"https://ia803104.us.archive.org/10/items/ezgif-frame-013/ezgif-frame-023.png",
-"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-024.png",
-"https://dn720000.ca.archive.org/0/items/ezgif-frame-013/ezgif-frame-025.png"
+    "assets/lion/ezgif-frame-001.png",
+    "assets/lion/ezgif-frame-002.png",
+    "assets/lion/ezgif-frame-003.png",
+    "assets/lion/ezgif-frame-004.png",
+    "assets/lion/ezgif-frame-005.png",
+    "assets/lion/ezgif-frame-006.png",
+    "assets/lion/ezgif-frame-007.png",
+    "assets/lion/ezgif-frame-008.png",
+    "assets/lion/ezgif-frame-009.png",
+    "assets/lion/ezgif-frame-010.png",
+    "assets/lion/ezgif-frame-011.png",
+    "assets/lion/ezgif-frame-012.png",
+    "assets/lion/ezgif-frame-013.png",
+    "assets/lion/ezgif-frame-014.png",
+    "assets/lion/ezgif-frame-015.png",
+    "assets/lion/ezgif-frame-016.png",
+    "assets/lion/ezgif-frame-017.png",
+    "assets/lion/ezgif-frame-018.png",
+    "assets/lion/ezgif-frame-019.png",
+    "assets/lion/ezgif-frame-020.png",
+    "assets/lion/ezgif-frame-021.png",
+    "assets/lion/ezgif-frame-022.png",
+    "assets/lion/ezgif-frame-023.png",
+    "assets/lion/ezgif-frame-024.png",
+    "assets/lion/ezgif-frame-025.png"
 
 ];
 
@@ -2406,7 +2535,7 @@ function processLionImage(
 
 
 /* =========================================================
-   LOAD FRAMES
+   LOAD LOCAL FRAMES
 ========================================================= */
 
 frameURLs.forEach(
@@ -2414,10 +2543,6 @@ frameURLs.forEach(
 
         const img=
             new Image();
-
-
-        img.crossOrigin=
-            "Anonymous";
 
 
         img.onload=()=>{
@@ -2432,8 +2557,8 @@ frameURLs.forEach(
         img.onerror=()=>{
 
             console.log(
-                "Error loading lion frame:",
-                index
+                "Error loading local lion frame:",
+                url
             );
         };
 
@@ -2494,10 +2619,6 @@ function drawLion(){
     ctx.save();
 
 
-    /*
-       DAMAGE FLASH
-    */
-
     if(
         hitCooldown>0 &&
         Math.floor(
@@ -2508,10 +2629,6 @@ function drawLion(){
         ctx.globalAlpha=.35;
     }
 
-
-    /*
-       SHADOW
-    */
 
     ctx.beginPath();
 
@@ -3016,6 +3133,8 @@ function loop(time){
 draw();
 
 </script>
+
+</div>
 
 </body>
 </html>
