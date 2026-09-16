@@ -11,6 +11,26 @@ jobs:
       - name: Baixar projeto
         uses: actions/checkout@v4
 
+      - name: Verificar estrutura do jogo
+        run: |
+          echo "=== ESTRUTURA DO PROJETO ==="
+          test -f 2.html
+          test -d asset/lion
+          test -d asset/music
+          test -f asset/music/babylon_mp3_58926.mp3
+
+          echo "2.html encontrado:"
+          ls -lh 2.html
+
+          echo "Imagens do leão:"
+          find asset/lion -type f | sort
+
+          echo "Quantidade de imagens:"
+          find asset/lion -type f -name "*.png" | wc -l
+
+          echo "Música:"
+          ls -lh asset/music/
+
       - name: Configurar Java 17
         uses: actions/setup-java@v5
         with:
@@ -33,6 +53,7 @@ jobs:
         run: |
           mkdir -p app/src/main/java/com/maribone/babylonlion
           mkdir -p app/src/main/res/values
+          mkdir -p app/src/main/assets
 
           cat > settings.gradle <<'EOF'
           pluginManagement {
@@ -89,12 +110,11 @@ jobs:
           <?xml version="1.0" encoding="utf-8"?>
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-              <uses-permission android:name="android.permission.INTERNET"/>
-
               <application
                   android:theme="@style/AppTheme"
                   android:label="Babylon Lion"
-                  android:hardwareAccelerated="true">
+                  android:hardwareAccelerated="true"
+                  android:usesCleartextTraffic="false">
 
                   <activity
                       android:name=".MainActivity"
@@ -116,10 +136,17 @@ jobs:
           cat > app/src/main/res/values/styles.xml <<'EOF'
           <?xml version="1.0" encoding="utf-8"?>
           <resources>
-              <style name="AppTheme" parent="android:style/Theme.Material.Light.NoActionBar">
+
+              <style
+                  name="AppTheme"
+                  parent="android:style/Theme.Material.Light.NoActionBar">
+
                   <item name="android:windowFullscreen">true</item>
                   <item name="android:windowActionModeOverlay">true</item>
+                  <item name="android:fontFamily">sans</item>
+
               </style>
+
           </resources>
           EOF
 
@@ -149,12 +176,20 @@ jobs:
                   webView = new WebView(this);
 
                   WebSettings settings = webView.getSettings();
+
                   settings.setJavaScriptEnabled(true);
                   settings.setDomStorageEnabled(true);
                   settings.setDatabaseEnabled(true);
+
                   settings.setAllowFileAccess(true);
                   settings.setAllowContentAccess(true);
+
+                  // Permite reprodução automática de áudio dentro do APK.
                   settings.setMediaPlaybackRequiresUserGesture(false);
+
+                  settings.setBuiltInZoomControls(false);
+                  settings.setDisplayZoomControls(false);
+                  settings.setSupportZoom(false);
 
                   webView.setWebViewClient(new WebViewClient());
 
@@ -169,16 +204,57 @@ jobs:
 
                   setContentView(webView);
 
+                  /*
+                   * IMPORTANTE:
+                   * O jogo NÃO é carregado pela internet.
+                   *
+                   * O arquivo 2.html e a pasta asset/
+                   * estarão dentro do próprio APK.
+                   */
                   webView.loadUrl(
-                      "https://maribone.github.io/Babylon-Lion/2"
+                      "file:///android_asset/2.html"
                   );
               }
 
               @Override
               public void onBackPressed() {
+                  // Bloqueia o botão voltar para manter o jogo em tela cheia.
               }
           }
           EOF
+
+      - name: Empacotar jogo dentro do APK
+        run: |
+          echo "=== COPIANDO JOGO PARA O APK ==="
+
+          cp 2.html app/src/main/assets/2.html
+
+          mkdir -p app/src/main/assets/asset
+
+          cp -R asset/. app/src/main/assets/asset/
+
+          echo "=== CONTEÚDO DOS ASSETS DO APK ==="
+          find app/src/main/assets -type f | sort
+
+      - name: Verificar arquivos do jogo dentro do projeto Android
+        run: |
+          echo "=== 2.HTML ==="
+          ls -lh app/src/main/assets/2.html
+
+          echo "=== IMAGENS ==="
+          find app/src/main/assets/asset/lion \
+            -type f \
+            -name "*.png" | sort
+
+          echo "=== TOTAL DE IMAGENS ==="
+          find app/src/main/assets/asset/lion \
+            -type f \
+            -name "*.png" | wc -l
+
+          echo "=== MÚSICA ==="
+          ls -lh app/src/main/assets/asset/music/
+
+          test -f app/src/main/assets/asset/music/babylon_mp3_58926.mp3
 
       - name: Configurar Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -186,7 +262,16 @@ jobs:
           gradle-version: '8.9'
 
       - name: Compilar APK
-        run: gradle assembleDebug --no-daemon
+        run: |
+          gradle assembleDebug --no-daemon
+
+      - name: Verificar APK gerado
+        run: |
+          echo "=== APK GERADO ==="
+          ls -lh app/build/outputs/apk/debug/app-debug.apk
+
+          echo "=== TAMANHO DO APK ==="
+          du -h app/build/outputs/apk/debug/app-debug.apk
 
       - name: Publicar APK
         uses: actions/upload-artifact@v4
