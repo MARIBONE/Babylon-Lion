@@ -11,25 +11,84 @@ jobs:
       - name: Baixar projeto
         uses: actions/checkout@v4
 
-      - name: Verificar estrutura do jogo
+      - name: Localizar arquivos do Babylon Lion
+        shell: bash
         run: |
-          echo "=== ESTRUTURA DO PROJETO ==="
-          test -f 2.html
-          test -d asset/lion
-          test -d asset/music
-          test -f asset/music/babylon_mp3_58926.mp3
+          set -e
 
-          echo "2.html encontrado:"
-          ls -lh 2.html
+          echo "========================================"
+          echo " PROCURANDO 2.HTML"
+          echo "========================================"
 
-          echo "Imagens do leão:"
-          find asset/lion -type f | sort
+          GAME_HTML=$(find . -type f -name "2.html" -print -quit)
 
+          if [ -z "$GAME_HTML" ]; then
+            echo "ERRO: 2.html não foi encontrado."
+            echo ""
+            echo "Arquivos HTML encontrados:"
+            find . -type f \( -name "*.html" -o -name "*.htm" \) | sort
+            exit 1
+          fi
+
+          echo "2.html encontrado em:"
+          echo "$GAME_HTML"
+
+          echo ""
+          echo "========================================"
+          echo " PROCURANDO AS IMAGENS DO LEÃO"
+          echo "========================================"
+
+          LION_DIR=$(find . -type d -path "*/asset/lion" -print -quit)
+
+          if [ -z "$LION_DIR" ]; then
+            LION_DIR=$(find . -type d -path "*/assets/lion" -print -quit)
+          fi
+
+          if [ -z "$LION_DIR" ]; then
+            echo "ERRO: pasta lion não encontrada."
+            echo ""
+            echo "Pastas encontradas:"
+            find . -type d \( -name "lion" -o -name "asset" -o -name "assets" \) | sort
+            exit 1
+          fi
+
+          echo "Pasta lion encontrada em:"
+          echo "$LION_DIR"
+
+          echo ""
           echo "Quantidade de imagens:"
-          find asset/lion -type f -name "*.png" | wc -l
+          find "$LION_DIR" -type f -name "*.png" | wc -l
 
-          echo "Música:"
-          ls -lh asset/music/
+          echo ""
+          echo "Arquivos:"
+          find "$LION_DIR" -type f | sort
+
+          echo ""
+          echo "========================================"
+          echo " PROCURANDO A MÚSICA"
+          echo "========================================"
+
+          MUSIC_FILE=$(find . -type f -name "babylon_mp3_58926.mp3" -print -quit)
+
+          if [ -z "$MUSIC_FILE" ]; then
+            echo "ERRO: babylon_mp3_58926.mp3 não foi encontrado."
+            echo ""
+            echo "Arquivos MP3 encontrados:"
+            find . -type f -iname "*.mp3" | sort
+            exit 1
+          fi
+
+          echo "Música encontrada em:"
+          echo "$MUSIC_FILE"
+
+          echo ""
+          echo "========================================"
+          echo " SALVANDO CAMINHOS"
+          echo "========================================"
+
+          echo "GAME_HTML=$GAME_HTML" >> "$GITHUB_ENV"
+          echo "LION_DIR=$LION_DIR" >> "$GITHUB_ENV"
+          echo "MUSIC_FILE=$MUSIC_FILE" >> "$GITHUB_ENV"
 
       - name: Configurar Java 17
         uses: actions/setup-java@v5
@@ -113,8 +172,7 @@ jobs:
               <application
                   android:theme="@style/AppTheme"
                   android:label="Babylon Lion"
-                  android:hardwareAccelerated="true"
-                  android:usesCleartextTraffic="false">
+                  android:hardwareAccelerated="true">
 
                   <activity
                       android:name=".MainActivity"
@@ -142,8 +200,6 @@ jobs:
                   parent="android:style/Theme.Material.Light.NoActionBar">
 
                   <item name="android:windowFullscreen">true</item>
-                  <item name="android:windowActionModeOverlay">true</item>
-                  <item name="android:fontFamily">sans</item>
 
               </style>
 
@@ -184,12 +240,7 @@ jobs:
                   settings.setAllowFileAccess(true);
                   settings.setAllowContentAccess(true);
 
-                  // Permite reprodução automática de áudio dentro do APK.
                   settings.setMediaPlaybackRequiresUserGesture(false);
-
-                  settings.setBuiltInZoomControls(false);
-                  settings.setDisplayZoomControls(false);
-                  settings.setSupportZoom(false);
 
                   webView.setWebViewClient(new WebViewClient());
 
@@ -204,13 +255,6 @@ jobs:
 
                   setContentView(webView);
 
-                  /*
-                   * IMPORTANTE:
-                   * O jogo NÃO é carregado pela internet.
-                   *
-                   * O arquivo 2.html e a pasta asset/
-                   * estarão dentro do próprio APK.
-                   */
                   webView.loadUrl(
                       "file:///android_asset/2.html"
                   );
@@ -218,43 +262,82 @@ jobs:
 
               @Override
               public void onBackPressed() {
-                  // Bloqueia o botão voltar para manter o jogo em tela cheia.
               }
           }
           EOF
 
-      - name: Empacotar jogo dentro do APK
+      - name: Copiar jogo para dentro do APK
+        shell: bash
         run: |
-          echo "=== COPIANDO JOGO PARA O APK ==="
+          set -e
 
-          cp 2.html app/src/main/assets/2.html
+          echo "========================================"
+          echo " EMPACOTANDO BABYLON LION"
+          echo "========================================"
 
-          mkdir -p app/src/main/assets/asset
+          cp "$GAME_HTML" app/src/main/assets/2.html
 
-          cp -R asset/. app/src/main/assets/asset/
+          GAME_DIR=$(dirname "$GAME_HTML")
 
-          echo "=== CONTEÚDO DOS ASSETS DO APK ==="
+          echo "Diretório do 2.html:"
+          echo "$GAME_DIR"
+
+          echo ""
+          echo "Copiando pasta asset..."
+
+          if [ -d "$GAME_DIR/asset" ]; then
+              cp -R "$GAME_DIR/asset" app/src/main/assets/
+              echo "asset encontrado junto do 2.html."
+          elif [ -d "$GAME_DIR/assets" ]; then
+              cp -R "$GAME_DIR/assets" app/src/main/assets/asset
+              echo "assets encontrado junto do 2.html."
+          else
+              ASSET_DIR=$(dirname "$LION_DIR")
+
+              if [ "$(basename "$ASSET_DIR")" = "asset" ]; then
+                  mkdir -p app/src/main/assets/asset
+                  cp -R "$ASSET_DIR/." app/src/main/assets/asset/
+                  echo "asset localizado através da pasta lion."
+              else
+                  echo "ERRO: não consegui determinar a pasta asset."
+                  exit 1
+              fi
+          fi
+
+          echo ""
+          echo "========================================"
+          echo " CONTEÚDO EMPACOTADO"
+          echo "========================================"
+
           find app/src/main/assets -type f | sort
 
-      - name: Verificar arquivos do jogo dentro do projeto Android
+      - name: Validar conteúdo do APK
         run: |
-          echo "=== 2.HTML ==="
-          ls -lh app/src/main/assets/2.html
+          set -e
 
-          echo "=== IMAGENS ==="
-          find app/src/main/assets/asset/lion \
+          echo "Verificando 2.html..."
+          test -f app/src/main/assets/2.html
+
+          echo "Verificando imagens..."
+
+          IMAGE_COUNT=$(find app/src/main/assets/asset/lion \
             -type f \
-            -name "*.png" | sort
+            -name "*.png" | wc -l)
 
-          echo "=== TOTAL DE IMAGENS ==="
-          find app/src/main/assets/asset/lion \
-            -type f \
-            -name "*.png" | wc -l
+          echo "Imagens encontradas: $IMAGE_COUNT"
 
-          echo "=== MÚSICA ==="
-          ls -lh app/src/main/assets/asset/music/
+          if [ "$IMAGE_COUNT" -lt 25 ]; then
+            echo "ERRO: menos de 25 imagens encontradas."
+            exit 1
+          fi
 
+          echo "Verificando música..."
           test -f app/src/main/assets/asset/music/babylon_mp3_58926.mp3
+
+          echo ""
+          echo "========================================"
+          echo " TODOS OS ARQUIVOS ESTÃO PRESENTES"
+          echo "========================================"
 
       - name: Configurar Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -265,12 +348,16 @@ jobs:
         run: |
           gradle assembleDebug --no-daemon
 
-      - name: Verificar APK gerado
+      - name: Verificar APK
         run: |
-          echo "=== APK GERADO ==="
+          echo "========================================"
+          echo " APK GERADO"
+          echo "========================================"
+
           ls -lh app/build/outputs/apk/debug/app-debug.apk
 
-          echo "=== TAMANHO DO APK ==="
+          echo ""
+          echo "Tamanho:"
           du -h app/build/outputs/apk/debug/app-debug.apk
 
       - name: Publicar APK
