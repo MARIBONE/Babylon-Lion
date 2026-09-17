@@ -34,10 +34,10 @@ jobs:
 
 
       # ============================================================
-      # 3. LOCALIZAR ANDROID SDK E SDKMANAGER
+      # 3. LOCALIZAR ANDROID SDK
       # ============================================================
 
-      - name: Configure Android SDK
+      - name: Locate Android SDK
         shell: bash
         run: |
 
@@ -58,51 +58,48 @@ jobs:
             exit 1
           fi
 
+          SDKMANAGER="$SDK/cmdline-tools/latest/bin/sdkmanager"
+
           echo ""
-          echo "Searching for sdkmanager..."
-          echo ""
-
-          SDKMANAGER=$(find "$SDK" -type f -name sdkmanager 2>/dev/null | head -n 1 || true)
-
-          if [ -z "$SDKMANAGER" ]; then
-            echo "sdkmanager was not found inside:"
-            echo "$SDK"
-            echo ""
-            echo "SDK directory contents:"
-            find "$SDK" -maxdepth 3 -type d | sort
-            exit 1
-          fi
-
-          echo "sdkmanager found:"
+          echo "Expected sdkmanager:"
           echo "$SDKMANAGER"
 
-          SDKMANAGER_DIR="$(dirname "$SDKMANAGER")"
+          if [ ! -f "$SDKMANAGER" ]; then
 
-          echo ""
-          echo "sdkmanager directory:"
-          echo "$SDKMANAGER_DIR"
+            echo ""
+            echo "ERROR: sdkmanager was not found."
 
-          echo ""
-          echo "Adding Android SDK tools to PATH..."
+            echo ""
+            echo "Searching Android SDK..."
 
-          echo "$SDKMANAGER_DIR" >> "$GITHUB_PATH"
+            find "$SDK" \
+              -type f \
+              -name sdkmanager \
+              2>/dev/null \
+              | sort
 
-          echo "$SDK/platform-tools" >> "$GITHUB_PATH"
+            exit 1
 
-          if [ -d "$SDK/cmdline-tools/latest/bin" ]; then
-            echo "$SDK/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
           fi
 
-          if [ -d "$SDK/cmdline-tools/bin" ]; then
-            echo "$SDK/cmdline-tools/bin" >> "$GITHUB_PATH"
-          fi
+          echo ""
+          echo "sdkmanager found."
+
+          echo "$SDKMANAGER" \
+            >> "$GITHUB_ENV"
+
+          echo "$SDK/cmdline-tools/latest/bin" \
+            >> "$GITHUB_PATH"
+
+          echo "$SDK/platform-tools" \
+            >> "$GITHUB_PATH"
 
           echo ""
           echo "Android SDK configured."
 
 
       # ============================================================
-      # 4. LOCALIZAR E VALIDAR SDKMANAGER
+      # 4. VALIDAR SDKMANAGER
       # ============================================================
 
       - name: Validate Android SDK
@@ -113,25 +110,19 @@ jobs:
 
           SDK="$ANDROID_HOME"
 
-          SDKMANAGER=$(find "$SDK" -type f -name sdkmanager 2>/dev/null | head -n 1 || true)
+          SDKMANAGER="$SDK/cmdline-tools/latest/bin/sdkmanager"
 
-          if [ -z "$SDKMANAGER" ]; then
-            echo "ERROR: sdkmanager unavailable."
-            exit 1
-          fi
-
+          echo ""
           echo "Using:"
           echo "$SDKMANAGER"
 
           echo ""
 
-          chmod +x "$SDKMANAGER"
-
           "$SDKMANAGER" --version
 
 
       # ============================================================
-      # 5. INSTALAR COMPONENTES ANDROID
+      # 5. ACEITAR LICENÇAS E INSTALAR SDK
       # ============================================================
 
       - name: Install Android SDK packages
@@ -142,9 +133,7 @@ jobs:
 
           SDK="$ANDROID_HOME"
 
-          SDKMANAGER=$(find "$SDK" -type f -name sdkmanager 2>/dev/null | head -n 1)
-
-          chmod +x "$SDKMANAGER"
+          SDKMANAGER="$SDK/cmdline-tools/latest/bin/sdkmanager"
 
           echo ""
           echo "Accepting Android SDK licenses..."
@@ -153,7 +142,7 @@ jobs:
           yes | "$SDKMANAGER" --licenses || true
 
           echo ""
-          echo "Installing Android packages..."
+          echo "Installing Android SDK packages..."
           echo ""
 
           "$SDKMANAGER" \
@@ -162,7 +151,7 @@ jobs:
             "build-tools;35.0.0"
 
           echo ""
-          echo "Android SDK installation complete."
+          echo "Android SDK packages installed."
 
 
       # ============================================================
@@ -176,7 +165,7 @@ jobs:
 
 
       # ============================================================
-      # 7. CRIAR PROJETO ANDROID
+      # 7. CRIAR ESTRUTURA ANDROID
       # ============================================================
 
       - name: Create Android project
@@ -212,7 +201,7 @@ jobs:
 
 
       # ============================================================
-      # 9. VERIFICAR JOGO
+      # 9. VERIFICAR ESTRUTURA
       # ============================================================
 
       - name: Verify packaged game structure
@@ -220,17 +209,16 @@ jobs:
 
           echo ""
           echo "=========================================="
-          echo "BABYLON LION"
+          echo "BABYLON LION - GAME FILE"
           echo "=========================================="
-
-          echo ""
-          echo "2.html:"
 
           ls -lh \
             android/app/src/main/assets/www/2.html
 
           echo ""
-          echo "Assets:"
+          echo "=========================================="
+          echo "ASSETS"
+          echo "=========================================="
 
           find \
             android/app/src/main/assets/www/assets \
@@ -240,7 +228,7 @@ jobs:
 
 
       # ============================================================
-      # 10. VERIFICAR 25 LEÕES
+      # 10. VERIFICAR 25 FRAMES
       # ============================================================
 
       - name: Verify 25 lion frames
@@ -256,9 +244,12 @@ jobs:
           echo "Lion frames found: $COUNT"
 
           if [ "$COUNT" -ne 25 ]; then
+
             echo ""
             echo "ERROR: Expected exactly 25 lion frames."
+
             exit 1
+
           fi
 
           echo ""
@@ -300,7 +291,7 @@ jobs:
 
 
       # ============================================================
-      # 13. SETTINGS
+      # 13. SETTINGS.GRADLE
       # ============================================================
 
       - name: Create settings.gradle
@@ -348,7 +339,7 @@ jobs:
 
 
       # ============================================================
-      # 14. BUILD PRINCIPAL
+      # 14. ROOT BUILD.GRADLE
       # ============================================================
 
       - name: Create root build.gradle
@@ -368,7 +359,7 @@ jobs:
 
 
       # ============================================================
-      # 15. BUILD DO APP
+      # 15. APP BUILD.GRADLE
       # ============================================================
 
       - name: Create app build.gradle
@@ -496,7 +487,7 @@ jobs:
 
 
       # ============================================================
-      # 17. ÍCONE
+      # 17. COPIAR ÍCONE
       # ============================================================
 
       - name: Copy launcher icon
@@ -797,11 +788,13 @@ jobs:
 
 
           echo ""
+          echo "=========================================="
           echo "BABYLON LION APK GERADO COM SUCESSO!"
+          echo "=========================================="
 
 
       # ============================================================
-      # 23. PUBLICAR APK
+      # 23. UPLOAD APK
       # ============================================================
 
       - name: Upload Babylon Lion APK
