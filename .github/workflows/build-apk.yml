@@ -34,49 +34,129 @@ jobs:
 
 
       # ============================================================
-      # 3. CONFIGURAR ANDROID SDK
+      # 3. LOCALIZAR ANDROID SDK E SDKMANAGER
       # ============================================================
 
       - name: Configure Android SDK
         shell: bash
         run: |
 
+          set -e
+
           echo "ANDROID_HOME=$ANDROID_HOME"
           echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
 
-          if [ -z "$ANDROID_HOME" ]; then
-            echo "ERROR: ANDROID_HOME is not defined."
+          SDK="$ANDROID_HOME"
+
+          if [ -z "$SDK" ]; then
+            echo "ERROR: ANDROID_HOME is empty."
             exit 1
           fi
 
-          if [ ! -d "$ANDROID_HOME" ]; then
+          if [ ! -d "$SDK" ]; then
             echo "ERROR: Android SDK directory does not exist."
             exit 1
           fi
 
           echo ""
-          echo "Android SDK:"
-          echo "$ANDROID_HOME"
+          echo "Searching for sdkmanager..."
           echo ""
 
-          echo "sdkmanager:"
-          command -v sdkmanager || true
+          SDKMANAGER=$(find "$SDK" -type f -name sdkmanager 2>/dev/null | head -n 1 || true)
 
-          echo ""
-
-          if ! command -v sdkmanager >/dev/null 2>&1; then
-            echo "ERROR: sdkmanager was not found."
+          if [ -z "$SDKMANAGER" ]; then
+            echo "sdkmanager was not found inside:"
+            echo "$SDK"
+            echo ""
+            echo "SDK directory contents:"
+            find "$SDK" -maxdepth 3 -type d | sort
             exit 1
           fi
 
-          echo "Accepting Android SDK licenses..."
+          echo "sdkmanager found:"
+          echo "$SDKMANAGER"
 
-          yes | sdkmanager --licenses || true
+          SDKMANAGER_DIR="$(dirname "$SDKMANAGER")"
 
           echo ""
-          echo "Installing Android SDK packages..."
+          echo "sdkmanager directory:"
+          echo "$SDKMANAGER_DIR"
 
-          sdkmanager \
+          echo ""
+          echo "Adding Android SDK tools to PATH..."
+
+          echo "$SDKMANAGER_DIR" >> "$GITHUB_PATH"
+
+          echo "$SDK/platform-tools" >> "$GITHUB_PATH"
+
+          if [ -d "$SDK/cmdline-tools/latest/bin" ]; then
+            echo "$SDK/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
+          fi
+
+          if [ -d "$SDK/cmdline-tools/bin" ]; then
+            echo "$SDK/cmdline-tools/bin" >> "$GITHUB_PATH"
+          fi
+
+          echo ""
+          echo "Android SDK configured."
+
+
+      # ============================================================
+      # 4. LOCALIZAR E VALIDAR SDKMANAGER
+      # ============================================================
+
+      - name: Validate Android SDK
+        shell: bash
+        run: |
+
+          set -e
+
+          SDK="$ANDROID_HOME"
+
+          SDKMANAGER=$(find "$SDK" -type f -name sdkmanager 2>/dev/null | head -n 1 || true)
+
+          if [ -z "$SDKMANAGER" ]; then
+            echo "ERROR: sdkmanager unavailable."
+            exit 1
+          fi
+
+          echo "Using:"
+          echo "$SDKMANAGER"
+
+          echo ""
+
+          chmod +x "$SDKMANAGER"
+
+          "$SDKMANAGER" --version
+
+
+      # ============================================================
+      # 5. INSTALAR COMPONENTES ANDROID
+      # ============================================================
+
+      - name: Install Android SDK packages
+        shell: bash
+        run: |
+
+          set -e
+
+          SDK="$ANDROID_HOME"
+
+          SDKMANAGER=$(find "$SDK" -type f -name sdkmanager 2>/dev/null | head -n 1)
+
+          chmod +x "$SDKMANAGER"
+
+          echo ""
+          echo "Accepting Android SDK licenses..."
+          echo ""
+
+          yes | "$SDKMANAGER" --licenses || true
+
+          echo ""
+          echo "Installing Android packages..."
+          echo ""
+
+          "$SDKMANAGER" \
             "platform-tools" \
             "platforms;android-35" \
             "build-tools;35.0.0"
@@ -84,17 +164,9 @@ jobs:
           echo ""
           echo "Android SDK installation complete."
 
-          echo ""
-          echo "Installed platforms:"
-          sdkmanager --list_installed | grep "platforms;android" || true
-
-          echo ""
-          echo "Installed build tools:"
-          sdkmanager --list_installed | grep "build-tools" || true
-
 
       # ============================================================
-      # 4. CONFIGURAR GRADLE
+      # 6. CONFIGURAR GRADLE
       # ============================================================
 
       - name: Setup Gradle
@@ -104,7 +176,7 @@ jobs:
 
 
       # ============================================================
-      # 5. CRIAR ESTRUTURA ANDROID
+      # 7. CRIAR PROJETO ANDROID
       # ============================================================
 
       - name: Create Android project
@@ -124,7 +196,7 @@ jobs:
 
 
       # ============================================================
-      # 6. COPIAR JOGO
+      # 8. COPIAR JOGO
       # ============================================================
 
       - name: Copy Babylon Lion game
@@ -140,7 +212,7 @@ jobs:
 
 
       # ============================================================
-      # 7. VERIFICAR JOGO
+      # 9. VERIFICAR JOGO
       # ============================================================
 
       - name: Verify packaged game structure
@@ -168,7 +240,7 @@ jobs:
 
 
       # ============================================================
-      # 8. VERIFICAR 25 FRAMES
+      # 10. VERIFICAR 25 LEÕES
       # ============================================================
 
       - name: Verify 25 lion frames
@@ -194,7 +266,7 @@ jobs:
 
 
       # ============================================================
-      # 9. VERIFICAR MÚSICAS
+      # 11. VERIFICAR MÚSICAS
       # ============================================================
 
       - name: Verify music files
@@ -211,7 +283,7 @@ jobs:
 
 
       # ============================================================
-      # 10. VERIFICAR IMAGENS
+      # 12. VERIFICAR IMAGENS
       # ============================================================
 
       - name: Verify application images
@@ -228,7 +300,7 @@ jobs:
 
 
       # ============================================================
-      # 11. SETTINGS.GRADLE
+      # 13. SETTINGS
       # ============================================================
 
       - name: Create settings.gradle
@@ -276,7 +348,7 @@ jobs:
 
 
       # ============================================================
-      # 12. BUILD.GRADLE
+      # 14. BUILD PRINCIPAL
       # ============================================================
 
       - name: Create root build.gradle
@@ -296,7 +368,7 @@ jobs:
 
 
       # ============================================================
-      # 13. APP BUILD.GRADLE
+      # 15. BUILD DO APP
       # ============================================================
 
       - name: Create app build.gradle
@@ -358,7 +430,7 @@ jobs:
 
 
       # ============================================================
-      # 14. MANIFEST
+      # 16. MANIFEST
       # ============================================================
 
       - name: Create AndroidManifest.xml
@@ -424,7 +496,7 @@ jobs:
 
 
       # ============================================================
-      # 15. ÍCONE
+      # 17. ÍCONE
       # ============================================================
 
       - name: Copy launcher icon
@@ -436,7 +508,7 @@ jobs:
 
 
       # ============================================================
-      # 16. TEMA
+      # 18. TEMA
       # ============================================================
 
       - name: Create Android theme
@@ -488,7 +560,7 @@ jobs:
 
 
       # ============================================================
-      # 17. MAIN ACTIVITY
+      # 19. MAIN ACTIVITY
       # ============================================================
 
       - name: Create MainActivity
@@ -669,7 +741,7 @@ jobs:
 
 
       # ============================================================
-      # 18. VERIFICAR PROJETO ANDROID
+      # 20. VERIFICAR PROJETO
       # ============================================================
 
       - name: Verify Android project
@@ -688,7 +760,7 @@ jobs:
 
 
       # ============================================================
-      # 19. BUILD
+      # 21. BUILD APK
       # ============================================================
 
       - name: Build Babylon Lion APK
@@ -702,7 +774,7 @@ jobs:
 
 
       # ============================================================
-      # 20. VERIFICAR APK
+      # 22. VERIFICAR APK
       # ============================================================
 
       - name: Verify APK exists
@@ -710,7 +782,7 @@ jobs:
 
           echo ""
           echo "=========================================="
-          echo "APK"
+          echo "GENERATED APK"
           echo "=========================================="
 
           find \
@@ -729,7 +801,7 @@ jobs:
 
 
       # ============================================================
-      # 21. UPLOAD
+      # 23. PUBLICAR APK
       # ============================================================
 
       - name: Upload Babylon Lion APK
