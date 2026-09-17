@@ -85,12 +85,11 @@ jobs:
           echo ""
           echo "sdkmanager found."
 
-          echo "$SDKMANAGER" \
-            >> "$GITHUB_ENV"
-
+          # Coloca o diretório do sdkmanager no PATH
           echo "$SDK/cmdline-tools/latest/bin" \
             >> "$GITHUB_PATH"
 
+          # Coloca platform-tools no PATH
           echo "$SDK/platform-tools" \
             >> "$GITHUB_PATH"
 
@@ -113,7 +112,7 @@ jobs:
           SDKMANAGER="$SDK/cmdline-tools/latest/bin/sdkmanager"
 
           echo ""
-          echo "Using:"
+          echo "Using sdkmanager:"
           echo "$SDKMANAGER"
 
           echo ""
@@ -122,7 +121,7 @@ jobs:
 
 
       # ============================================================
-      # 5. ACEITAR LICENÇAS E INSTALAR SDK
+      # 5. INSTALAR COMPONENTES ANDROID
       # ============================================================
 
       - name: Install Android SDK packages
@@ -499,7 +498,7 @@ jobs:
 
 
       # ============================================================
-      # 18. TEMA
+      # 18. TEMA ANDROID
       # ============================================================
 
       - name: Create Android theme
