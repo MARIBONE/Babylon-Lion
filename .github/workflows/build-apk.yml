@@ -1,3 +1,4 @@
+```yaml
 name: Build Babylon Lion APK
 
 on:
@@ -14,17 +15,8 @@ jobs:
 
     steps:
 
-      # ============================================================
-      # 1. CHECKOUT
-      # ============================================================
-
       - name: Checkout repository
         uses: actions/checkout@v5
-
-
-      # ============================================================
-      # 2. JAVA 17
-      # ============================================================
 
       - name: Setup Java 17
         uses: actions/setup-java@v5
@@ -32,15 +24,9 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-
-      # ============================================================
-      # 3. LOCALIZAR ANDROID SDK
-      # ============================================================
-
       - name: Locate Android SDK
         shell: bash
         run: |
-
           set -e
 
           echo "ANDROID_HOME=$ANDROID_HOME"
@@ -65,10 +51,8 @@ jobs:
           echo "$SDKMANAGER"
 
           if [ ! -f "$SDKMANAGER" ]; then
-
             echo ""
             echo "ERROR: sdkmanager was not found."
-
             echo ""
             echo "Searching Android SDK..."
 
@@ -79,36 +63,23 @@ jobs:
               | sort
 
             exit 1
-
           fi
 
           echo ""
           echo "sdkmanager found."
 
-          # Coloca o diretório do sdkmanager no PATH
-          echo "$SDK/cmdline-tools/latest/bin" \
-            >> "$GITHUB_PATH"
-
-          # Coloca platform-tools no PATH
-          echo "$SDK/platform-tools" \
-            >> "$GITHUB_PATH"
+          echo "$SDK/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
+          echo "$SDK/platform-tools" >> "$GITHUB_PATH"
 
           echo ""
           echo "Android SDK configured."
 
-
-      # ============================================================
-      # 4. VALIDAR SDKMANAGER
-      # ============================================================
-
       - name: Validate Android SDK
         shell: bash
         run: |
-
           set -e
 
           SDK="$ANDROID_HOME"
-
           SDKMANAGER="$SDK/cmdline-tools/latest/bin/sdkmanager"
 
           echo ""
@@ -119,19 +90,12 @@ jobs:
 
           "$SDKMANAGER" --version
 
-
-      # ============================================================
-      # 5. INSTALAR COMPONENTES ANDROID
-      # ============================================================
-
       - name: Install Android SDK packages
         shell: bash
         run: |
-
           set -e
 
           SDK="$ANDROID_HOME"
-
           SDKMANAGER="$SDK/cmdline-tools/latest/bin/sdkmanager"
 
           echo ""
@@ -152,87 +116,44 @@ jobs:
           echo ""
           echo "Android SDK packages installed."
 
-
-      # ============================================================
-      # 6. CONFIGURAR GRADLE
-      # ============================================================
-
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.7'
 
-
-      # ============================================================
-      # 7. CRIAR ESTRUTURA ANDROID
-      # ============================================================
-
       - name: Create Android project
         run: |
-
-          mkdir -p \
-            android/app/src/main/java/com/maribone/babylonlion
-
-          mkdir -p \
-            android/app/src/main/res/drawable
-
-          mkdir -p \
-            android/app/src/main/res/values
-
-          mkdir -p \
-            android/app/src/main/assets/www
-
-
-      # ============================================================
-      # 8. COPIAR JOGO
-      # ============================================================
+          mkdir -p android/app/src/main/java/com/maribone/babylonlion
+          mkdir -p android/app/src/main/res/drawable
+          mkdir -p android/app/src/main/res/values
+          mkdir -p android/app/src/main/assets/www
 
       - name: Copy Babylon Lion game
         run: |
-
-          cp \
-            2.html \
-            android/app/src/main/assets/www/2.html
-
-          cp -R \
-            assets \
-            android/app/src/main/assets/www/assets
-
-
-      # ============================================================
-      # 9. VERIFICAR ESTRUTURA
-      # ============================================================
+          cp 2.html android/app/src/main/assets/www/2.html
+          cp -R assets android/app/src/main/assets/www/assets
 
       - name: Verify packaged game structure
         run: |
-
           echo ""
           echo "=========================================="
           echo "BABYLON LION - GAME FILE"
           echo "=========================================="
 
-          ls -lh \
-            android/app/src/main/assets/www/2.html
+          ls -lh android/app/src/main/assets/www/2.html
 
           echo ""
           echo "=========================================="
           echo "ASSETS"
           echo "=========================================="
 
-          find \
-            android/app/src/main/assets/www/assets \
+          find android/app/src/main/assets/www/assets \
             -maxdepth 2 \
             -type f \
             | sort
 
-
-      # ============================================================
-      # 10. VERIFICAR 25 FRAMES
-      # ============================================================
-
       - name: Verify 25 lion frames
         run: |
-
           COUNT=$(find \
             android/app/src/main/assets/www/assets/lion \
             -type f \
@@ -243,25 +164,16 @@ jobs:
           echo "Lion frames found: $COUNT"
 
           if [ "$COUNT" -ne 25 ]; then
-
             echo ""
             echo "ERROR: Expected exactly 25 lion frames."
-
             exit 1
-
           fi
 
           echo ""
           echo "OK: 25 lion frames."
 
-
-      # ============================================================
-      # 11. VERIFICAR MÚSICAS
-      # ============================================================
-
       - name: Verify music files
         run: |
-
           test -f \
             android/app/src/main/assets/www/assets/music/babylon_mp3_58926.mp3
 
@@ -271,14 +183,8 @@ jobs:
           echo ""
           echo "OK: music files."
 
-
-      # ============================================================
-      # 12. VERIFICAR IMAGENS
-      # ============================================================
-
       - name: Verify application images
         run: |
-
           test -f \
             android/app/src/main/assets/www/assets/images/icon.png
 
@@ -288,100 +194,61 @@ jobs:
           echo ""
           echo "OK: application images."
 
-
-      # ============================================================
-      # 13. SETTINGS.GRADLE
-      # ============================================================
-
       - name: Create settings.gradle
         run: |
-
           cat > android/settings.gradle <<'EOF'
-
           pluginManagement {
-
               repositories {
-
                   google()
-
                   mavenCentral()
-
                   gradlePluginPortal()
-
               }
-
           }
 
-
           dependencyResolutionManagement {
-
               repositoriesMode.set(
                   RepositoriesMode.FAIL_ON_PROJECT_REPOS
               )
 
               repositories {
-
                   google()
-
                   mavenCentral()
-
               }
-
           }
-
 
           rootProject.name = "BabylonLion"
 
           include(":app")
-
           EOF
-
-
-      # ============================================================
-      # 14. ROOT BUILD.GRADLE
-      # ============================================================
 
       - name: Create root build.gradle
         run: |
-
           cat > android/build.gradle <<'EOF'
+          buildscript {
+              repositories {
+                  google()
+                  mavenCentral()
+              }
 
-          plugins {
-
-              id 'com.android.application'
-                  version '8.5.2'
-                  apply false
-
+              dependencies {
+                  classpath 'com.android.tools.build:gradle:8.5.2'
+              }
           }
-
           EOF
-
-
-      # ============================================================
-      # 15. APP BUILD.GRADLE
-      # ============================================================
 
       - name: Create app build.gradle
         run: |
-
           cat > android/app/build.gradle <<'EOF'
-
           plugins {
-
               id 'com.android.application'
-
           }
 
-
           android {
-
               namespace 'com.maribone.babylonlion'
 
               compileSdk 35
 
-
               defaultConfig {
-
                   applicationId 'com.maribone.babylonlion'
 
                   minSdk 23
@@ -391,43 +258,25 @@ jobs:
                   versionCode 1
 
                   versionName '1.0'
-
               }
-
 
               buildTypes {
 
                   debug {
-
                       minifyEnabled false
-
                   }
-
 
                   release {
-
                       minifyEnabled false
-
                       shrinkResources false
-
                   }
-
               }
-
           }
-
           EOF
-
-
-      # ============================================================
-      # 16. MANIFEST
-      # ============================================================
 
       - name: Create AndroidManifest.xml
         run: |
-
           cat > android/app/src/main/AndroidManifest.xml <<'EOF'
-
           <?xml version="1.0" encoding="utf-8"?>
 
           <manifest
@@ -437,32 +286,19 @@ jobs:
                   android:name="android.permission.INTERNET" />
 
               <application
-
                   android:allowBackup="false"
-
                   android:hardwareAccelerated="true"
-
                   android:icon="@drawable/icon"
-
                   android:label="Babylon Lion"
-
                   android:resizeableActivity="false"
-
                   android:supportsRtl="true"
-
                   android:theme="@style/AppTheme">
 
-
                   <activity
-
                       android:name=".MainActivity"
-
                       android:configChanges="orientation|screenSize|keyboardHidden"
-
                       android:exported="true"
-
                       android:screenOrientation="landscape">
-
 
                       <intent-filter>
 
@@ -474,38 +310,22 @@ jobs:
 
                       </intent-filter>
 
-
                   </activity>
-
 
               </application>
 
           </manifest>
-
           EOF
-
-
-      # ============================================================
-      # 17. COPIAR ÍCONE
-      # ============================================================
 
       - name: Copy launcher icon
         run: |
-
           cp \
             android/app/src/main/assets/www/assets/images/icon.png \
             android/app/src/main/res/drawable/icon.png
 
-
-      # ============================================================
-      # 18. TEMA ANDROID
-      # ============================================================
-
       - name: Create Android theme
         run: |
-
           cat > android/app/src/main/res/values/styles.xml <<'EOF'
-
           <?xml version="1.0" encoding="utf-8"?>
 
           <resources>
@@ -545,19 +365,11 @@ jobs:
               </style>
 
           </resources>
-
           EOF
-
-
-      # ============================================================
-      # 19. MAIN ACTIVITY
-      # ============================================================
 
       - name: Create MainActivity
         run: |
-
           cat > android/app/src/main/java/com/maribone/babylonlion/MainActivity.java <<'EOF'
-
           package com.maribone.babylonlion;
 
           import android.app.Activity;
@@ -571,11 +383,9 @@ jobs:
           import android.view.Window;
           import android.view.WindowManager;
 
-
           public class MainActivity extends Activity {
 
               private WebView webView;
-
 
               @Override
               protected void onCreate(
@@ -586,39 +396,29 @@ jobs:
                       savedInstanceState
                   );
 
-
                   requestWindowFeature(
                       Window.FEATURE_NO_TITLE
                   );
 
-
                   getWindow().setFlags(
-
                       WindowManager.LayoutParams.FLAG_FULLSCREEN,
-
                       WindowManager.LayoutParams.FLAG_FULLSCREEN
-
                   );
-
 
                   getWindow().setNavigationBarColor(
                       Color.BLACK
                   );
 
-
                   webView = new WebView(
                       this
                   );
-
 
                   setContentView(
                       webView
                   );
 
-
                   WebSettings settings =
                       webView.getSettings();
-
 
                   settings.setJavaScriptEnabled(
                       true
@@ -676,7 +476,6 @@ jobs:
                       100
                   );
 
-
                   webView.setBackgroundColor(
                       Color.rgb(
                           8,
@@ -685,38 +484,31 @@ jobs:
                       )
                   );
 
-
                   webView.setWebViewClient(
                       new WebViewClient()
                   );
-
 
                   webView.setWebChromeClient(
                       new WebChromeClient()
                   );
 
-
                   webView.setOverScrollMode(
                       View.OVER_SCROLL_NEVER
                   );
-
 
                   webView.setVerticalScrollBarEnabled(
                       false
                   );
 
-
                   webView.setHorizontalScrollBarEnabled(
                       false
                   );
-
 
                   webView.loadUrl(
                       "file:///android_asset/www/2.html"
                   );
 
               }
-
 
               @Override
               public void onBackPressed() {
@@ -726,84 +518,57 @@ jobs:
               }
 
           }
-
           EOF
-
-
-      # ============================================================
-      # 20. VERIFICAR PROJETO
-      # ============================================================
 
       - name: Verify Android project
         run: |
-
           echo ""
           echo "=========================================="
           echo "ANDROID PROJECT READY"
           echo "=========================================="
 
-          find \
-            android \
+          find android \
             -maxdepth 7 \
             -type f \
             | sort
 
-
-      # ============================================================
-      # 21. BUILD APK
-      # ============================================================
-
       - name: Build Babylon Lion APK
         working-directory: android
         run: |
-
           gradle \
             assembleDebug \
             --no-daemon \
             --stacktrace
 
-
-      # ============================================================
-      # 22. VERIFICAR APK
-      # ============================================================
-
       - name: Verify APK exists
         run: |
-
           echo ""
           echo "=========================================="
           echo "GENERATED APK"
           echo "=========================================="
 
-          find \
-            android/app/build/outputs/apk \
+          find android/app/build/outputs/apk \
             -type f \
             -name "*.apk" \
             -print
 
-
           test -f \
             android/app/build/outputs/apk/debug/app-debug.apk
-
 
           echo ""
           echo "=========================================="
           echo "BABYLON LION APK GERADO COM SUCESSO!"
           echo "=========================================="
 
-
-      # ============================================================
-      # 23. UPLOAD APK
-      # ============================================================
-
       - name: Upload Babylon Lion APK
         uses: actions/upload-artifact@v4
-
         with:
-
           name: Babylon-Lion-APK
-
           path: |
             android/app/build/outputs/apk/debug/app-debug.apk
-
           if-no-files-found: error
+```
+
+**Esta é a versão para rodar agora.** A única alteração estrutural importante em relação à anterior é justamente a correção do `android/build.gradle`; o restante permanece alinhado ao projeto real: `2.html`, as **25 imagens do leão**, as duas músicas, `icon.png` e `spalsh-screen-babylon.png`.
+
+Estou a sua disposição Majestade!
