@@ -14,28 +14,38 @@ jobs:
 
     steps:
 
-      # =====================================================
-      # CHECKOUT
-      # =====================================================
+      # ============================================================
+      # 1. BAIXAR O REPOSITÓRIO
+      # ============================================================
 
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
 
-      # =====================================================
-      # JAVA
-      # =====================================================
+      # ============================================================
+      # 2. JAVA
+      # ============================================================
 
       - name: Setup Java 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
 
 
-      # =====================================================
-      # ANDROID SDK
-      # =====================================================
+      # ============================================================
+      # 3. GRADLE
+      # ============================================================
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+
+
+      # ============================================================
+      # 4. ANDROID SDK
+      # ============================================================
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
@@ -51,93 +61,124 @@ jobs:
             "build-tools;35.0.0"
 
 
-      # =====================================================
-      # CREATE ANDROID PROJECT
-      # =====================================================
+      # ============================================================
+      # 5. CRIAR ESTRUTURA DO PROJETO ANDROID
+      # ============================================================
 
       - name: Create Android project
         run: |
 
           mkdir -p android/app/src/main/java/com/maribone/babylonlion
+
           mkdir -p android/app/src/main/res/drawable
-          mkdir -p android/app/src/main/res/mipmap-hdpi
-          mkdir -p android/app/src/main/res/mipmap-mdpi
-          mkdir -p android/app/src/main/res/mipmap-xhdpi
-          mkdir -p android/app/src/main/res/mipmap-xxhdpi
-          mkdir -p android/app/src/main/res/mipmap-xxxhdpi
-          mkdir -p android/app/src/main/res/mipmap-anydpi-v26
+
           mkdir -p android/app/src/main/res/values
+
           mkdir -p android/app/src/main/assets/www
 
 
-      # =====================================================
-      # COPY GAME
-      #
-      # IMPORTANT:
-      # 2.html and assets/ are copied together.
-      # =====================================================
+      # ============================================================
+      # 6. COPIAR O JOGO COMPLETO
+      # ============================================================
 
       - name: Copy Babylon Lion game
         run: |
 
-          cp 2.html android/app/src/main/assets/www/2.html
+          cp 2.html \
+            android/app/src/main/assets/www/2.html
 
-          cp -R assets android/app/src/main/assets/www/assets
+          cp -R assets \
+            android/app/src/main/assets/www/assets
 
 
-      # =====================================================
-      # CHECK GAME STRUCTURE
-      # =====================================================
+      # ============================================================
+      # 7. VERIFICAR ESTRUTURA EMPACOTADA
+      # ============================================================
 
       - name: Verify packaged game structure
         run: |
 
+          echo ""
+          echo "=========================================="
+          echo "BABYLON LION - ESTRUTURA DO PROJETO"
+          echo "=========================================="
+          echo ""
+
           echo "=== GAME FILE ==="
-          ls -lh android/app/src/main/assets/www/2.html
+
+          ls -lh \
+            android/app/src/main/assets/www/2.html
 
           echo ""
+
           echo "=== ASSETS ==="
-          find android/app/src/main/assets/www/assets -maxdepth 2 -type f | sort
 
-          echo ""
-          echo "=== LION FRAMES ==="
-          find android/app/src/main/assets/www/assets/lion \
+          find \
+            android/app/src/main/assets/www/assets \
+            -maxdepth 2 \
             -type f \
-            -name "*.png" | sort
+            | sort
 
           echo ""
+
+          echo "=== LION FRAMES ==="
+
+          find \
+            android/app/src/main/assets/www/assets/lion \
+            -type f \
+            -name "*.png" \
+            | sort
+
+          echo ""
+
           echo "=== MUSIC ==="
-          find android/app/src/main/assets/www/assets/music \
-            -type f | sort
+
+          find \
+            android/app/src/main/assets/www/assets/music \
+            -type f \
+            | sort
 
           echo ""
+
           echo "=== IMAGES ==="
-          find android/app/src/main/assets/www/assets/images \
-            -type f | sort
+
+          find \
+            android/app/src/main/assets/www/assets/images \
+            -type f \
+            | sort
 
 
-      # =====================================================
-      # VERIFY 25 LION FRAMES
-      # =====================================================
+      # ============================================================
+      # 8. GARANTIR 25 FRAMES DO LEÃO
+      # ============================================================
 
       - name: Verify 25 lion frames
         run: |
 
-          COUNT=$(find android/app/src/main/assets/www/assets/lion \
+          COUNT=$(find \
+            android/app/src/main/assets/www/assets/lion \
             -type f \
-            -name "ezgif-frame-*.png" | wc -l)
+            -name "ezgif-frame-*.png" \
+            | wc -l)
 
+          echo ""
           echo "Lion frames found: $COUNT"
+          echo ""
 
           if [ "$COUNT" -ne 25 ]; then
-            echo "ERROR: Expected 25 lion frames."
+
+            echo "ERROR: Expected exactly 25 lion frames."
+
             exit 1
+
           fi
 
+          echo "OK: 25 lion frames found."
 
-      # =====================================================
-      # VERIFY MUSIC
-      # =====================================================
+
+      # ============================================================
+      # 9. GARANTIR MÚSICAS
+      # ============================================================
 
       - name: Verify music files
         run: |
@@ -148,12 +189,13 @@ jobs:
           test -f \
             android/app/src/main/assets/www/assets/music/ancient_sumerian_music_ancient_kingdom_mp3_59905.mp3
 
-          echo "Music files OK."
+          echo ""
+          echo "OK: Music files found."
 
 
-      # =====================================================
-      # VERIFY ICON
-      # =====================================================
+      # ============================================================
+      # 10. GARANTIR IMAGENS
+      # ============================================================
 
       - name: Verify application images
         run: |
@@ -164,71 +206,100 @@ jobs:
           test -f \
             android/app/src/main/assets/www/assets/images/spalsh-screen-babylon.png
 
-          echo "Application images OK."
+          echo ""
+          echo "OK: Application images found."
 
 
-      # =====================================================
-      # ANDROID SETTINGS
-      # =====================================================
+      # ============================================================
+      # 11. CRIAR SETTINGS.GRADLE
+      # ============================================================
 
       - name: Create settings.gradle
         run: |
 
           cat > android/settings.gradle <<'EOF'
+
           pluginManagement {
+
               repositories {
+
                   google()
+
                   mavenCentral()
+
                   gradlePluginPortal()
+
               }
+
           }
+
 
           dependencyResolutionManagement {
-              repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+
+              repositoriesMode.set(
+                  RepositoriesMode.FAIL_ON_PROJECT_REPOS
+              )
 
               repositories {
+
                   google()
+
                   mavenCentral()
+
               }
+
           }
+
 
           rootProject.name = "BabylonLion"
 
           include(":app")
+
           EOF
 
 
-      # =====================================================
-      # ROOT BUILD
-      # =====================================================
+      # ============================================================
+      # 12. BUILD.GRADLE PRINCIPAL
+      # ============================================================
 
       - name: Create root build.gradle
         run: |
 
           cat > android/build.gradle <<'EOF'
+
           plugins {
-              id 'com.android.application' version '8.5.2' apply false
+
+              id 'com.android.application'
+                  version '8.5.2'
+                  apply false
+
           }
+
           EOF
 
 
-      # =====================================================
-      # APP BUILD
-      # =====================================================
+      # ============================================================
+      # 13. BUILD.GRADLE DO APP
+      # ============================================================
 
       - name: Create app build.gradle
         run: |
 
           cat > android/app/build.gradle <<'EOF'
+
           plugins {
+
               id 'com.android.application'
+
           }
+
 
           android {
 
               namespace 'com.maribone.babylonlion'
 
               compileSdk 35
+
 
               defaultConfig {
 
@@ -241,56 +312,80 @@ jobs:
                   versionCode 1
 
                   versionName '1.0'
+
               }
+
 
               buildTypes {
 
                   debug {
 
                       minifyEnabled false
+
                   }
+
 
                   release {
 
                       minifyEnabled false
 
                       shrinkResources false
+
                   }
+
               }
+
           }
+
           EOF
 
 
-      # =====================================================
-      # ANDROID MANIFEST
-      # =====================================================
+      # ============================================================
+      # 14. ANDROID MANIFEST
+      # ============================================================
 
       - name: Create AndroidManifest.xml
         run: |
 
           cat > android/app/src/main/AndroidManifest.xml <<'EOF'
+
           <?xml version="1.0" encoding="utf-8"?>
 
           <manifest
               xmlns:android="http://schemas.android.com/apk/res/android">
 
+
               <uses-permission
                   android:name="android.permission.INTERNET" />
 
+
               <application
+
                   android:allowBackup="false"
+
                   android:hardwareAccelerated="true"
+
                   android:icon="@drawable/icon"
+
                   android:label="Babylon Lion"
+
                   android:resizeableActivity="false"
+
                   android:supportsRtl="true"
+
                   android:theme="@style/AppTheme">
 
+
                   <activity
+
                       android:name=".MainActivity"
+
                       android:configChanges="orientation|screenSize|keyboardHidden"
+
                       android:exported="true"
+
                       android:screenOrientation="landscape">
+
 
                       <intent-filter>
 
@@ -302,17 +397,21 @@ jobs:
 
                       </intent-filter>
 
+
                   </activity>
+
 
               </application>
 
+
           </manifest>
+
           EOF
 
 
-      # =====================================================
-      # COPY ICON
-      # =====================================================
+      # ============================================================
+      # 15. COPIAR ÍCONE DO APLICATIVO
+      # ============================================================
 
       - name: Copy launcher icon
         run: |
@@ -322,217 +421,366 @@ jobs:
             android/app/src/main/res/drawable/icon.png
 
 
-      # =====================================================
-      # APPLICATION THEME
-      # =====================================================
+      # ============================================================
+      # 16. TEMA ANDROID
+      # ============================================================
 
       - name: Create Android theme
         run: |
 
           cat > android/app/src/main/res/values/styles.xml <<'EOF'
+
           <?xml version="1.0" encoding="utf-8"?>
 
           <resources>
 
+
               <style
+
                   name="AppTheme"
+
                   parent="android:style/Theme.Material.Light.NoActionBar">
 
-                  <item name="android:fontFamily">sans</item>
 
-                  <item name="android:windowFullscreen">true</item>
+                  <item name="android:fontFamily">
+                      sans
+                  </item>
 
-                  <item name="android:windowActionModeOverlay">true</item>
 
-                  <item name="android:colorAccent">#F0BD4E</item>
+                  <item name="android:windowFullscreen">
+                      true
+                  </item>
 
-                  <item name="android:navigationBarColor">#08090D</item>
 
-                  <item name="android:statusBarColor">#08090D</item>
+                  <item name="android:windowActionModeOverlay">
+                      true
+                  </item>
 
-                  <item name="android:windowLightStatusBar">false</item>
+
+                  <item name="android:colorAccent">
+                      #F0BD4E
+                  </item>
+
+
+                  <item name="android:navigationBarColor">
+                      #08090D
+                  </item>
+
+
+                  <item name="android:statusBarColor">
+                      #08090D
+                  </item>
+
+
+                  <item name="android:windowLightStatusBar">
+                      false
+                  </item>
+
 
               </style>
 
+
           </resources>
+
           EOF
 
 
-      # =====================================================
-      # MAIN ACTIVITY
-      # =====================================================
+      # ============================================================
+      # 17. MAIN ACTIVITY
+      # ============================================================
 
       - name: Create MainActivity
         run: |
 
           cat > android/app/src/main/java/com/maribone/babylonlion/MainActivity.java <<'EOF'
+
           package com.maribone.babylonlion;
 
+
           import android.app.Activity;
+
           import android.os.Bundle;
+
           import android.view.View;
+
           import android.webkit.WebChromeClient;
+
           import android.webkit.WebSettings;
+
           import android.webkit.WebView;
+
           import android.webkit.WebViewClient;
+
           import android.graphics.Color;
+
           import android.view.Window;
+
           import android.view.WindowManager;
+
 
           public class MainActivity extends Activity {
 
+
               private WebView webView;
 
-              @Override
-              protected void onCreate(Bundle savedInstanceState) {
 
-                  super.onCreate(savedInstanceState);
+              @Override
+
+              protected void onCreate(
+                  Bundle savedInstanceState
+              ) {
+
+
+                  super.onCreate(
+                      savedInstanceState
+                  );
+
 
                   requestWindowFeature(
                       Window.FEATURE_NO_TITLE
                   );
 
+
                   getWindow().setFlags(
+
                       WindowManager.LayoutParams.FLAG_FULLSCREEN,
+
                       WindowManager.LayoutParams.FLAG_FULLSCREEN
+
                   );
+
 
                   getWindow().setNavigationBarColor(
                       Color.BLACK
                   );
 
-                  webView = new WebView(this);
 
-                  setContentView(webView);
+                  webView = new WebView(
+                      this
+                  );
+
+
+                  setContentView(
+                      webView
+                  );
+
 
                   WebSettings settings =
                       webView.getSettings();
 
-                  settings.setJavaScriptEnabled(true);
 
-                  settings.setDomStorageEnabled(true);
+                  settings.setJavaScriptEnabled(
+                      true
+                  );
 
-                  settings.setDatabaseEnabled(true);
 
-                  settings.setAllowFileAccess(true);
+                  settings.setDomStorageEnabled(
+                      true
+                  );
 
-                  settings.setAllowContentAccess(true);
 
-                  settings.setAllowFileAccessFromFileURLs(true);
+                  settings.setDatabaseEnabled(
+                      true
+                  );
 
-                  settings.setAllowUniversalAccessFromFileURLs(true);
 
-                  settings.setMediaPlaybackRequiresUserGesture(false);
+                  settings.setAllowFileAccess(
+                      true
+                  );
 
-                  settings.setLoadWithOverviewMode(false);
 
-                  settings.setUseWideViewPort(false);
+                  settings.setAllowContentAccess(
+                      true
+                  );
 
-                  settings.setBuiltInZoomControls(false);
 
-                  settings.setDisplayZoomControls(false);
+                  settings.setAllowFileAccessFromFileURLs(
+                      true
+                  );
 
-                  settings.setSupportZoom(false);
 
-                  settings.setTextZoom(100);
+                  settings.setAllowUniversalAccessFromFileURLs(
+                      true
+                  );
+
+
+                  settings.setMediaPlaybackRequiresUserGesture(
+                      false
+                  );
+
+
+                  settings.setLoadWithOverviewMode(
+                      false
+                  );
+
+
+                  settings.setUseWideViewPort(
+                      false
+                  );
+
+
+                  settings.setBuiltInZoomControls(
+                      false
+                  );
+
+
+                  settings.setDisplayZoomControls(
+                      false
+                  );
+
+
+                  settings.setSupportZoom(
+                      false
+                  );
+
+
+                  settings.setTextZoom(
+                      100
+                  );
+
 
                   webView.setBackgroundColor(
-                      Color.rgb(8, 9, 13)
+
+                      Color.rgb(
+                          8,
+                          9,
+                          13
+                      )
+
                   );
+
 
                   webView.setWebViewClient(
                       new WebViewClient()
                   );
 
+
                   webView.setWebChromeClient(
                       new WebChromeClient()
                   );
+
 
                   webView.setOverScrollMode(
                       View.OVER_SCROLL_NEVER
                   );
 
+
                   webView.setVerticalScrollBarEnabled(
                       false
                   );
+
 
                   webView.setHorizontalScrollBarEnabled(
                       false
                   );
 
+
                   webView.loadUrl(
                       "file:///android_asset/www/2.html"
                   );
+
+
               }
+
 
               @Override
+
               public void onBackPressed() {
 
-                  /*
-                   * Babylon Lion is intended to run
-                   * as a full-screen game.
-                   *
-                   * Do not navigate away from the game.
-                   */
-
                   super.onBackPressed();
+
               }
+
+
           }
+
           EOF
 
 
-      # =====================================================
-      # CREATE GRADLE WRAPPER
-      # =====================================================
+      # ============================================================
+      # 18. VERIFICAÇÃO FINAL DO PROJETO ANDROID
+      # ============================================================
 
-      - name: Create Gradle wrapper
-        working-directory: android
+      - name: Verify Android project
         run: |
 
-          gradle wrapper \
-            --gradle-version 8.7
+          echo ""
+          echo "=========================================="
+          echo "ANDROID PROJECT"
+          echo "=========================================="
+          echo ""
+
+          find android \
+            -maxdepth 6 \
+            -type f \
+            | sort
 
 
-      # =====================================================
-      # BUILD DEBUG APK
-      # =====================================================
+      # ============================================================
+      # 19. BUILD APK
+      # ============================================================
 
       - name: Build Babylon Lion APK
         working-directory: android
         run: |
 
-          ./gradlew \
+          gradle \
             assembleDebug \
             --no-daemon \
             --stacktrace
 
 
-      # =====================================================
-      # SHOW APK
-      # =====================================================
+      # ============================================================
+      # 20. VERIFICAR APK GERADO
+      # ============================================================
 
       - name: Show generated APK
         run: |
 
-          echo "=== GENERATED APK ==="
+          echo ""
+          echo "=========================================="
+          echo "GENERATED APK"
+          echo "=========================================="
+          echo ""
 
-          find android/app/build/outputs/apk \
+          find \
+            android/app/build/outputs/apk \
             -type f \
             -name "*.apk" \
             -print
 
+          echo ""
 
-      # =====================================================
-      # UPLOAD APK
-      # =====================================================
+
+      # ============================================================
+      # 21. GARANTIR QUE O APK EXISTE
+      # ============================================================
+
+      - name: Verify APK exists
+        run: |
+
+          test -f \
+            android/app/build/outputs/apk/debug/app-debug.apk
+
+          echo ""
+          echo "=========================================="
+          echo "BABYLON LION APK GERADO COM SUCESSO"
+          echo "=========================================="
+          echo ""
+
+
+      # ============================================================
+      # 22. PUBLICAR APK COMO ARTIFACT
+      # ============================================================
 
       - name: Upload Babylon Lion APK
         uses: actions/upload-artifact@v4
+
         with:
 
           name: Babylon-Lion-APK
 
-          path:
+          path: |
             android/app/build/outputs/apk/debug/app-debug.apk
 
           if-no-files-found: error
