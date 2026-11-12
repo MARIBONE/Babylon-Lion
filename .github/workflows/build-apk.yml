@@ -235,11 +235,12 @@ jobs:
               )
 
               repositories {
-                  google()
-                  mavenCentral()
-              }
-          }
-
+    google()
+    mavenCentral()
+    maven {
+        url 'https://cboost.jfrog.io/artifactory/chartboost-ads/'
+    }
+}
           rootProject.name = "BabylonLion"
 
           include(":app")
